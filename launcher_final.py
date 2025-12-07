@@ -22,8 +22,14 @@ from typing import Optional
 # Ensure UTF-8 on Windows
 if sys.platform == 'win32':
     os.environ['PYTHONIOENCODING'] = 'utf-8'
-    sys.stdout.reconfigure(encoding='utf-8')
-    sys.stderr.reconfigure(encoding='utf-8')
+    # Only reconfigure if stdout/stderr exist (not in GUI context)
+    try:
+        if sys.stdout is not None:
+            sys.stdout.reconfigure(encoding='utf-8')
+        if sys.stderr is not None:
+            sys.stderr.reconfigure(encoding='utf-8')
+    except Exception:
+        pass  # Silently ignore if not applicable
 
 # Настройка логирования
 logging.basicConfig(
