@@ -403,16 +403,28 @@ def main():
     print()
     
     if run_backend:
-        print_info("bot", "Backend API доступен на:")
-        print_info("bot", f"  HTTP: {Config.API_URL}")
-        print_info("bot", f"  Docs: {Config.API_URL}/docs")
+        print_info("bot", "🔗 Backend API доступен на:")
+        print_info("bot", f"  HTTP: {Color.CYAN}{Config.API_URL}{Color.END}")
+        print_info("bot", f"  Docs: {Color.CYAN}{Config.API_URL}/docs{Color.END}")
+        print_info("bot", "")
+        print_info("bot", "  Откройте в браузере для API документации:")
+        print(f"  {Color.CYAN}{Config.API_URL}/docs{Color.END}")
     
     if run_frontend:
-        print_info("frontend", "Frontend доступен на:")
-        print_info("frontend", f"  {Config.FRONTEND_URL}")
+        print_info("frontend", "🌐 Frontend доступен на:")
+        print_info("frontend", f"  {Color.CYAN}{Config.FRONTEND_URL}{Color.END}")
+        print_info("frontend", "")
+        print_info("frontend", "  Откройте в браузере:")
+        print(f"  {Color.CYAN}{Config.FRONTEND_URL}{Color.END}")
     
     print()
     print_info("info", "=" * 60)
+    print_info("info", "📋 Ссылки для быстрого доступа:")
+    if run_backend:
+        print(f"  API Docs:  {Color.CYAN}http://127.0.0.1:8000/docs{Color.END}")
+    if run_frontend:
+        print(f"  Frontend:  {Color.CYAN}http://127.0.0.1:3000{Color.END}")
+    print()
     print_warning("Нажмите Ctrl+C для остановки всех процессов")
     print()
     
