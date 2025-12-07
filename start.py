@@ -21,8 +21,16 @@ class Config:
     PROJECT_ROOT = Path(__file__).parent
     BACKEND_DIR = PROJECT_ROOT / "backend"
     FRONTEND_DIR = PROJECT_ROOT / "frontend"
+    VENV_DIR = PROJECT_ROOT / "venv"
     
-    PYTHON_CMD = sys.executable
+    # Используем Python из виртуального окружения
+    if VENV_DIR.exists():
+        if platform.system() == "Windows":
+            PYTHON_CMD = str(VENV_DIR / "Scripts" / "python.exe")
+        else:
+            PYTHON_CMD = str(VENV_DIR / "bin" / "python")
+    else:
+        PYTHON_CMD = sys.executable
     
     # Ports
     API_PORT = int(os.getenv("API_PORT", "8000"))
@@ -187,9 +195,15 @@ class ProcessManager:
         print_info("bot", "Запуск Backend API...")
         
         try:
+            # Use uvicorn module instead of run.py for better reload support
             cmd = [
                 Config.PYTHON_CMD,
-                str(Config.BACKEND_DIR / "run.py")
+                "-m",
+                "uvicorn",
+                "app.main:app",
+                "--host", "127.0.0.1",
+                "--port", str(Config.API_PORT),
+                "--reload"
             ]
             
             process = subprocess.Popen(
@@ -229,12 +243,24 @@ class ProcessManager:
         print_info("frontend", "Запуск Frontend...")
         
         try:
+            # Check if npm is available
+            try:
+                subprocess.run(["npm", "--version"], capture_output=True, check=True, timeout=5)
+            except (FileNotFoundError, subprocess.CalledProcessError):
+                print_warning("npm не найден. Frontend недоступен.")
+                print_info("frontend", "Установите Node.js для использования Frontend")
+                return False
+            
             # Check if node_modules exists
             node_modules = Config.FRONTEND_DIR / "node_modules"
             if not node_modules.exists():
                 print_warning("node_modules не найден. Установка зависимостей...")
-                install_cmd = ["npm", "install"]
-                subprocess.run(install_cmd, cwd=str(Config.FRONTEND_DIR), check=True)
+                try:
+                    install_cmd = ["npm", "install"]
+                    subprocess.run(install_cmd, cwd=str(Config.FRONTEND_DIR), check=True)
+                except Exception as e:
+                    print_error(f"Ошибка установки npm зависимостей: {e}")
+                    return False
             
             cmd = ["npm", "run", "dev"]
             
@@ -254,9 +280,6 @@ class ProcessManager:
             print_success(f"Frontend запущен на {Config.FRONTEND_URL}")
             return True
             
-        except FileNotFoundError:
-            print_error("npm не найден. Убедитесь что Node.js установлен")
-            return False
         except Exception as e:
             print_error(f"Ошибка запуска Frontend: {e}")
             return False

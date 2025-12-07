@@ -8,6 +8,7 @@ venv/
 ENV/
 env/
 .venv/
+env*/
 
 # IDEs
 .vscode/
@@ -36,6 +37,7 @@ logs/
 tmp/
 temp/
 *.tmp
+launcher.py
 
 # Node modules (frontend)
 node_modules/
@@ -47,6 +49,16 @@ frontend/build/
 # Build artifacts
 backend/dist/
 backend/build/
+dist/
+build/
+*.egg-info/
 
+# PyInstaller
+*.manifest
+*.spec
+
+# IDE caches
+*.cache/
+.pytest_cache/
 # References (external data)
 references/

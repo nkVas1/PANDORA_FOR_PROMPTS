@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     # Server
     HOST: str = os.getenv("HOST", "127.0.0.1")
     PORT: int = int(os.getenv("PORT", "8000"))
+    API_HOST: str = os.getenv("API_HOST", "127.0.0.1")
+    API_PORT: int = int(os.getenv("API_PORT", "8000"))
     
     # Database
     DATABASE_URL: str = os.getenv(
@@ -35,6 +37,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+        extra = "ignore"  # Игнорируем дополнительные переменные из .env
 
 
 settings = Settings()

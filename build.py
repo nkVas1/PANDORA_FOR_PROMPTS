@@ -8,12 +8,23 @@ import os
 import sys
 import subprocess
 import shutil
+import platform
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).parent
 BACKEND_DIR = ROOT_DIR / "backend"
 FRONTEND_DIR = ROOT_DIR / "frontend"
 BUILD_DIR = ROOT_DIR / "dist"
+
+# Определяем Python для запуска (используем venv если существует)
+VENV_DIR = ROOT_DIR / "venv"
+if VENV_DIR.exists():
+    if platform.system() == "Windows":
+        PYTHON_CMD = str(VENV_DIR / "Scripts" / "python.exe")
+    else:
+        PYTHON_CMD = str(VENV_DIR / "bin" / "python")
+else:
+    PYTHON_CMD = sys.executable
 
 
 def print_section(title):
@@ -61,12 +72,12 @@ def install_backend_deps():
         ]
         
         subprocess.run([
-            sys.executable, "-m", "pip", "install", "-r", "requirements.txt"
+            PYTHON_CMD, "-m", "pip", "install", "-r", "requirements.txt"
         ], check=True)
         
         for package in required_packages:
             subprocess.run([
-                sys.executable, "-m", "pip", "install", package
+                PYTHON_CMD, "-m", "pip", "install", package
             ], check=True)
         
         print("✓ Backend dependencies installed")
@@ -107,7 +118,7 @@ subprocess.run([sys.executable, str(starter_script)], cwd=str(ROOT_DIR))
         print("Building executable with PyInstaller...")
         
         subprocess.run([
-            sys.executable, "-m", "PyInstaller",
+            PYTHON_CMD, "-m", "PyInstaller",
             "--onedir",  # Package as directory
             "--windowed",  # No console window
             "--add-data", f"{BACKEND_DIR}:backend",
