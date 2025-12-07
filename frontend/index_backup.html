@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PANDORA - Менеджер промптов</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%237c3aed' width='100' height='100'/><text x='50' y='70' font-size='60' fill='white' text-anchor='middle' font-weight='bold'>🚀</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-600: #7c3aed;
+            --primary-500: #a855f7;
+            --primary-400: #d8b4fe;
+            --dark-900: #0f0f12;
+            --dark-800: #1a1a1f;
+            --dark-700: #25252d;
+            --dark-600: #323239;
+            --dark-400: #a0a0a0;
+            --dark-300: #d0d0d0;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        html, body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: var(--dark-900);
+            color: var(--dark-300);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* Layout */
+        .app-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: linear-gradient(180deg, var(--dark-800) 0%, rgba(26, 26, 31, 0.9) 100%);
+            border-right: 1px solid var(--dark-700);
+            padding: 24px;
+            overflow-y: auto;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 280px;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 32px;
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+        }
+
+        .sidebar-brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--dark-400);
+            border: none;
+            background: none;
+            font-size: 14px;
+            font-weight: 500;
+            width: 100%;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--primary-600);
+            transform: scaleY(0);
+            transform-origin: top;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-item:hover {
+            background: var(--dark-700);
+            color: var(--dark-300);
+        }
+
+        .nav-item:hover::before {
+            transform: scaleY(1);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
+            color: white;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+        }
+
+        .nav-item.active::before {
+            transform: scaleY(1);
+            opacity: 0;
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            grid-column: 2;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
+            padding: 32px 40px;
+            border-bottom: 1px solid var(--dark-700);
+            flex-shrink: 0;
+            z-index: 100;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(124, 58, 237, 0.2));
+            pointer-events: none;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: linear-gradient(135deg, var(--dark-900) 0%, rgba(31, 24, 47, 0.5) 50%, var(--dark-900) 100%);
+            background-attachment: fixed;
+            position: relative;
+        }
+
+        /* Animated background gradient - only behind content */
+        .content::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 280px;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(124, 58, 237, 0.05) 0%, 
+                rgba(168, 85, 247, 0.03) 25%, 
+                rgba(124, 58, 237, 0.05) 50%, 
+                rgba(168, 85, 247, 0.03) 75%, 
+                rgba(124, 58, 237, 0.05) 100%);
+            background-size: 400% 400%;
+            animation: gradientFlow 15s ease infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .page {
+            width: 100%;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--dark-800);
+            border: 1px solid var(--dark-700);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--primary-600);
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.1);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .card-description {
+            font-size: 14px;
+            color: var(--dark-400);
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--dark-800);
+            border: 1px solid var(--dark-700);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--primary-600);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(124, 58, 237, 0.15);
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.05), rgba(168, 85, 247, 0.05));
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--dark-400);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+        }
+
+        .btn-secondary {
+            background: var(--dark-700);
+            color: var(--dark-300);
+            border: 1px solid var(--dark-600);
+        }
+
+        .btn-secondary:hover {
+            background: var(--dark-600);
+            border-color: var(--primary-600);
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 48px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, white, rgba(255, 255, 255, 0.8));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--dark-800);
+            border: 1px solid var(--dark-700);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .feature-card:hover::before {
+            left: 100%;
+        }
+
+        .feature-card:hover {
+            border-color: var(--primary-600);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(124, 58, 237, 0.15);
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.05), rgba(168, 85, 247, 0.05));
+        }
+
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+
+        .feature-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .feature-description {
+            font-size: 13px;
+            color: var(--dark-400);
+            line-height: 1.6;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--dark-400);
+        }
+
+        .spinner {
+            border: 3px solid var(--dark-700);
+            border-top: 3px solid var(--primary-600);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark-800);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--dark-600);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--dark-500);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid var(--dark-700);
+                padding: 16px;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .header {
+                padding: 24px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .content {
+                padding: 24px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .empty-state-description {
+            color: var(--dark-400);
+            margin-bottom: 24px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, var(--dark-800), var(--dark-700));
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 600px;
+            width: 90%;
+            animation: slideUp 0.3s ease;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-header {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 24px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: var(--dark-400);
+            font-size: 24px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-300);
+            font-size: 14px;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            background: var(--dark-700);
+            border: 1px solid var(--dark-600);
+            border-radius: 8px;
+            color: var(--dark-300);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary-600);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: monospace;
+        }
+
+        .form-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--dark-700);
+        }
+
+        /* Prompt List */
+        .prompt-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .prompt-item {
+            background: var(--dark-700);
+            border: 1px solid var(--dark-600);
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prompt-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.05), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .prompt-item:hover::before {
+            left: 100%;
+        }
+
+        .prompt-item:hover {
+            border-color: var(--primary-600);
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.1);
+            background: linear-gradient(135deg, var(--dark-700), rgba(124, 58, 237, 0.03));
+            transform: translateX(4px);
+        }
+
+        .prompt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .prompt-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .prompt-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .prompt-btn {
+            background: none;
+            border: none;
+            color: var(--dark-400);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px 8px;
+            transition: color 0.3s ease;
+        }
+
+        .prompt-btn:hover {
+            color: var(--primary-500);
+        }
+
+        .prompt-description {
+            font-size: 13px;
+            color: var(--dark-300);
+            margin-bottom: 12px;
+        }
+
+        .prompt-content {
+            background: var(--dark-800);
+            padding: 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            color: var(--dark-300);
+            margin-bottom: 12px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .prompt-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .prompt-tag {
+            background: rgba(124, 58, 237, 0.2);
+            color: var(--primary-400);
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            border: 1px solid rgba(124, 58, 237, 0.4);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes gradientFlow {
+            0% {
+                background-position: 0% 50%;
+            }
+            25% {
+                background-position: 100% 50%;
+            }
+            50% {
+                background-position: 100% 0%;
+            }
+            75% {
+                background-position: 0% 100%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes cardEntry {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        /* Glass morphism effects */
+        .glass {
+            background: rgba(15, 15, 18, 0.7);
+            backdrop-filter: blur(10px) saturate(180%);
+            -webkit-backdrop-filter: blur(10px) saturate(180%);
+            border: 1px solid rgba(124, 58, 237, 0.18);
+        }
+
+        /* Animated gradient background */
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+
+        .shimmer-effect {
+            background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.3), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+
+        /* Loading spinner with gradient */
+        .spinner-gradient {
+            border: 3px solid var(--dark-700);
+            border-top: 3px solid transparent;
+            border-right: 3px solid var(--primary-600);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1.2s linear infinite;
+        }
+
+        /* Hover lift effect */
+        .lift:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(124, 58, 237, 0.25);
+        }
+
+        /* Subtle glow effect */
+        .glow {
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.15);
+        }
+
+        .glow:hover {
+            box-shadow: 0 0 30px rgba(124, 58, 237, 0.3);
+        }
+
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Input focus glow */
+        .form-input:focus,
+        .form-textarea:focus {
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+            border-color: var(--primary-500);
+        }
+
+        /* Button press animation */
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Card entrance animation */
+        @keyframes cardEntry {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .prompt-item {
+            animation: cardEntry 0.3s ease-out;
+        }
+
+        .stat-card {
+            animation: cardEntry 0.4s ease-out;
+        }
+
+        /* Badge pulse animation */
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* Smooth transitions for all interactive elements */
+        button,
+        a,
+        input,
+        textarea,
+        select,
+        .card,
+        .stat-card,
+        .feature-card,
+        .prompt-item,
+        .nav-item {
+            transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="#" class="sidebar-brand">
+                <div class="sidebar-brand-icon">🚀</div>
+                <span>PANDORA</span>
+            </a>
+
+            <nav class="sidebar-nav">
+                <button class="nav-item active" onclick="switchPage('dashboard')">
+                    <span class="nav-icon">📊</span>
+                    Главная
+                </button>
+                <button class="nav-item" onclick="switchPage('prompts')">
+                    <span class="nav-icon">✨</span>
+                    Промпты
+                </button>
+                <button class="nav-item" onclick="switchPage('projects')">
+                    <span class="nav-icon">📁</span>
+                    Проекты
+                </button>
+                <button class="nav-item" onclick="switchPage('tags')">
+                    <span class="nav-icon">🏷️</span>
+                    Теги
+                </button>
+                <button class="nav-item" onclick="switchPage('import')">
+                    <span class="nav-icon">📥</span>
+                    Импорт
+                </button>
+                <button class="nav-item" onclick="switchPage('settings')">
+                    <span class="nav-icon">⚙️</span>
+                    Настройки
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <h1 id="page-title">PANDORA Prompts Manager</h1>
+                <p id="page-description">Профессиональный инструмент для управления и структуризации промптов</p>
+            </header>
+
+            <!-- Content -->
+            <main class="content">
+                <!-- Dashboard Page -->
+                <div id="dashboard-page" class="page">
+                    <div class="section">
+                        <div class="grid">
+                            <div class="stat-card">
+                                <div class="stat-number" id="stat-prompts">0</div>
+                                <div class="stat-label">Всего промптов</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="stat-tags">0</div>
+                                <div class="stat-label">Тегов</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="stat-projects">0</div>
+                                <div class="stat-label">Проектов</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="stat-categories">0</div>
+                                <div class="stat-label">Категорий</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">✨ Основные возможности</div>
+                        <div class="features-grid">
+                            <div class="feature-card">
+                                <div class="feature-icon">💾</div>
+                                <div class="feature-title">Управление промптами</div>
+                                <div class="feature-description">Сохраняйте, категоризируйте и структурируйте все ваши промпты в одном месте</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">🤖</div>
+                                <div class="feature-title">Автотегирование</div>
+                                <div class="feature-description">Автоматическое распределение по категориям и генерация релевантных тегов</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">🔍</div>
+                                <div class="feature-title">Поиск и фильтрация</div>
+                                <div class="feature-description">Быстро находите нужные промпты по ключевым словам, тегам и категориям</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">📋</div>
+                                <div class="feature-title">Проекты и задачи</div>
+                                <div class="feature-description">Ведите процесс разработки и список задач для каждого проекта</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">📊</div>
+                                <div class="feature-title">Аналитика</div>
+                                <div class="feature-description">Отслеживайте использование промптов и статистику проектов</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">💾</div>
+                                <div class="feature-title">Локальное хранилище</div>
+                                <div class="feature-description">Все данные хранятся локально на вашем ПК, полная приватность</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prompts Page -->
+                <div id="prompts-page" class="page" style="display: none;">
+                    <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+                        <button class="btn btn-primary" onclick="showCreatePromptModal()">
+                            ➕ Новый промпт
+                        </button>
+                        <button class="btn btn-secondary">
+                            📥 Импортировать
+                        </button>
+                    </div>
+                    <div id="prompts-list" class="card">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">✨</div>
+                            <div class="empty-state-title">Промптов не найдено</div>
+                            <div class="empty-state-description">Создайте первый промпт или импортируйте из файла</div>
+                            <button class="btn btn-primary" onclick="showCreatePromptModal()">Создать промпт</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Projects Page -->
+                <div id="projects-page" class="page" style="display: none;">
+                    <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+                        <button class="btn btn-primary" onclick="showCreateProjectModal()">
+                            ➕ Новый проект
+                        </button>
+                    </div>
+                    <div id="projects-list" class="card">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📁</div>
+                            <div class="empty-state-title">Проектов не найдено</div>
+                            <div class="empty-state-description">Создайте первый проект для организации ваших задач</div>
+                            <button class="btn btn-primary" onclick="showCreateProjectModal()">Создать проект</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tags Page -->
+                <div id="tags-page" class="page" style="display: none;">
+                    <div id="tags-list" class="card">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🏷️</div>
+                            <div class="empty-state-title">Тегов не найдено</div>
+                            <div class="empty-state-description">Теги будут созданы автоматически при добавлении промптов</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Import Page -->
+                <div id="import-page" class="page" style="display: none;">
+                    <div class="card">
+                        <div class="section-title">📥 Импорт промптов</div>
+                        <div style="margin-bottom: 24px;">
+                            <p style="margin-bottom: 16px; color: var(--dark-400);">Загрузите JSON файл с промптами</p>
+                            <input type="file" id="import-file" accept=".json" style="padding: 12px; background: var(--dark-700); color: var(--dark-300); border: 1px solid var(--dark-600); border-radius: 8px;">
+                            <button class="btn btn-primary" style="margin-top: 16px;" onclick="importPrompts()">
+                                Импортировать
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Page -->
+                <div id="settings-page" class="page" style="display: none;">
+                    <div class="card">
+                        <div class="card-title">⚙️ Настройки</div>
+                        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--dark-700);">
+                            <p style="color: var(--dark-400); margin-bottom: 16px;">
+                                <strong>Версия:</strong> 1.0.3
+                            </p>
+                            <p style="color: var(--dark-400); margin-bottom: 16px;">
+                                <strong>Backend:</strong> FastAPI Uvicorn
+                            </p>
+                            <p style="color: var(--dark-400); margin-bottom: 16px;">
+                                <strong>Последнее обновление:</strong> 7 декабря 2025
+                            </p>
+                            <button class="btn btn-secondary" onclick="exportData()">
+                                📤 Экспортировать данные
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Create/Edit Prompt Modal -->
+    <div id="promptModal" class="modal">
+        <div class="modal-content" style="position: relative;">
+            <button class="modal-close" onclick="closePromptModal()">✕</button>
+            <div class="modal-header" id="promptModalTitle">Новый промпт</div>
+            <form id="promptForm">
+                <div class="form-group">
+                    <label class="form-label">Название промпта</label>
+                    <input type="text" id="promptName" class="form-input" placeholder="Введите название" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Описание</label>
+                    <input type="text" id="promptDesc" class="form-input" placeholder="Краткое описание">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Содержание промпта</label>
+                    <textarea id="promptContent" class="form-textarea" placeholder="Введите содержание промпта..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Теги (через запятую)</label>
+                    <input type="text" id="promptTags" class="form-input" placeholder="AI, Копирайтинг, Маркетинг">
+                </div>
+                <div class="form-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closePromptModal()">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create/Edit Project Modal -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content" style="position: relative;">
+            <button class="modal-close" onclick="closeProjectModal()">✕</button>
+            <div class="modal-header" id="projectModalTitle">Новый проект</div>
+            <form id="projectForm">
+                <div class="form-group">
+                    <label class="form-label">Название проекта</label>
+                    <input type="text" id="projectName" class="form-input" placeholder="Введите название" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Описание</label>
+                    <textarea id="projectDesc" class="form-textarea" placeholder="Описание проекта"></textarea>
+                </div>
+                <div class="form-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeProjectModal()">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:8000';
+        let currentPromptId = null;
+        let currentProjectId = null;
+        let allPrompts = [];
+
+        // ===== PAGE SWITCHING =====
+        function switchPage(page) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+            
+            // Show selected page
+            const pageEl = document.getElementById(`${page}-page`);
+            if (pageEl) pageEl.style.display = 'block';
+
+            // Update nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.nav-item').classList.add('active');
+
+            // Update header
+            const titles = {
+                dashboard: ['PANDORA Prompts Manager', 'Профессиональный инструмент для управления и структуризации промптов'],
+                prompts: ['Промпты', 'Управление всеми вашими промптами'],
+                projects: ['Проекты', 'Организуйте работу по проектам'],
+                tags: ['Теги и категории', 'Управление тегами и категориями'],
+                import: ['Импорт', 'Загрузите промпты из файла'],
+                settings: ['Настройки', 'Параметры приложения']
+            };
+
+            if (titles[page]) {
+                document.getElementById('page-title').textContent = titles[page][0];
+                document.getElementById('page-description').textContent = titles[page][1];
+            }
+
+            // Load data for page
+            if (page === 'dashboard') loadStats();
+            if (page === 'prompts') loadPrompts();
+            if (page === 'projects') loadProjects();
+            if (page === 'tags') loadTags();
+        }
+
+        // ===== STATISTICS =====
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_URL}/api/stats`);
+                const data = await response.json();
+                
+                document.getElementById('stat-prompts').textContent = data.total_prompts || 0;
+                document.getElementById('stat-tags').textContent = data.total_tags || 0;
+                document.getElementById('stat-projects').textContent = data.total_projects || 0;
+                document.getElementById('stat-categories').textContent = data.total_categories || 0;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // ===== PROMPTS CRUD =====
+        async function loadPrompts() {
+            try {
+                const response = await fetch(`${API_URL}/api/prompts`);
+                allPrompts = await response.json();
+
+                const list = document.getElementById('prompts-list');
+                
+                if (!allPrompts || allPrompts.length === 0) {
+                    list.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">✨</div>
+                            <div class="empty-state-title">Промптов не найдено</div>
+                            <div class="empty-state-description">Создайте первый промпт или импортируйте из файла</div>
+                            <button class="btn btn-primary" onclick="showCreatePromptModal()">Создать промпт</button>
+                        </div>
+                    `;
+                } else {
+                    list.innerHTML = '<div class="prompt-list"></div>';
+                    const promptList = list.querySelector('.prompt-list');
+                    
+                    allPrompts.forEach(prompt => {
+                        const tagsHtml = prompt.tags ? prompt.tags.split(',').map(tag => 
+                            `<span class="prompt-tag">${tag.trim()}</span>`
+                        ).join('') : '';
+                        
+                        const promptHtml = document.createElement('div');
+                        promptHtml.className = 'prompt-item';
+                        promptHtml.innerHTML = `
+                            <div class="prompt-header">
+                                <div class="prompt-title">${escapeHtml(prompt.name)}</div>
+                                <div class="prompt-actions">
+                                    <button class="prompt-btn" onclick="editPrompt(${prompt.id})" title="Редактировать">✏️</button>
+                                    <button class="prompt-btn" onclick="deletePrompt(${prompt.id})" title="Удалить">🗑️</button>
+                                </div>
+                            </div>
+                            ${prompt.description ? `<div class="prompt-description">${escapeHtml(prompt.description)}</div>` : ''}
+                            <div class="prompt-content">${escapeHtml(prompt.content)}</div>
+                            ${tagsHtml ? `<div class="prompt-tags">${tagsHtml}</div>` : ''}
+                        `;
+                        promptList.appendChild(promptHtml);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading prompts:', error);
+            }
+        }
+
+        function showCreatePromptModal() {
+            currentPromptId = null;
+            document.getElementById('promptModalTitle').textContent = 'Новый промпт';
+            document.getElementById('promptForm').reset();
+            document.getElementById('promptModal').classList.add('active');
+        }
+
+        function editPrompt(id) {
+            currentPromptId = id;
+            const prompt = allPrompts.find(p => p.id === id);
+            if (!prompt) return;
+
+            document.getElementById('promptModalTitle').textContent = 'Редактировать промпт';
+            document.getElementById('promptName').value = prompt.name || '';
+            document.getElementById('promptDesc').value = prompt.description || '';
+            document.getElementById('promptContent').value = prompt.content || '';
+            document.getElementById('promptTags').value = prompt.tags || '';
+            document.getElementById('promptModal').classList.add('active');
+        }
+
+        function closePromptModal() {
+            document.getElementById('promptModal').classList.remove('active');
+            currentPromptId = null;
+        }
+
+        async function savePrompt(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('promptName').value;
+            const description = document.getElementById('promptDesc').value;
+            const content = document.getElementById('promptContent').value;
+            const tags = document.getElementById('promptTags').value;
+
+            if (!name || !content) {
+                alert('Заполните название и содержание промпта');
+                return;
+            }
+
+            try {
+                const url = currentPromptId 
+                    ? `${API_URL}/api/prompts/${currentPromptId}`
+                    : `${API_URL}/api/prompts`;
+                
+                const method = currentPromptId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name,
+                        description,
+                        content,
+                        tags
+                    })
+                });
+
+                if (response.ok) {
+                    closePromptModal();
+                    loadPrompts();
+                    loadStats();
+                    showNotification('Промпт сохранён успешно!', 'success');
+                } else {
+                    showNotification('Ошибка при сохранении', 'error');
+                }
+            } catch (error) {
+                console.error('Error saving prompt:', error);
+                showNotification('Ошибка при сохранении', 'error');
+            }
+        }
+
+        async function deletePrompt(id) {
+            if (!confirm('Вы уверены? Это действие нельзя отменить.')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/prompts/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    loadPrompts();
+                    loadStats();
+                    showNotification('Промпт удалён', 'success');
+                } else {
+                    showNotification('Ошибка при удалении', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting prompt:', error);
+                showNotification('Ошибка при удалении', 'error');
+            }
+        }
+
+        // ===== PROJECTS CRUD =====
+        async function loadProjects() {
+            try {
+                const response = await fetch(`${API_URL}/api/projects`);
+                const projects = await response.json();
+
+                const list = document.getElementById('projects-list');
+                
+                if (!projects || projects.length === 0) {
+                    list.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📁</div>
+                            <div class="empty-state-title">Проектов не найдено</div>
+                            <div class="empty-state-description">Создайте первый проект для организации ваших задач</div>
+                            <button class="btn btn-primary" onclick="showCreateProjectModal()">Создать проект</button>
+                        </div>
+                    `;
+                } else {
+                    list.innerHTML = '<div class="prompt-list"></div>';
+                    const projectList = list.querySelector('.prompt-list');
+                    
+                    projects.forEach(project => {
+                        const projectHtml = document.createElement('div');
+                        projectHtml.className = 'prompt-item';
+                        projectHtml.innerHTML = `
+                            <div class="prompt-header">
+                                <div class="prompt-title">${escapeHtml(project.name)}</div>
+                                <div class="prompt-actions">
+                                    <button class="prompt-btn" onclick="editProject(${project.id})" title="Редактировать">✏️</button>
+                                    <button class="prompt-btn" onclick="deleteProject(${project.id})" title="Удалить">🗑️</button>
+                                </div>
+                            </div>
+                            ${project.description ? `<div class="prompt-description">${escapeHtml(project.description)}</div>` : ''}
+                        `;
+                        projectList.appendChild(projectHtml);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading projects:', error);
+            }
+        }
+
+        function showCreateProjectModal() {
+            currentProjectId = null;
+            document.getElementById('projectModalTitle').textContent = 'Новый проект';
+            document.getElementById('projectForm').reset();
+            document.getElementById('projectModal').classList.add('active');
+        }
+
+        function editProject(id) {
+            // Реализуется аналогично editPrompt
+            currentProjectId = id;
+            document.getElementById('projectModalTitle').textContent = 'Редактировать проект';
+            document.getElementById('projectModal').classList.add('active');
+        }
+
+        function closeProjectModal() {
+            document.getElementById('projectModal').classList.remove('active');
+            currentProjectId = null;
+        }
+
+        async function saveProject(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('projectName').value;
+            const description = document.getElementById('projectDesc').value;
+
+            if (!name) {
+                alert('Введите название проекта');
+                return;
+            }
+
+            try {
+                const url = currentProjectId 
+                    ? `${API_URL}/api/projects/${currentProjectId}`
+                    : `${API_URL}/api/projects`;
+                
+                const method = currentProjectId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name,
+                        description
+                    })
+                });
+
+                if (response.ok) {
+                    closeProjectModal();
+                    loadProjects();
+                    loadStats();
+                    showNotification('Проект сохранён успешно!', 'success');
+                } else {
+                    showNotification('Ошибка при сохранении', 'error');
+                }
+            } catch (error) {
+                console.error('Error saving project:', error);
+                showNotification('Ошибка при сохранении', 'error');
+            }
+        }
+
+        async function deleteProject(id) {
+            if (!confirm('Вы уверены? Это действие нельзя отменить.')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/projects/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    loadProjects();
+                    loadStats();
+                    showNotification('Проект удалён', 'success');
+                } else {
+                    showNotification('Ошибка при удалении', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting project:', error);
+                showNotification('Ошибка при удалении', 'error');
+            }
+        }
+
+        // ===== TAGS CRUD =====
+        async function loadTags() {
+            try {
+                const response = await fetch(`${API_URL}/api/tags`);
+                const tags = await response.json();
+
+                const list = document.getElementById('tags-list');
+                
+                if (!tags || tags.length === 0) {
+                    list.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🏷️</div>
+                            <div class="empty-state-title">Тегов не найдено</div>
+                            <div class="empty-state-description">Теги будут созданы автоматически при добавлении промптов</div>
+                        </div>
+                    `;
+                } else {
+                    const tagsHtml = tags.map(tag => 
+                        `<span class="prompt-tag">${escapeHtml(tag.name)}</span>`
+                    ).join('');
+                    list.innerHTML = `<div class="prompt-tags" style="gap: 12px;">${tagsHtml}</div>`;
+                }
+            } catch (error) {
+                console.error('Error loading tags:', error);
+            }
+        }
+
+        // ===== UTILITIES =====
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        function showNotification(message, type = 'info') {
+            // Простое уведомление (можно доработать)
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function importPrompts() {
+            const file = document.getElementById('import-file').files[0];
+            if (!file) {
+                alert('Выберите файл');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    // Отправляем каждый промпт
+                    for (const prompt of data.prompts || data) {
+                        await fetch(`${API_URL}/api/prompts`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                name: prompt.name,
+                                description: prompt.description,
+                                content: prompt.content,
+                                tags: prompt.tags
+                            })
+                        });
+                    }
+
+                    loadStats();
+                    switchPage('prompts');
+                    showNotification('Промпты импортированы успешно!', 'success');
+                } catch (error) {
+                    showNotification('Ошибка при импорте файла', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function exportData() {
+            if (!allPrompts || allPrompts.length === 0) {
+                alert('Нечего экспортировать');
+                return;
+            }
+
+            const dataStr = JSON.stringify({
+                prompts: allPrompts,
+                exportDate: new Date().toISOString()
+            }, null, 2);
+
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `prompts-export-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ===== FORM HANDLERS =====
+        document.getElementById('promptForm')?.addEventListener('submit', savePrompt);
+        document.getElementById('projectForm')?.addEventListener('submit', saveProject);
+
+        // ===== INITIALIZATION =====
+        window.addEventListener('load', () => {
+            loadStats();
+        });
+    </script>
+</body>
+</html>

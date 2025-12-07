@@ -133,7 +133,6 @@
             justify-content: space-between;
             position: relative;
             overflow: hidden;
-            animation: slideInRight 0.5s ease-out;
         }
 
         .header::before {
@@ -157,7 +156,6 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             letter-spacing: -0.5px;
-            animation: slideInLeft 0.5s ease-out;
         }
 
         .logo-icon {
@@ -235,19 +233,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            animation: slideInLeft 0.5s ease-out;
         }
-
-        .nav-btn {
-            animation: fadeInUp 0.4s ease-out;
-        }
-
-        .nav-btn:nth-child(1) { animation-delay: 0.1s; }
-        .nav-btn:nth-child(2) { animation-delay: 0.2s; }
-        .nav-btn:nth-child(3) { animation-delay: 0.3s; }
-        .nav-btn:nth-child(4) { animation-delay: 0.4s; }
-        .nav-btn:nth-child(5) { animation-delay: 0.5s; }
-        .nav-btn:nth-child(6) { animation-delay: 0.6s; }
 
         .nav-btn {
             padding: 14px 16px;
@@ -328,29 +314,7 @@
 
         .page.active {
             display: block;
-            animation: fadeInUp 0.6s ease-out;
         }
-
-        .page-title {
-            animation: slideInLeft 0.5s ease-out;
-        }
-
-        .page-subtitle {
-            animation: slideInLeft 0.5s ease-out 0.1s both;
-        }
-
-        .stats-grid {
-            animation: fadeInUp 0.6s ease-out 0.2s both;
-        }
-
-        .stat-card {
-            animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .stat-card:nth-child(1) { animation-delay: 0.3s; }
-        .stat-card:nth-child(2) { animation-delay: 0.4s; }
-        .stat-card:nth-child(3) { animation-delay: 0.5s; }
-        .stat-card:nth-child(4) { animation-delay: 0.6s; }
 
         @keyframes fadeInUp {
             from {
@@ -362,98 +326,6 @@
                 transform: translateY(0);
             }
         }
-
-        @keyframes scaleIn {
-            from {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        @keyframes slideInLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes shimmer {
-            0% {
-                background-position: -1000px 0;
-            }
-            100% {
-                background-position: 1000px 0;
-            }
-        }
-
-        @keyframes pulse-soft {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.7;
-            }
-        }
-
-        @keyframes bounce-in {
-            0% {
-                opacity: 0;
-                transform: scale(0.8) translateY(20px);
-            }
-            50% {
-                opacity: 1;
-            }
-            100% {
-                transform: scale(1) translateY(0);
-            }
-        }
-
-        /* Skeleton Loading Animation */
-        .skeleton {
-            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
-            background-size: 1000px 100%;
-            animation: shimmer 2s infinite;
-        }
-
-        .skeleton-card {
-            background: rgba(124, 58, 237, 0.1);
-            border: 1px solid rgba(124, 58, 237, 0.2);
-            border-radius: 12px;
-            padding: 16px;
-            height: 200px;
-            animation: pulse-soft 2s ease-in-out infinite;
-        }
-
-        /* Stagger animation for lists */
-        .card-item {
-            animation: slideInLeft 0.5s ease-out both;
-        }
-
-        .card-item:nth-child(1) { animation-delay: 0.1s; }
-        .card-item:nth-child(2) { animation-delay: 0.2s; }
-        .card-item:nth-child(3) { animation-delay: 0.3s; }
-        .card-item:nth-child(4) { animation-delay: 0.4s; }
-        .card-item:nth-child(5) { animation-delay: 0.5s; }
-        .card-item:nth-child(n+6) { animation-delay: 0.6s; }
 
         /* ===== КОНТЕНТНЫЕ БЛОКИ ===== */
         .page-title {
@@ -577,14 +449,6 @@
             transform: translateY(-1px);
         }
 
-        .btn-primary {
-            animation: slideInLeft 0.5s ease-out;
-        }
-
-        .btn-secondary {
-            animation: slideInLeft 0.5s ease-out 0.1s both;
-        }
-
         .btn-secondary {
             background: rgba(124, 58, 237, 0.1);
             color: var(--primary-400);
@@ -625,16 +489,6 @@
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
             animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
-        }
-
-        .modal-content::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.5), transparent);
         }
 
         @keyframes slideUp {
@@ -844,8 +698,11 @@
                     <p class="page-subtitle">Управляйте и оптимизируйте вашу коллекцию промптов</p>
 
                     <div style="margin-bottom: 40px; display: flex; gap: 12px;">
-                        <button class="btn btn-primary" onclick="openPromptModal()">
+                        <button class="btn btn-primary" onclick="alert('Открыть модаль создания промпта')">
                             ➕ Новый Промпт
+                        </button>
+                        <button class="btn btn-secondary" onclick="alert('Импортировать промпты')">
+                            📥 Импортировать
                         </button>
                     </div>
 
@@ -860,7 +717,7 @@
                     <p class="page-subtitle">Организуйте работу по проектам и отслеживайте прогресс</p>
 
                     <div style="margin-bottom: 40px;">
-                        <button class="btn btn-primary" onclick="openProjectModal()">
+                        <button class="btn btn-primary" onclick="alert('Открыть модаль создания проекта')">
                             ➕ Новый Проект
                         </button>
                     </div>
@@ -918,100 +775,10 @@
         </div>
     </div>
 
-    <!-- ===== PROMPT MODAL ===== -->
-    <div id="prompt-modal" class="modal">
-        <div class="modal-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
-                <div class="modal-header">Новый Промпт</div>
-                <button style="background: transparent; border: none; color: var(--dark-400); font-size: 24px; cursor: pointer;" onclick="closePromptModal()">✕</button>
-            </div>
-            
-            <form id="prompt-form" onsubmit="createPrompt(event)">
-                <div class="form-group">
-                    <label class="form-label">Название</label>
-                    <input type="text" id="prompt-title" class="form-input" required placeholder="Введите название промпта">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Содержание</label>
-                    <textarea id="prompt-content" class="form-textarea" required placeholder="Введите содержание промпта"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Описание (опционально)</label>
-                    <input type="text" id="prompt-description" class="form-input" placeholder="Краткое описание">
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                    <div class="form-group">
-                        <label class="form-label">Категория</label>
-                        <select id="prompt-category" class="form-input" style="cursor: pointer;">
-                            <option>general</option>
-                            <option>writing</option>
-                            <option>coding</option>
-                            <option>analysis</option>
-                            <option>creative</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Версия</label>
-                        <input type="text" id="prompt-version" class="form-input" placeholder="1.0" value="1.0">
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closePromptModal()">Отмена</button>
-                    <button type="submit" class="btn btn-primary">Создать</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- ===== PROJECT MODAL ===== -->
-    <div id="project-modal" class="modal">
-        <div class="modal-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
-                <div class="modal-header">Новый Проект</div>
-                <button style="background: transparent; border: none; color: var(--dark-400); font-size: 24px; cursor: pointer;" onclick="closeProjectModal()">✕</button>
-            </div>
-            
-            <form id="project-form" onsubmit="createProject(event)">
-                <div class="form-group">
-                    <label class="form-label">Название проекта</label>
-                    <input type="text" id="project-name" class="form-input" required placeholder="Введите название проекта">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Описание</label>
-                    <textarea id="project-description" class="form-textarea" placeholder="Описание проекта"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Статус</label>
-                    <select id="project-status" class="form-input" style="cursor: pointer;">
-                        <option>active</option>
-                        <option>paused</option>
-                        <option>completed</option>
-                        <option>archived</option>
-                    </select>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeProjectModal()">Отмена</button>
-                    <button type="submit" class="btn btn-primary">Создать</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <script>
         const API_URL = 'http://127.0.0.1:8000';
-        let currentPage = 'dashboard';
 
         function switchPage(pageName) {
-            currentPage = pageName;
-            
             // Hide all pages
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             
@@ -1023,33 +790,10 @@
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             event.target.closest('.nav-btn')?.classList.add('active');
 
-            // Load page-specific data
+            // Load stats
             if (pageName === 'dashboard') {
                 loadStats();
-            } else if (pageName === 'prompts') {
-                loadPrompts();
-            } else if (pageName === 'projects') {
-                loadProjects();
-            } else if (pageName === 'tags') {
-                loadTags();
             }
-        }
-
-        // Show loading skeleton
-        function showPromptsSkeleton() {
-            const container = document.getElementById('prompts-list');
-            const skeletons = Array(3).fill(0).map(() => 
-                `<div class="skeleton-card"></div>`
-            ).join('');
-            container.innerHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">${skeletons}</div>`;
-        }
-
-        function showProjectsSkeleton() {
-            const container = document.getElementById('projects-list');
-            const skeletons = Array(3).fill(0).map(() => 
-                `<div class="skeleton-card"></div>`
-            ).join('');
-            container.innerHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">${skeletons}</div>`;
         }
 
         async function loadStats() {
@@ -1057,23 +801,14 @@
                 const response = await fetch(`${API_URL}/api/stats`);
                 const data = await response.json();
 
-                // Animate stat updates
-                const updateStatWithAnimation = (elementId, value) => {
-                    const element = document.getElementById(elementId);
-                    if (element) {
-                        element.style.transition = 'all 0.3s ease';
-                        element.textContent = value || 0;
-                    }
-                };
+                document.getElementById('stat-prompts').textContent = data.total_prompts || 0;
+                document.getElementById('stat-tags').textContent = data.total_tags || 0;
+                document.getElementById('stat-projects').textContent = data.total_projects || 0;
+                document.getElementById('stat-categories').textContent = data.total_categories || 0;
 
-                updateStatWithAnimation('stat-prompts', data.total_prompts);
-                updateStatWithAnimation('stat-tags', data.total_tags);
-                updateStatWithAnimation('stat-projects', data.total_projects);
-                updateStatWithAnimation('stat-categories', data.total_categories);
-
-                updateStatWithAnimation('header-prompts', data.total_prompts);
-                updateStatWithAnimation('header-projects', data.total_projects);
-                updateStatWithAnimation('header-tags', data.total_tags);
+                document.getElementById('header-prompts').textContent = data.total_prompts || 0;
+                document.getElementById('header-projects').textContent = data.total_projects || 0;
+                document.getElementById('header-tags').textContent = data.total_tags || 0;
             } catch (error) {
                 console.error('Error loading stats:', error);
             }
@@ -1088,284 +823,8 @@
             });
         });
 
-        // Prompt Modal Functions
-        function openPromptModal() {
-            const modal = document.getElementById('prompt-modal');
-            if (modal) {
-                modal.classList.add('active');
-                document.getElementById('prompt-form').reset();
-            }
-        }
-
-        function closePromptModal() {
-            const modal = document.getElementById('prompt-modal');
-            if (modal) modal.classList.remove('active');
-        }
-
-        async function createPrompt(event) {
-            event.preventDefault();
-            
-            const title = document.getElementById('prompt-title').value;
-            const content = document.getElementById('prompt-content').value;
-            const description = document.getElementById('prompt-description').value || '';
-            const category = document.getElementById('prompt-category').value || 'general';
-            const version = document.getElementById('prompt-version').value || '1.0';
-            
-            try {
-                const response = await fetch(`${API_URL}/api/prompts`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        title,
-                        content,
-                        description,
-                        category,
-                        version,
-                        tag_ids: []
-                    })
-                });
-                
-                if (response.ok) {
-                    closePromptModal();
-                    
-                    // Success notification
-                    const notification = document.createElement('div');
-                    notification.textContent = '✅ Промпт успешно создан!';
-                    notification.style.cssText = `
-                        position: fixed;
-                        top: 20px;
-                        right: 20px;
-                        background: linear-gradient(135deg, #10b981, #059669);
-                        color: white;
-                        padding: 16px 24px;
-                        border-radius: 10px;
-                        z-index: 2000;
-                        animation: slideInRight 0.4s ease-out;
-                    `;
-                    document.body.appendChild(notification);
-                    setTimeout(() => notification.remove(), 3000);
-                    
-                    await loadPrompts();
-                    await loadStats();
-                } else {
-                    alert('❌ Ошибка при создании промпта');
-                }
-            } catch (error) {
-                console.error('Error creating prompt:', error);
-                alert('❌ Ошибка подключения к API');
-            }
-        }
-
-        async function loadPrompts() {
-            showPromptsSkeleton();
-            
-            try {
-                const response = await fetch(`${API_URL}/api/prompts`);
-                const prompts = await response.json();
-                
-                const container = document.getElementById('prompts-list');
-                if (prompts.length === 0) {
-                    container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--dark-400);"><p style="font-size: 16px;">Промптов не найдено. Создайте первый промпт!</p></div>';
-                } else {
-                    const cardsHtml = prompts.map(p => `
-                        <div class="card-item" style="background: rgba(124, 58, 237, 0.1); border: 1px solid rgba(124, 58, 237, 0.2); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.borderColor='rgba(168, 85, 247, 0.5)'; this.style.background='rgba(124, 58, 237, 0.15)'; this.style.transform='translateY(-4px)';" onmouseout="this.style.borderColor='rgba(124, 58, 237, 0.2)'; this.style.background='rgba(124, 58, 237, 0.1)'; this.style.transform='translateY(0)';" onclick="alert('Промпт: ' + '${p.title}')">
-                            <h3 style="color: white; margin-bottom: 8px; font-weight: 600;">${p.title}</h3>
-                            <p style="color: var(--dark-400); font-size: 13px; margin-bottom: 12px; height: 40px; overflow: hidden; line-height: 1.4;">${p.content.substring(0, 80)}...</p>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 12px; color: var(--primary-400); background: rgba(124, 58, 237, 0.2); padding: 4px 12px; border-radius: 6px;">${p.category}</span>
-                                <button style="background: transparent; border: none; color: var(--dark-400); cursor: pointer; font-size: 16px; transition: transform 0.2s ease;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='var(--accent-1)';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--dark-400)';" onclick="deletePrompt(${p.id}, event)">🗑️</button>
-                            </div>
-                        </div>
-                    `).join('');
-                    
-                    container.innerHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">${cardsHtml}</div>`;
-                }
-            } catch (error) {
-                console.error('Error loading prompts:', error);
-                document.getElementById('prompts-list').innerHTML = '<p style="color: var(--dark-400);">Ошибка загрузки промптов</p>';
-            }
-        }
-
-        async function deletePrompt(id, event) {
-            event.stopPropagation();
-            if (!confirm('Вы уверены, что хотите удалить этот промпт?')) return;
-            
-            try {
-                const response = await fetch(`${API_URL}/api/prompts/${id}`, { method: 'DELETE' });
-                if (response.ok) {
-                    await loadPrompts();
-                    await loadStats();
-                }
-            } catch (error) {
-                console.error('Error deleting prompt:', error);
-            }
-        }
-
-        // Project Modal Functions
-        function openProjectModal() {
-            const modal = document.getElementById('project-modal');
-            if (modal) {
-                modal.classList.add('active');
-                document.getElementById('project-form').reset();
-            }
-        }
-
-        function closeProjectModal() {
-            const modal = document.getElementById('project-modal');
-            if (modal) modal.classList.remove('active');
-        }
-
-        async function createProject(event) {
-            event.preventDefault();
-            
-            const name = document.getElementById('project-name').value;
-            const description = document.getElementById('project-description').value || '';
-            const status = document.getElementById('project-status').value || 'active';
-            
-            try {
-                const response = await fetch(`${API_URL}/api/projects`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        name,
-                        description,
-                        status
-                    })
-                });
-                
-                if (response.ok) {
-                    closeProjectModal();
-                    
-                    // Success notification
-                    const notification = document.createElement('div');
-                    notification.textContent = '✅ Проект успешно создан!';
-                    notification.style.cssText = `
-                        position: fixed;
-                        top: 20px;
-                        right: 20px;
-                        background: linear-gradient(135deg, #10b981, #059669);
-                        color: white;
-                        padding: 16px 24px;
-                        border-radius: 10px;
-                        z-index: 2000;
-                        animation: slideInRight 0.4s ease-out;
-                    `;
-                    document.body.appendChild(notification);
-                    setTimeout(() => notification.remove(), 3000);
-                    
-                    await loadProjects();
-                    await loadStats();
-                } else {
-                    alert('❌ Ошибка при создании проекта');
-                }
-            } catch (error) {
-                console.error('Error creating project:', error);
-                alert('❌ Ошибка подключения к API');
-            }
-        }
-
-        async function loadProjects() {
-            showProjectsSkeleton();
-            
-            try {
-                const response = await fetch(`${API_URL}/api/projects`);
-                const projects = await response.json();
-                
-                const container = document.getElementById('projects-list');
-                if (projects.length === 0) {
-                    container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--dark-400);"><p style="font-size: 16px;">Проектов не найдено. Создайте первый проект!</p></div>';
-                } else {
-                    const cardsHtml = projects.map(p => `
-                        <div class="card-item" style="background: rgba(236, 72, 153, 0.1); border: 1px solid rgba(236, 72, 153, 0.2); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.borderColor='rgba(236, 72, 153, 0.5)'; this.style.background='rgba(236, 72, 153, 0.15)'; this.style.transform='translateY(-4px)';" onmouseout="this.style.borderColor='rgba(236, 72, 153, 0.2)'; this.style.background='rgba(236, 72, 153, 0.1)'; this.style.transform='translateY(0)';">
-                            <h3 style="color: white; margin-bottom: 8px; font-weight: 600;">${p.name}</h3>
-                            <p style="color: var(--dark-400); font-size: 13px; margin-bottom: 12px; height: 40px; overflow: hidden;">${p.description || 'Нет описания'}</p>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 12px; color: var(--accent-1); background: rgba(236, 72, 153, 0.2); padding: 4px 12px; border-radius: 6px;">${p.status}</span>
-                                <button style="background: transparent; border: none; color: var(--dark-400); cursor: pointer; font-size: 16px; transition: transform 0.2s ease;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='var(--accent-1)';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--dark-400)';" onclick="deleteProject(${p.id}, event)">🗑️</button>
-                            </div>
-                        </div>
-                    `).join('');
-                    
-                    container.innerHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">${cardsHtml}</div>`;
-                }
-            } catch (error) {
-                console.error('Error loading projects:', error);
-                document.getElementById('projects-list').innerHTML = '<p style="color: var(--dark-400);">Ошибка загрузки проектов</p>';
-            }
-        }
-
-        async function deleteProject(id, event) {
-            event.stopPropagation();
-            if (!confirm('Вы уверены, что хотите удалить этот проект?')) return;
-            
-            try {
-                const response = await fetch(`${API_URL}/api/projects/${id}`, { method: 'DELETE' });
-                if (response.ok) {
-                    await loadProjects();
-                    await loadStats();
-                }
-            } catch (error) {
-                console.error('Error deleting project:', error);
-            }
-        }
-
-        async function loadTags() {
-            try {
-                const response = await fetch(`${API_URL}/api/tags`);
-                const tags = await response.json();
-                
-                const container = document.getElementById('tags-list');
-                if (tags.length === 0) {
-                    container.innerHTML = '<p style="font-size: 16px;">Тегов не найдено. Они будут созданы автоматически.</p>';
-                } else {
-                    const tagsHtml = tags.map(t => `
-                        <span style="display: inline-block; background: linear-gradient(135deg, var(--primary-600), var(--accent-1)); color: white; padding: 8px 16px; border-radius: 20px; margin: 8px; animation: scaleIn 0.3s ease-out;">
-                            ${t.name}
-                        </span>
-                    `).join('');
-                    container.innerHTML = `<div style="margin-top: 20px;">${tagsHtml}</div>`;
-                }
-            } catch (error) {
-                console.error('Error loading tags:', error);
-            }
-        }
-
-        // Инициализация при загрузке страницы
-        async function initializeApp() {
-            // Загружаем статистику
-            await loadStats();
-            
-            // Загружаем промпты и проекты в фоне
-            setTimeout(() => {
-                loadPrompts();
-                loadProjects();
-            }, 100);
-        }
-
-        // Wait for API to be ready, then initialize
-        async function waitForAPI() {
-            let attempts = 0;
-            const maxAttempts = 30;
-            
-            while (attempts < maxAttempts) {
-                try {
-                    const response = await fetch(`${API_URL}/api/stats`, { signal: AbortSignal.timeout(2000) });
-                    if (response.ok) {
-                        console.log('✅ API готов');
-                        initializeApp();
-                        return;
-                    }
-                } catch (error) {
-                    attempts++;
-                    console.log(`⏳ Ожидаю API... (${attempts}/${maxAttempts})`);
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                }
-            }
-            console.error('❌ API недоступен');
-        }
-
         // Initial load
-        window.addEventListener('load', waitForAPI);
+        window.addEventListener('load', loadStats);
     </script>
 </body>
 </html>
