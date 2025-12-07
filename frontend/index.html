@@ -27,19 +27,22 @@
             --warning: #f59e0b;
         }
 
-        body {
+        html, body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
             background: var(--dark-900);
             color: var(--dark-300);
             line-height: 1.6;
-            overflow-x: hidden;
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
         }
 
         /* Layout */
         .app-container {
             display: grid;
             grid-template-columns: 280px 1fr;
-            min-height: 100vh;
+            height: 100vh;
+            width: 100vw;
         }
 
         /* Sidebar */
@@ -122,17 +125,17 @@
 
         /* Main Content */
         .main-content {
-            margin-left: 280px;
             display: flex;
             flex-direction: column;
+            height: 100%;
+            overflow: hidden;
         }
 
         .header {
             background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
             padding: 32px 40px;
             border-bottom: 1px solid var(--dark-700);
-            position: sticky;
-            top: 0;
+            flex-shrink: 0;
             z-index: 100;
         }
 
@@ -152,6 +155,12 @@
             flex: 1;
             padding: 40px;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .page {
+            width: 100%;
         }
 
         /* Cards */
@@ -411,6 +420,220 @@
             color: var(--dark-400);
             margin-bottom: 24px;
         }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--dark-800);
+            border: 1px solid var(--dark-700);
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 600px;
+            width: 90%;
+            animation: slideUp 0.3s ease;
+        }
+
+        .modal-header {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 24px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: var(--dark-400);
+            font-size: 24px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-300);
+            font-size: 14px;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            background: var(--dark-700);
+            border: 1px solid var(--dark-600);
+            border-radius: 8px;
+            color: var(--dark-300);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary-600);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: monospace;
+        }
+
+        .form-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--dark-700);
+        }
+
+        /* Prompt List */
+        .prompt-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .prompt-item {
+            background: var(--dark-700);
+            border: 1px solid var(--dark-600);
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .prompt-item:hover {
+            border-color: var(--primary-600);
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.1);
+        }
+
+        .prompt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .prompt-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .prompt-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .prompt-btn {
+            background: none;
+            border: none;
+            color: var(--dark-400);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px 8px;
+            transition: color 0.3s ease;
+        }
+
+        .prompt-btn:hover {
+            color: var(--primary-500);
+        }
+
+        .prompt-description {
+            font-size: 13px;
+            color: var(--dark-300);
+            margin-bottom: 12px;
+        }
+
+        .prompt-content {
+            background: var(--dark-800);
+            padding: 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            color: var(--dark-300);
+            margin-bottom: 12px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .prompt-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .prompt-tag {
+            background: rgba(124, 58, 237, 0.2);
+            color: var(--primary-400);
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            border: 1px solid rgba(124, 58, 237, 0.4);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes gradientShift {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -606,10 +829,65 @@
         </div>
     </div>
 
+    <!-- Create/Edit Prompt Modal -->
+    <div id="promptModal" class="modal">
+        <div class="modal-content" style="position: relative;">
+            <button class="modal-close" onclick="closePromptModal()">✕</button>
+            <div class="modal-header" id="promptModalTitle">Новый промпт</div>
+            <form id="promptForm">
+                <div class="form-group">
+                    <label class="form-label">Название промпта</label>
+                    <input type="text" id="promptName" class="form-input" placeholder="Введите название" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Описание</label>
+                    <input type="text" id="promptDesc" class="form-input" placeholder="Краткое описание">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Содержание промпта</label>
+                    <textarea id="promptContent" class="form-textarea" placeholder="Введите содержание промпта..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Теги (через запятую)</label>
+                    <input type="text" id="promptTags" class="form-input" placeholder="AI, Копирайтинг, Маркетинг">
+                </div>
+                <div class="form-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closePromptModal()">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create/Edit Project Modal -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content" style="position: relative;">
+            <button class="modal-close" onclick="closeProjectModal()">✕</button>
+            <div class="modal-header" id="projectModalTitle">Новый проект</div>
+            <form id="projectForm">
+                <div class="form-group">
+                    <label class="form-label">Название проекта</label>
+                    <input type="text" id="projectName" class="form-input" placeholder="Введите название" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Описание</label>
+                    <textarea id="projectDesc" class="form-textarea" placeholder="Описание проекта"></textarea>
+                </div>
+                <div class="form-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeProjectModal()">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         const API_URL = 'http://127.0.0.1:8000';
+        let currentPromptId = null;
+        let currentProjectId = null;
+        let allPrompts = [];
 
-        // Page switching
+        // ===== PAGE SWITCHING =====
         function switchPage(page) {
             // Hide all pages
             document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
@@ -641,9 +919,12 @@
 
             // Load data for page
             if (page === 'dashboard') loadStats();
+            if (page === 'prompts') loadPrompts();
+            if (page === 'projects') loadProjects();
+            if (page === 'tags') loadTags();
         }
 
-        // Load statistics
+        // ===== STATISTICS =====
         async function loadStats() {
             try {
                 const response = await fetch(`${API_URL}/api/stats`);
@@ -658,24 +939,379 @@
             }
         }
 
-        // Modals
+        // ===== PROMPTS CRUD =====
+        async function loadPrompts() {
+            try {
+                const response = await fetch(`${API_URL}/api/prompts`);
+                allPrompts = await response.json();
+
+                const list = document.getElementById('prompts-list');
+                
+                if (!allPrompts || allPrompts.length === 0) {
+                    list.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">✨</div>
+                            <div class="empty-state-title">Промптов не найдено</div>
+                            <div class="empty-state-description">Создайте первый промпт или импортируйте из файла</div>
+                            <button class="btn btn-primary" onclick="showCreatePromptModal()">Создать промпт</button>
+                        </div>
+                    `;
+                } else {
+                    list.innerHTML = '<div class="prompt-list"></div>';
+                    const promptList = list.querySelector('.prompt-list');
+                    
+                    allPrompts.forEach(prompt => {
+                        const tagsHtml = prompt.tags ? prompt.tags.split(',').map(tag => 
+                            `<span class="prompt-tag">${tag.trim()}</span>`
+                        ).join('') : '';
+                        
+                        const promptHtml = document.createElement('div');
+                        promptHtml.className = 'prompt-item';
+                        promptHtml.innerHTML = `
+                            <div class="prompt-header">
+                                <div class="prompt-title">${escapeHtml(prompt.name)}</div>
+                                <div class="prompt-actions">
+                                    <button class="prompt-btn" onclick="editPrompt(${prompt.id})" title="Редактировать">✏️</button>
+                                    <button class="prompt-btn" onclick="deletePrompt(${prompt.id})" title="Удалить">🗑️</button>
+                                </div>
+                            </div>
+                            ${prompt.description ? `<div class="prompt-description">${escapeHtml(prompt.description)}</div>` : ''}
+                            <div class="prompt-content">${escapeHtml(prompt.content)}</div>
+                            ${tagsHtml ? `<div class="prompt-tags">${tagsHtml}</div>` : ''}
+                        `;
+                        promptList.appendChild(promptHtml);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading prompts:', error);
+            }
+        }
+
         function showCreatePromptModal() {
-            alert('Функция создания промпта будет доступна в версии 1.1');
+            currentPromptId = null;
+            document.getElementById('promptModalTitle').textContent = 'Новый промпт';
+            document.getElementById('promptForm').reset();
+            document.getElementById('promptModal').classList.add('active');
+        }
+
+        function editPrompt(id) {
+            currentPromptId = id;
+            const prompt = allPrompts.find(p => p.id === id);
+            if (!prompt) return;
+
+            document.getElementById('promptModalTitle').textContent = 'Редактировать промпт';
+            document.getElementById('promptName').value = prompt.name || '';
+            document.getElementById('promptDesc').value = prompt.description || '';
+            document.getElementById('promptContent').value = prompt.content || '';
+            document.getElementById('promptTags').value = prompt.tags || '';
+            document.getElementById('promptModal').classList.add('active');
+        }
+
+        function closePromptModal() {
+            document.getElementById('promptModal').classList.remove('active');
+            currentPromptId = null;
+        }
+
+        async function savePrompt(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('promptName').value;
+            const description = document.getElementById('promptDesc').value;
+            const content = document.getElementById('promptContent').value;
+            const tags = document.getElementById('promptTags').value;
+
+            if (!name || !content) {
+                alert('Заполните название и содержание промпта');
+                return;
+            }
+
+            try {
+                const url = currentPromptId 
+                    ? `${API_URL}/api/prompts/${currentPromptId}`
+                    : `${API_URL}/api/prompts`;
+                
+                const method = currentPromptId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name,
+                        description,
+                        content,
+                        tags
+                    })
+                });
+
+                if (response.ok) {
+                    closePromptModal();
+                    loadPrompts();
+                    loadStats();
+                    showNotification('Промпт сохранён успешно!', 'success');
+                } else {
+                    showNotification('Ошибка при сохранении', 'error');
+                }
+            } catch (error) {
+                console.error('Error saving prompt:', error);
+                showNotification('Ошибка при сохранении', 'error');
+            }
+        }
+
+        async function deletePrompt(id) {
+            if (!confirm('Вы уверены? Это действие нельзя отменить.')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/prompts/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    loadPrompts();
+                    loadStats();
+                    showNotification('Промпт удалён', 'success');
+                } else {
+                    showNotification('Ошибка при удалении', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting prompt:', error);
+                showNotification('Ошибка при удалении', 'error');
+            }
+        }
+
+        // ===== PROJECTS CRUD =====
+        async function loadProjects() {
+            try {
+                const response = await fetch(`${API_URL}/api/projects`);
+                const projects = await response.json();
+
+                const list = document.getElementById('projects-list');
+                
+                if (!projects || projects.length === 0) {
+                    list.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📁</div>
+                            <div class="empty-state-title">Проектов не найдено</div>
+                            <div class="empty-state-description">Создайте первый проект для организации ваших задач</div>
+                            <button class="btn btn-primary" onclick="showCreateProjectModal()">Создать проект</button>
+                        </div>
+                    `;
+                } else {
+                    list.innerHTML = '<div class="prompt-list"></div>';
+                    const projectList = list.querySelector('.prompt-list');
+                    
+                    projects.forEach(project => {
+                        const projectHtml = document.createElement('div');
+                        projectHtml.className = 'prompt-item';
+                        projectHtml.innerHTML = `
+                            <div class="prompt-header">
+                                <div class="prompt-title">${escapeHtml(project.name)}</div>
+                                <div class="prompt-actions">
+                                    <button class="prompt-btn" onclick="editProject(${project.id})" title="Редактировать">✏️</button>
+                                    <button class="prompt-btn" onclick="deleteProject(${project.id})" title="Удалить">🗑️</button>
+                                </div>
+                            </div>
+                            ${project.description ? `<div class="prompt-description">${escapeHtml(project.description)}</div>` : ''}
+                        `;
+                        projectList.appendChild(projectHtml);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading projects:', error);
+            }
         }
 
         function showCreateProjectModal() {
-            alert('Функция создания проекта будет доступна в версии 1.1');
+            currentProjectId = null;
+            document.getElementById('projectModalTitle').textContent = 'Новый проект';
+            document.getElementById('projectForm').reset();
+            document.getElementById('projectModal').classList.add('active');
+        }
+
+        function editProject(id) {
+            // Реализуется аналогично editPrompt
+            currentProjectId = id;
+            document.getElementById('projectModalTitle').textContent = 'Редактировать проект';
+            document.getElementById('projectModal').classList.add('active');
+        }
+
+        function closeProjectModal() {
+            document.getElementById('projectModal').classList.remove('active');
+            currentProjectId = null;
+        }
+
+        async function saveProject(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('projectName').value;
+            const description = document.getElementById('projectDesc').value;
+
+            if (!name) {
+                alert('Введите название проекта');
+                return;
+            }
+
+            try {
+                const url = currentProjectId 
+                    ? `${API_URL}/api/projects/${currentProjectId}`
+                    : `${API_URL}/api/projects`;
+                
+                const method = currentProjectId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name,
+                        description
+                    })
+                });
+
+                if (response.ok) {
+                    closeProjectModal();
+                    loadProjects();
+                    loadStats();
+                    showNotification('Проект сохранён успешно!', 'success');
+                } else {
+                    showNotification('Ошибка при сохранении', 'error');
+                }
+            } catch (error) {
+                console.error('Error saving project:', error);
+                showNotification('Ошибка при сохранении', 'error');
+            }
+        }
+
+        async function deleteProject(id) {
+            if (!confirm('Вы уверены? Это действие нельзя отменить.')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/projects/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    loadProjects();
+                    loadStats();
+                    showNotification('Проект удалён', 'success');
+                } else {
+                    showNotification('Ошибка при удалении', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting project:', error);
+                showNotification('Ошибка при удалении', 'error');
+            }
+        }
+
+        // ===== TAGS CRUD =====
+        async function loadTags() {
+            try {
+                const response = await fetch(`${API_URL}/api/tags`);
+                const tags = await response.json();
+
+                const list = document.getElementById('tags-list');
+                
+                if (!tags || tags.length === 0) {
+                    list.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🏷️</div>
+                            <div class="empty-state-title">Тегов не найдено</div>
+                            <div class="empty-state-description">Теги будут созданы автоматически при добавлении промптов</div>
+                        </div>
+                    `;
+                } else {
+                    const tagsHtml = tags.map(tag => 
+                        `<span class="prompt-tag">${escapeHtml(tag.name)}</span>`
+                    ).join('');
+                    list.innerHTML = `<div class="prompt-tags" style="gap: 12px;">${tagsHtml}</div>`;
+                }
+            } catch (error) {
+                console.error('Error loading tags:', error);
+            }
+        }
+
+        // ===== UTILITIES =====
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        function showNotification(message, type = 'info') {
+            // Простое уведомление (можно доработать)
+            console.log(`[${type.toUpperCase()}] ${message}`);
         }
 
         function importPrompts() {
-            alert('Функция импорта будет доступна в версии 1.1');
+            const file = document.getElementById('import-file').files[0];
+            if (!file) {
+                alert('Выберите файл');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    // Отправляем каждый промпт
+                    for (const prompt of data.prompts || data) {
+                        await fetch(`${API_URL}/api/prompts`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                name: prompt.name,
+                                description: prompt.description,
+                                content: prompt.content,
+                                tags: prompt.tags
+                            })
+                        });
+                    }
+
+                    loadStats();
+                    switchPage('prompts');
+                    showNotification('Промпты импортированы успешно!', 'success');
+                } catch (error) {
+                    showNotification('Ошибка при импорте файла', 'error');
+                }
+            };
+            reader.readAsText(file);
         }
 
         function exportData() {
-            alert('Функция экспорта будет доступна в версии 1.1');
+            if (!allPrompts || allPrompts.length === 0) {
+                alert('Нечего экспортировать');
+                return;
+            }
+
+            const dataStr = JSON.stringify({
+                prompts: allPrompts,
+                exportDate: new Date().toISOString()
+            }, null, 2);
+
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `prompts-export-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
         }
 
-        // Load initial stats on page load
+        // ===== FORM HANDLERS =====
+        document.getElementById('promptForm')?.addEventListener('submit', savePrompt);
+        document.getElementById('projectForm')?.addEventListener('submit', saveProject);
+
+        // ===== INITIALIZATION =====
         window.addEventListener('load', () => {
             loadStats();
         });
