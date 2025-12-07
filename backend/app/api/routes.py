@@ -278,9 +278,12 @@ def get_statistics(db: Session = Depends(get_db)):
     from sqlalchemy import func
     from app.db.models import Prompt, Tag, Project
     
+    from sqlalchemy import func
+    
     total_prompts = db.query(func.count(Prompt.id)).scalar()
     total_tags = db.query(func.count(Tag.id)).scalar()
     total_projects = db.query(func.count(Project.id)).scalar()
+    total_categories = db.query(func.count(Prompt.category.distinct())).scalar()
     
     # Самые используемые промпты
     top_prompts = db.query(Prompt).order_by(Prompt.usage_count.desc()).limit(5).all()
@@ -289,5 +292,25 @@ def get_statistics(db: Session = Depends(get_db)):
         "total_prompts": total_prompts or 0,
         "total_tags": total_tags or 0,
         "total_projects": total_projects or 0,
+        "total_categories": total_categories or 0,
         "top_prompts": top_prompts
+    }
+
+
+@router.get("/stats")
+def get_stats(db: Session = Depends(get_db)):
+    """Получить статистику"""
+    from sqlalchemy import func
+    from app.db.models import Prompt, Tag, Project
+    
+    total_prompts = db.query(func.count(Prompt.id)).scalar() or 0
+    total_tags = db.query(func.count(Tag.id)).scalar() or 0
+    total_projects = db.query(func.count(Project.id)).scalar() or 0
+    total_categories = db.query(func.count(Prompt.category.distinct())).scalar() or 0
+    
+    return {
+        "total_prompts": total_prompts,
+        "total_tags": total_tags,
+        "total_projects": total_projects,
+        "total_categories": total_categories
     }
