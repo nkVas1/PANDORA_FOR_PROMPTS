@@ -23,6 +23,13 @@ class DatabaseInitializer:
         """Инициализирует БД и создает таблицы если их нет"""
         print("[DB] Initializing database...")
         
+        # Сначала выполняем миграции (добавляем новые колонки)
+        try:
+            from app.db.migrations import migrate_database
+            migrate_database()
+        except Exception as e:
+            print(f"[DB] Migration error: {e}")
+        
         # Создаем таблицы если их нет
         Base.metadata.create_all(bind=engine)
         

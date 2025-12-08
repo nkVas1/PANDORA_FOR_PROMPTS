@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, File, UploadFile
 from sqlalchemy.orm import Session
 from typing import List
+import json
 from app.db import get_db
 from app.models import schemas
 from app.services.database import (
@@ -8,8 +9,8 @@ from app.services.database import (
 )
 from app.services.autotagging import AutoTaggingService as ATS
 from app.services.file_service import FileService
+from app.services.keyword_analyzer import analyzer as keyword_analyzer
 from app.utils.importer import PromptImporter
-import json
 
 router = APIRouter(prefix="/api", tags=["prompts"])
 
@@ -119,6 +120,38 @@ def delete_tag(tag_id: int, db: Session = Depends(get_db)):
 
 
 # ================ AUTO-TAGGING ENDPOINTS ================
+
+@router.post("/prompts/analyze")
+def analyze_prompt_for_creation(data: dict):
+    """
+    Анализирует промпт перед созданием для предложения тегов, категории и ключевых слов
+    
+    Expected input:
+    {
+        "title": "Prompt Title",
+        "content": "Prompt content",
+        "category": "development" (optional)
+    }
+    """
+    title = data.get("title", "")
+    content = data.get("content", "")
+    category = data.get("category")
+    
+    if not title or not content:
+        raise HTTPException(status_code=400, detail="Title and content are required")
+    
+    # Анализируем с помощью KeywordAnalyzer
+    analysis_result = keyword_analyzer.analyze(title, content, category)
+    
+    return {
+        "suggested_tags": analysis_result.get("suggested_tags", []),
+        "keywords": analysis_result.get("keywords", []),
+        "suggested_category": analysis_result.get("suggested_category"),
+        "suggested_difficulty": analysis_result.get("suggested_difficulty"),
+        "confidence": analysis_result.get("confidence", 0.0),
+        "tag_count": analysis_result.get("tag_count", 0)
+    }
+
 
 @router.post("/prompts/{prompt_id}/auto-tag", response_model=schemas.AutoTagResult)
 def auto_tag_prompt(prompt_id: int, db: Session = Depends(get_db)):

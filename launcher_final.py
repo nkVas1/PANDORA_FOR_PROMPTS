@@ -22,7 +22,7 @@ from typing import Optional
 # Try to import splash screen
 try:
     import tkinter as tk
-    from splash_screen_v2 import ModernSplashScreen
+    from splash_screen import PandoraSplashScreen
     HAS_SPLASH = True
 except ImportError:
     HAS_SPLASH = False
@@ -222,7 +222,7 @@ class DesktopApp:
         try:
             if HAS_SPLASH:
                 root = tk.Tk()
-                splash = ModernSplashScreen(root)
+                splash = PandoraSplashScreen(root)
                 logger.info("✓ Splash screen initialized")
         except Exception as e:
             logger.warning(f"Could not initialize splash screen: {e}")

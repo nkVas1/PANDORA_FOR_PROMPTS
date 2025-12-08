@@ -32,7 +32,7 @@ class Tag(Base):
 
 
 class Prompt(Base):
-    """Модель промпта"""
+    """Модель промпта с расширенными метаданными"""
     __tablename__ = "prompts"
     
     id = Column(Integer, primary_key=True)
@@ -40,9 +40,23 @@ class Prompt(Base):
     content = Column(Text, nullable=False)
     description = Column(Text)
     category = Column(String(50), index=True, default="custom")
+    subcategory = Column(String(50), index=True)  # Подкатегория для иерархии
+    emoji = Column(String(10))  # Эмодзи для категории
     version = Column(String(20), default="1.0")
+    difficulty = Column(String(50), default="intermediate")  # beginner, intermediate, advanced
+    context_window = Column(String(50))  # small, medium, large
+    models = Column(Text)  # JSON array: ["gpt-4", "claude-3"]
+    use_cases = Column(Text)  # JSON array: ["use_case_1", "use_case_2"]
+    examples = Column(Text)  # JSON array: ["example1.md", "example2.md"]
+    changelog = Column(Text)  # История изменений (версионирование)
+    rating = Column(Float, default=0.0)  # Рейтинг от 0 до 5
     usage_count = Column(Integer, default=0)
+    author = Column(String(255))  # Автор промта
+    author_url = Column(String(500))  # URL автора (GitHub profile и т.д.)
     imported_from = Column(String(255))  # Источник импорта
+    keywords = Column(Text)  # JSON array: ["keyword1", "keyword2"] для поиска
+    is_featured = Column(Boolean, default=False)
+    is_experimental = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     

@@ -239,99 +239,152 @@ class PandoraSplashScreen:
         )
     
     def _draw_progress_bar(self):
-        """Рисует прогресс бар"""
+        """Рисует плавный прогресс бар с анимацией"""
         bar_width = 400
-        bar_height = 6
+        bar_height = 8
         bar_x = (self.width - bar_width) / 2
-        bar_y = 420
+        bar_y = 410
         
-        # Фон прогресс бара
+        # Фон прогресс бара с тенью
+        self.canvas.create_rectangle(
+            bar_x - 2,
+            bar_y - 2,
+            bar_x + bar_width + 2,
+            bar_y + bar_height + 2,
+            fill="#0f172a",
+            outline="",
+            width=0
+        )
+        
         self.canvas.create_rectangle(
             bar_x,
             bar_y,
             bar_x + bar_width,
             bar_y + bar_height,
             fill="#1e293b",
-            outline="#475569",
+            outline="#334155",
             width=1
         )
         
-        # Заполненная часть с градиентом
+        # Заполненная часть с плавным градиентом и сверканием
         if self.progress > 0:
             filled_width = (bar_width - 4) * (self.progress / 100)
             
-            # Рисуем несколько слоев для эффекта
-            for i in range(int(filled_width)):
-                ratio = i / max(filled_width, 1)
+            # Основной градиент заполнения
+            steps = max(10, int(filled_width))
+            for i in range(steps):
+                ratio = i / max(steps, 1)
                 color = self._interpolate_color(
                     self.primary_color,
                     self.accent_color,
                     ratio
                 )
+                x_pos = bar_x + 2 + (filled_width * ratio)
+                line_width = max(1, int(filled_width / steps))
                 self.canvas.create_line(
-                    bar_x + 2 + i,
+                    x_pos,
                     bar_y + 1,
-                    bar_x + 2 + i,
+                    x_pos,
                     bar_y + bar_height - 1,
                     fill=color,
-                    width=1
+                    width=line_width
                 )
             
-            # Светящийся эффект в конце
+            # Светящийся эффект с волной в конце бара
             glow_x = bar_x + 2 + filled_width
-            self.canvas.create_oval(
-                glow_x - 3,
-                bar_y - 2,
-                glow_x + 3,
-                bar_y + bar_height + 2,
-                fill="",
-                outline=self.accent_color,
-                width=2
+            
+            # Волна света
+            wave_intensity = (math.sin(self.time_offset * 2) + 1) / 2
+            glow_color = self._interpolate_color(
+                self.accent_color,
+                self.primary_color,
+                wave_intensity
             )
+            
+            for glow_size in [8, 5, 3]:
+                alpha_ratio = 1 - (glow_size / 8)
+                self.canvas.create_oval(
+                    glow_x - glow_size,
+                    bar_y - glow_size // 2,
+                    glow_x + glow_size,
+                    bar_y + bar_height + glow_size // 2,
+                    fill="",
+                    outline=glow_color,
+                    width=max(1, int(2 - alpha_ratio))
+                )
         
-        # Процент
+        # Процент с анимацией
+        pct_text = f"{int(self.progress)}%"
         self.canvas.create_text(
             self.width / 2,
-            bar_y + 25,
-            text=f"{int(self.progress)}%",
+            bar_y + 28,
+            text=pct_text,
+            font=("Segoe UI", 12, "bold"),
+            fill=self.text_color,
+            anchor="center"
+        )
+        
+        # Градиентные блики вдоль бара (движущиеся)
+        if self.progress > 0 and self.progress < 100:
+            glide_pos = (self.time_offset % 1) * (bar_width - 20)
+            self.canvas.create_rectangle(
+                bar_x + 2 + glide_pos,
+                bar_y + 1,
+                bar_x + 22 + glide_pos,
+                bar_y + bar_height - 1,
+                fill="#ffffff",
+                outline="",
+                width=0
+            )
+    
+    def _draw_status(self):
+        """Рисует статус информацию с плавной анимацией"""
+        # Основной статус с эффектом
+        self.canvas.create_text(
+            self.width / 2,
+            470,
+            text=self.status_text,
             font=("Segoe UI", 11, "bold"),
             fill=self.text_color,
             anchor="center"
         )
-    
-    def _draw_status(self):
-        """Рисует статус информацию"""
-        # Основной статус
-        self.canvas.create_text(
-            self.width / 2,
-            480,
-            text=self.status_text,
-            font=("Segoe UI", 11),
-            fill=self.text_color,
-            anchor="center"
-        )
         
-        # Детали
+        # Детали с легким свечением
         if self.status_details:
+            # Эффект мерцания для деталей
+            glow_ratio = (math.sin(self.time_offset) + 1) / 2
+            detail_color = self._interpolate_color(
+                "#94a3b8",
+                "#cbd5e1",
+                glow_ratio * 0.3
+            )
+            
             self.canvas.create_text(
                 self.width / 2,
-                505,
+                492,
                 text=self.status_details,
                 font=("Segoe UI", 9),
-                fill="#94a3b8",
+                fill=detail_color,
                 anchor="center"
             )
         
-        # Анимированный индикатор загрузки
-        dots_count = (self.animate_frame // 5) % 4
-        dots = "." * dots_count
+        # Плавная анимация индикатора загрузки (пульсирующие точки)
+        dots_count = (self.animate_frame // 8) % 4
+        dots = "●" * dots_count + "○" * (3 - dots_count)
+        
+        dot_color = self._interpolate_color(
+            self.primary_color,
+            self.accent_color,
+            (math.sin(self.time_offset * 2) + 1) / 2
+        )
+        
         self.canvas.create_text(
-            self.width / 2 + 80,
-            480,
+            self.width / 2,
+            545,
             text=dots,
-            font=("Segoe UI", 11),
-            fill=self.primary_color,
-            anchor="w"
+            font=("Segoe UI", 12),
+            fill=dot_color,
+            anchor="center"
         )
     
     def _draw_decorative_elements(self):

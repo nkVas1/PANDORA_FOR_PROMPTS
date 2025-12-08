@@ -39,17 +39,42 @@ class Tag(TagBase):
         from_attributes = True
 
 
+class DifficultyEnum(str, Enum):
+    """Уровни сложности промптов"""
+    BEGINNER = "beginner"
+    INTERMEDIATE = "intermediate"
+    ADVANCED = "advanced"
+
+
+class ContextWindowEnum(str, Enum):
+    """Размеры контекстного окна"""
+    SMALL = "small"      # < 4K
+    MEDIUM = "medium"    # 4K - 16K
+    LARGE = "large"      # > 16K
+
+
 class PromptBase(BaseModel):
-    """Базовая схема для промпта"""
+    """Базовая схема для промпта с расширенными метаданными"""
     title: str = Field(..., min_length=1, max_length=255)
     content: str = Field(..., min_length=1)
     description: Optional[str] = None
     category: CategoryEnum = CategoryEnum.CUSTOM
+    subcategory: Optional[str] = None
+    emoji: Optional[str] = None
     version: str = "1.0"
+    difficulty: DifficultyEnum = DifficultyEnum.INTERMEDIATE
+    context_window: Optional[ContextWindowEnum] = None
+    models: Optional[List[str]] = Field(default=None, description="Совместимые модели: gpt-4, claude-3, etc")
+    use_cases: Optional[List[str]] = None
+    author: Optional[str] = None
+    author_url: Optional[str] = None
+    is_featured: bool = False
+    is_experimental: bool = False
 
 
 class PromptCreate(PromptBase):
     tag_ids: Optional[List[int]] = []
+    keywords: Optional[List[str]] = None
 
 
 class PromptUpdate(BaseModel):
@@ -57,14 +82,27 @@ class PromptUpdate(BaseModel):
     content: Optional[str] = None
     description: Optional[str] = None
     category: Optional[CategoryEnum] = None
+    subcategory: Optional[str] = None
+    emoji: Optional[str] = None
     version: Optional[str] = None
+    difficulty: Optional[DifficultyEnum] = None
+    context_window: Optional[ContextWindowEnum] = None
+    models: Optional[List[str]] = None
+    use_cases: Optional[List[str]] = None
+    author: Optional[str] = None
+    author_url: Optional[str] = None
     tag_ids: Optional[List[int]] = None
+    is_featured: Optional[bool] = None
+    is_experimental: Optional[bool] = None
+    keywords: Optional[List[str]] = None
 
 
 class Prompt(PromptBase):
     id: int
     tags: List[Tag] = []
     usage_count: int = 0
+    rating: float = 0.0
+    keywords: Optional[List[str]] = None
     created_at: datetime
     updated_at: datetime
     imported_from: Optional[str] = None
