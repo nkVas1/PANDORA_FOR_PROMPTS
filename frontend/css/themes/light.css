@@ -1,0 +1,204 @@
+/* -*- coding: utf-8 -*- */
+/* Light Theme for PANDORA */
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --accent-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+body {
+    background-color: #f8f9fa;
+    color: #1f2937;
+}
+
+.navbar {
+    background: var(--primary-gradient);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.search-input {
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.search-input:focus {
+    box-shadow: 0 0 0 3px rgba(240, 147, 251, 0.3);
+}
+
+.stat-card {
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.stat-card:hover {
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15);
+}
+
+.feature-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+}
+
+.feature-card:hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-color: #667eea;
+}
+
+.prompt-card,
+.project-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+}
+
+.prompt-card:hover,
+.project-card:hover {
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15);
+    border-color: #667eea;
+}
+
+.modal {
+    background: white;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+}
+
+.form-input,
+.form-textarea-large {
+    background: white;
+    border: 1px solid #e5e7eb;
+    color: #1f2937;
+}
+
+.form-input:focus,
+.form-textarea-large:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.code-block {
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+}
+
+.code-content {
+    color: #1f2937;
+}
+
+.modal-tabs {
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.tab-btn {
+    color: #6b7280;
+}
+
+.tab-btn:hover {
+    color: #1f2937;
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.tab-btn.active {
+    color: #667eea;
+    border-bottom-color: #667eea;
+}
+
+.filter-input {
+    background: white;
+    border: 1px solid #e5e7eb;
+    color: #1f2937;
+}
+
+.filter-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.filter-btn {
+    background: white;
+    border: 2px solid #e5e7eb;
+    color: #6b7280;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.btn-primary {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background: #f3f4f6;
+    color: #1f2937;
+    border: 1px solid #e5e7eb;
+}
+
+.btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+.category-badge {
+    background: #667eea;
+    color: white;
+}
+
+.footer {
+    background: #f9fafb;
+    border-top: 1px solid #e5e7eb;
+    color: #6b7280;
+}
+
+/* Keywords cloud */
+.keywords-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.keyword-pill {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: inline-block;
+}
+
+/* Edit form styling */
+.edit-form {
+    background: white;
+}
+
+.project-info {
+    background: #f9fafb;
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+.project-info p {
+    margin: 0.75rem 0;
+    color: #4b5563;
+}
+
+.modal-header {
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.quick-actions {
+    background: var(--primary-gradient);
+    color: white;
+}
+
+.quick-actions h2 {
+    color: white;
+}

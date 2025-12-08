@@ -15,6 +15,10 @@ class CategoryEnum(str, Enum):
     IMPORT = "import"
     PROJECT = "project"
     CUSTOM = "custom"
+    REVIEW = "review"
+    DEVOPS = "devops"
+    RESEARCH = "research"
+    EDUCATION = "education"
 
 
 class TagBase(BaseModel):

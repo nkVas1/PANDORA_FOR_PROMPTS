@@ -6,6 +6,8 @@ from app.models import schemas
 from app.services.database import (
     PromptService, TagService, ProjectService, AutoTaggingService
 )
+from app.services.autotagging import AutoTaggingService as ATS
+from app.services.file_service import FileService
 from app.utils.importer import PromptImporter
 import json
 
@@ -313,4 +315,169 @@ def get_stats(db: Session = Depends(get_db)):
         "total_tags": total_tags,
         "total_projects": total_projects,
         "total_categories": total_categories
+    }
+
+
+# ================ AUTO-TAGGING ENDPOINTS ================
+
+@router.post("/prompts/{prompt_id}/auto-tag")
+def auto_tag_prompt(prompt_id: int, db: Session = Depends(get_db)):
+    """Auto-tag a prompt based on its content"""
+    prompt = PromptService.get_prompt(db, prompt_id)
+    if not prompt:
+        raise HTTPException(status_code=404, detail="Prompt not found")
+    
+    # Extract tags
+    tags = ATS.extract_tags(prompt.content, prompt.title, limit=5)
+    category = ATS.categorize_prompt(prompt.content, prompt.title)
+    keywords = ATS.extract_keywords(prompt.content, limit=10)
+    
+    return {
+        "prompt_id": prompt_id,
+        "suggested_tags": tags,
+        "suggested_category": category,
+        "keywords": keywords
+    }
+
+
+@router.post("/prompts/extract-keywords")
+def extract_keywords(data: dict):
+    """Extract keywords from text for highlighting"""
+    content = data.get("content", "")
+    keywords = ATS.extract_keywords(content, limit=15)
+    highlighted = ATS.highlight_keywords(content, keywords)
+    
+    return {
+        "keywords": keywords,
+        "highlighted_content": highlighted
+    }
+
+
+# ================ FILE SERVICE ENDPOINTS ================
+
+@router.post("/prompts/{prompt_id}/export-txt")
+def export_prompt_txt(prompt_id: int, db: Session = Depends(get_db)):
+    """Export prompt as TXT file"""
+    prompt = PromptService.get_prompt(db, prompt_id)
+    if not prompt:
+        raise HTTPException(status_code=404, detail="Prompt not found")
+    
+    # Get tags
+    tag_names = [tag.name for tag in prompt.tags]
+    
+    # Save file
+    file_path = FileService.save_prompt_as_txt(
+        prompt_id, prompt.title, prompt.content, 
+        prompt.category, tag_names
+    )
+    
+    return {
+        "message": "Prompt exported successfully",
+        "file_path": file_path
+    }
+
+
+@router.post("/projects/{project_id}/create-structure")
+def create_project_structure(project_id: int, db: Session = Depends(get_db)):
+    """Create directory structure for a project"""
+    project = ProjectService.get_project(db, project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    structure = FileService.create_project_structure(project_id, project.name)
+    
+    return {
+        "message": "Project structure created",
+        "structure": structure
+    }
+
+
+@router.put("/projects/{project_id}/tasks")
+def update_project_tasks(project_id: int, data: dict, db: Session = Depends(get_db)):
+    """Update project tasks file"""
+    project = ProjectService.get_project(db, project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    content = data.get("content", "")
+    file_path = FileService.update_project_file(project_id, project.name, "tasks", content)
+    
+    return {
+        "message": "Tasks updated successfully",
+        "file_path": file_path
+    }
+
+
+@router.put("/projects/{project_id}/process")
+def update_project_process(project_id: int, data: dict, db: Session = Depends(get_db)):
+    """Update project process file"""
+    project = ProjectService.get_project(db, project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    content = data.get("content", "")
+    file_path = FileService.update_project_file(project_id, project.name, "process", content)
+    
+    return {
+        "message": "Process updated successfully",
+        "file_path": file_path
+    }
+
+
+@router.get("/projects/{project_id}/tasks")
+def get_project_tasks(project_id: int, db: Session = Depends(get_db)):
+    """Get project tasks file content"""
+    project = ProjectService.get_project(db, project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    content = FileService.read_project_file(project_id, project.name, "tasks")
+    
+    return {
+        "project_id": project_id,
+        "content": content or ""
+    }
+
+
+@router.get("/projects/{project_id}/process")
+def get_project_process(project_id: int, db: Session = Depends(get_db)):
+    """Get project process file content"""
+    project = ProjectService.get_project(db, project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    content = FileService.read_project_file(project_id, project.name, "process")
+    
+    return {
+        "project_id": project_id,
+        "content": content or ""
+    }
+
+
+@router.get("/prompts/by-category/{category}")
+def get_prompts_by_category(category: str, db: Session = Depends(get_db)):
+    """Get all prompts in a specific category"""
+    prompts = db.query(PromptService.Prompt).filter(
+        PromptService.Prompt.category == category
+    ).all()
+    
+    return {
+        "category": category,
+        "prompts": prompts,
+        "count": len(prompts)
+    }
+
+
+@router.get("/prompts/categories")
+def get_all_categories(db: Session = Depends(get_db)):
+    """Get list of all prompt categories"""
+    from sqlalchemy import distinct
+    from app.db.models import Prompt
+    
+    categories = db.query(distinct(Prompt.category)).all()
+    category_list = [cat[0] for cat in categories if cat[0]]
+    
+    return {
+        "categories": category_list,
+        "count": len(category_list)
     }

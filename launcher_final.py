@@ -19,6 +19,14 @@ import logging
 from pathlib import Path
 from typing import Optional
 
+# Try to import splash screen
+try:
+    import tkinter as tk
+    from splash_screen_v2 import ModernSplashScreen
+    HAS_SPLASH = True
+except ImportError:
+    HAS_SPLASH = False
+
 # Ensure UTF-8 on Windows
 if sys.platform == 'win32':
     os.environ['PYTHONIOENCODING'] = 'utf-8'
@@ -90,35 +98,46 @@ class UvicornBackend:
         try:
             import uvicorn
             
-            logger.info("Starting FastAPI Backend in main process...")
+            logger.info("=" * 70)
+            logger.info("  FastAPI Backend Initialization")
+            logger.info("=" * 70)
+            logger.info(f"Backend directory: {BACKEND_DIR}")
+            logger.info(f"Is frozen (PyInstaller): {IS_FROZEN}")
+            logger.info(f"App root: {APP_ROOT}")
             
             # Add backend to Python path
             sys.path.insert(0, str(BACKEND_DIR))
+            logger.info(f"Added to Python path: {BACKEND_DIR}")
             
             # Import the FastAPI app
             try:
+                logger.info("Importing FastAPI app...")
                 from app.main import app
+                logger.info("✓ FastAPI app imported successfully")
             except ImportError as e:
-                logger.error(f"Failed to import FastAPI app: {e}")
+                logger.error(f"✗ Failed to import FastAPI app: {e}")
                 logger.error("Make sure all dependencies are installed")
                 raise
             
             # Configure Uvicorn
+            logger.info(f"Configuring Uvicorn server (port {BACKEND_PORT})...")
             config = uvicorn.Config(
                 app=app,
                 host="127.0.0.1",
                 port=BACKEND_PORT,
-                log_level="error",
+                log_level="info",
                 access_log=False,
+                reload=False,
             )
             
             server = uvicorn.Server(config)
             
             # Run the server
+            logger.info("Starting Uvicorn server...")
             server.run()
             
         except Exception as e:
-            logger.error(f"Error in backend server: {e}")
+            logger.error(f"✗ Error in backend server: {e}")
             import traceback
             logger.error(traceback.format_exc())
             self.is_running = False
@@ -130,7 +149,9 @@ class UvicornBackend:
                 logger.warning("Backend is already running")
                 return True
             
-            logger.info("🚀 Initializing PANDORA Backend...")
+            logger.info("=" * 70)
+            logger.info("  🚀 Initializing PANDORA Backend...")
+            logger.info("=" * 70)
             
             # Start backend in daemon thread
             self.thread = threading.Thread(target=self.run_server, daemon=True)
@@ -139,23 +160,39 @@ class UvicornBackend:
             # Wait for backend to be ready
             self.is_running = True
             logger.info("⏳ Waiting for backend to be ready...")
+            logger.info("   (This may take 30-60+ seconds on first run with large database import)")
             
-            for attempt in range(30):
+            # Increased timeout for DB initialization (can take 60+ sec with 1500+ prompts)
+            for attempt in range(40):  # 20 seconds max (40 * 0.5)
                 try:
                     if requests:
-                        response = requests.get(f"{BACKEND_URL}/", timeout=1)
-                        if response.status_code in [200, 404]:
-                            logger.info(f"✓ Backend is ready at {BACKEND_URL}")
-                            return True
+                        response = requests.get(f"{BACKEND_URL}/health", timeout=1)
+                        if response.status_code == 200:
+                            try:
+                                health_data = response.json()
+                                logger.info(f"✓ Backend is ready!")
+                                logger.info(f"   URL: {BACKEND_URL}")
+                                logger.info(f"   DB Path: {health_data.get('db_path', 'unknown')}")
+                                logger.info(f"   DB Size: {health_data.get('db_size', 0) / (1024*1024):.2f} MB")
+                                logger.info(f"   Prompts: {health_data.get('total_prompts', 0)}")
+                                return True
+                            except:
+                                pass
                 except:
                     pass
+                
+                if attempt % 4 == 0:
+                    logger.info(f"   Initializing... {attempt+1}/40")
                 time.sleep(0.5)
             
             logger.warning("⚠️  Backend might not be responding, continuing anyway...")
+            logger.warning(f"   Try opening {BACKEND_URL}/ in your browser manually")
             return True
         
         except Exception as e:
-            logger.error(f"❌ Error starting backend: {e}")
+            logger.error(f"✗ Error starting backend: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
             self.is_running = False
             return False
     
@@ -180,36 +217,91 @@ class DesktopApp:
     
     def run(self):
         """Run the desktop application"""
-        logger.info("=" * 70)
-        logger.info("  PANDORA - Professional Prompt Management System")
-        logger.info("=" * 70)
-        
-        # Start backend first
-        if not self.backend.start():
-            logger.error("Failed to start backend. Exiting.")
-            return False
-        
-        time.sleep(1)
-        
-        # Check if PyWebView is available
-        if not HAS_WEBVIEW:
-            logger.warning("⚠️  PyWebView not available, attempting to open in browser...")
-            try:
-                import webbrowser
-                webbrowser.open(f"{BACKEND_URL}/")
-                logger.info(f"Opened {BACKEND_URL}/ in default browser")
-                
-                # Keep the application running
-                logger.info("Application is running. Press Ctrl+C to quit.")
-                while True:
-                    time.sleep(1)
-            except Exception as e:
-                logger.error(f"Error opening browser: {e}")
-                return False
+        # Initialize splash screen if available
+        splash = None
+        try:
+            if HAS_SPLASH:
+                root = tk.Tk()
+                splash = ModernSplashScreen(root)
+                logger.info("✓ Splash screen initialized")
+        except Exception as e:
+            logger.warning(f"Could not initialize splash screen: {e}")
         
         try:
+            # Update splash with initialization info
+            if splash:
+                splash.update_progress(5, "Инициализация приложения...")
+                splash.show()
+            
+            logger.info("=" * 70)
+            logger.info("  PANDORA - Professional Prompt Management System")
+            logger.info("  v1.2.0 | Desktop Edition")
+            logger.info("=" * 70)
+            logger.info(f"Platform: {sys.platform}")
+            logger.info(f"Python: {sys.version.split()[0]}")
+            logger.info(f"Frozen (exe): {IS_FROZEN}")
+            logger.info(f"App Root: {APP_ROOT}")
+            logger.info("")
+            
+            # Update splash screen
+            if splash:
+                splash.update_progress(10, "Запуск backend сервера", "FastAPI инициализация")
+                splash.show()
+            
+            # Start backend first
+            if not self.backend.start():
+                logger.error("✗ Failed to start backend. Exiting.")
+                if splash:
+                    splash.update_progress(0, "Ошибка инициализации", "Backend не запустился")
+                    splash.show()
+                    time.sleep(3)
+                    splash.close()
+                return False
+            
+            time.sleep(1)
+            
+            # Update splash with backend ready
+            if splash:
+                splash.update_progress(30, "Backend готов", "Инициализация UI...")
+                splash.show()
+            
+            # Check if PyWebView is available
+            if not HAS_WEBVIEW:
+                logger.warning("⚠️  PyWebView not available, attempting to open in browser...")
+                if splash:
+                    splash.update_progress(50, "PyWebView не найден", "Открываю браузер...")
+                    splash.show()
+                try:
+                    import webbrowser
+                    webbrowser.open(f"{BACKEND_URL}/")
+                    logger.info(f"✓ Opened {BACKEND_URL}/ in default browser")
+                    
+                    # Close splash
+                    if splash:
+                        splash.update_progress(100, "Готово!")
+                        splash.show()
+                        time.sleep(1)
+                        splash.close()
+                    
+                    # Keep the application running
+                    logger.info("📌 Application is running. Press Ctrl+C to quit.")
+                    while True:
+                        time.sleep(1)
+                except Exception as e:
+                    logger.error(f"✗ Error opening browser: {e}")
+                    if splash:
+                        splash.close()
+                    return False
+            
             # Create PyWebView window
-            logger.info("🪟 Creating application window...")
+            logger.info("=" * 70)
+            logger.info("  Creating Application Window...")
+            logger.info("=" * 70)
+            
+            # Update splash
+            if splash:
+                splash.update_progress(70, "Создание окна приложения...")
+                splash.show()
             
             self.webview_window = webview.create_window(
                 title=CONFIG['app_name'],
@@ -222,9 +314,22 @@ class DesktopApp:
                 fullscreen=False,
             )
             
-            logger.info("✓ Application window created")
-            logger.info(f"📍 Frontend: {BACKEND_URL}/")
+            logger.info("✓ Application window created successfully")
+            logger.info(f"📍 Frontend URL: {BACKEND_URL}/")
             logger.info("=" * 70)
+            
+            # Update splash - almost done
+            if splash:
+                splash.update_progress(90, "Запуск интерфейса", "Полная загрузка")
+                splash.show()
+                time.sleep(0.3)
+            
+            # CRITICAL: Close splash BEFORE webview.start() to prevent hang
+            if splash:
+                splash.close()
+                splash = None
+                # Give splash window time to close
+                time.sleep(0.2)
             
             # Show window and start event loop
             webview.start(debug=CONFIG['debug'], http_server=False)
@@ -232,7 +337,11 @@ class DesktopApp:
             return True
         
         except Exception as e:
-            logger.error(f"❌ Error creating window: {e}")
+            logger.error(f"✗ Error: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            if splash:
+                splash.close()
             return False
         
         finally:
