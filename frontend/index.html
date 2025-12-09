@@ -21,54 +21,6 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75' font-family='system-ui' fill='%236366F1'>P</text></svg>">
 </head>
 <body>
-    <!-- ═════════════════════════════════════════════════════
-         LOADING SCREEN (Должен быть перед app для наложения)
-         ═════════════════════════════════════════════════════ -->
-    <div id="loading-screen" class="loading-screen loading-screen--visible">
-        <!-- Фоновая анимация (непрерывная) -->
-        <div class="loading-screen__background">
-            <div class="loading-screen__orb loading-screen__orb--1"></div>
-            <div class="loading-screen__orb loading-screen__orb--2"></div>
-            <div class="loading-screen__orb loading-screen__orb--3"></div>
-        </div>
-
-        <!-- Контент (по центру) -->
-        <div class="loading-screen__content">
-            <!-- Логотип -->
-            <div class="loading-screen__logo">
-                <span class="loading-screen__logo-emoji">🎨</span>
-            </div>
-
-            <!-- Заголовок -->
-            <h1 class="loading-screen__title">PANDORA</h1>
-            <p class="loading-screen__subtitle">Менеджер промптов v2.0</p>
-
-            <!-- Индикатор загрузки (реагирует на прогресс) -->
-            <div class="loading-screen__progress-container">
-                <div class="loading-screen__progress-bar">
-                    <div class="loading-screen__progress-fill" id="loading-progress-fill"></div>
-                </div>
-                <p class="loading-screen__progress-text" id="loading-progress-text">Инициализация...</p>
-            </div>
-
-            <!-- Статус загрузки -->
-            <div class="loading-screen__status" id="loading-status">
-                <p class="loading-screen__status-item" id="status-initialized" data-status="0">
-                    <span class="status-icon">○</span> Инициализация ядра
-                </p>
-                <p class="loading-screen__status-item" id="status-api" data-status="0">
-                    <span class="status-icon">○</span> Проверка API
-                </p>
-                <p class="loading-screen__status-item" id="status-data" data-status="0">
-                    <span class="status-icon">○</span> Загрузка данных
-                </p>
-                <p class="loading-screen__status-item" id="status-ready" data-status="0">
-                    <span class="status-icon">○</span> Готовится к запуску
-                </p>
-            </div>
-        </div>
-    </div>
-
     <div id="app" class="app-layout">
         <!-- ═════════════════════════════════════════════════════
              NAVBAR
