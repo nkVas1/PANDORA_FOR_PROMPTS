@@ -154,6 +154,9 @@ class NavigationManager {
       pageElement.style.opacity = '1';
     }, 50);
 
+    // Скролл к верху страницы для правильного отображения
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
     // Обновить текущую страницу
     this.currentPage = pageName;
 

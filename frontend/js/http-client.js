@@ -400,10 +400,8 @@ class HTTPClient {
 
     console.error('[HTTPClient Error]', errorInfo);
 
-    // Можно добавить логирование на сервер
-    if (window.App && window.App.analytics) {
-      window.App.analytics.logError(errorInfo);
-    }
+    // Логирование на сервер (может быть добавлено в будущем)
+    // Здесь можно отправить ошибку на сервер для анализа
   }
 }
 

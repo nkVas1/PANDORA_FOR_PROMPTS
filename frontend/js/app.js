@@ -110,62 +110,45 @@ class UIManager {
 
   /* МОДАЛЬНЫЕ ОКНА */
   setupModals() {
+    // Обработка кликов на backdrop для закрытия модали
     document.addEventListener('click', (e) => {
-      const trigger = e.target.closest('[data-modal-trigger]');
-      if (trigger) {
-        const modalId = trigger.getAttribute('data-modal-trigger');
-        this.openModal(modalId);
+      const modal = e.target.closest('.modal');
+      if (!modal) return;
+      
+      // Закрытие при клике на backdrop (вне modal-content)
+      if (e.target === modal) {
+        this.closeModal(modal.id);
+        return;
       }
 
-      const closeBtn = e.target.closest('[data-modal-close]');
-      if (closeBtn) {
-        const modal = closeBtn.closest('[data-modal]');
-        if (modal) {
-          const modalId = modal.getAttribute('data-modal');
-          this.closeModal(modalId);
-        }
-      }
-
-      const backdrop = e.target.closest('.modal-backdrop');
-      if (backdrop && e.target === backdrop) {
-        const modalId = backdrop.getAttribute('data-modal-id');
-        this.closeModal(modalId);
+      // Закрытие при клике на close button
+      if (e.target.closest('[data-action="close-modal"]')) {
+        this.closeModal(modal.id);
       }
     });
   }
 
   openModal(modalId) {
-    const backdrop = document.querySelector(`[data-modal-id="${modalId}"]`);
-    if (!backdrop) return;
-
-    backdrop.classList.add('active');
-    backdrop.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-
-    // Trigger animation
-    const modal = backdrop.querySelector('[data-modal]');
-    if (modal) {
-      modal.classList.add('animate-zoom-in');
+    const modal = document.getElementById(modalId);
+    if (!modal) {
+      console.warn(`[UIManager] Modal not found: ${modalId}`);
+      return;
     }
 
+    modal.classList.add('active');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
     this.modals.set(modalId, true);
   }
 
   closeModal(modalId) {
-    const backdrop = document.querySelector(`[data-modal-id="${modalId}"]`);
-    if (!backdrop) return;
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
 
-    const modal = backdrop.querySelector('[data-modal]');
-    if (modal) {
-      modal.classList.remove('animate-zoom-in');
-    }
-
-    setTimeout(() => {
-      backdrop.classList.remove('active');
-      backdrop.style.display = 'none';
-      document.body.style.overflow = 'auto';
-      this.modals.delete(modalId);
-    }, 150);
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+    this.modals.delete(modalId);
   }
 
   closeAllModals() {
@@ -557,6 +540,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // ========== 7. STARTUP CHECKS ==========
     performStartupChecks(http, uiManager);
 
+    // ========== 8. PAGE DISPLAY CALLBACKS ==========
+    // Reload analytics when dashboard is shown
+    const dashboardPage = document.getElementById('dashboard');
+    if (dashboardPage) {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.attributeName === 'class') {
+            if (dashboardPage.classList.contains('active') && analytics) {
+              console.log('[Dashboard] Page shown, refreshing analytics');
+              analytics.loadStats();
+            }
+          }
+        });
+      });
+      observer.observe(dashboardPage, { attributes: true });
+    }
+
     console.log('%cPANDORA v2.0 готова', 'color: #00ff00; font-size: 14px; font-weight: bold');
     console.log('%cАрхитектура:', 'color: #00ff00; font-weight: bold');
     console.log('  ✓ HTTPClient (centralized API)');
@@ -625,11 +625,37 @@ function setupEventDelegation(eventManager, http, uiManager, navigationManager) 
   });
 
   // ========== ФОРМА СОЗДАНИЯ ПРОМПТА ==========
-  const promptForm = document.querySelector('[data-form="new-prompt"]');
-  if (promptForm) {
-    eventManager.addEventListener(promptForm, 'submit', (e) => {
+  // Старый селектор для совместимости
+  let promptFormElement = document.querySelector('[data-form="new-prompt"]');
+  // Новый селектор для modal
+  if (!promptFormElement) {
+    promptFormElement = document.getElementById('prompt-form');
+  }
+  
+  if (promptFormElement) {
+    eventManager.addEventListener(promptFormElement, 'submit', (e) => {
       e.preventDefault();
-      handleCreatePrompt(new FormData(promptForm), http, uiManager);
+      handleCreatePrompt(new FormData(promptFormElement), http, uiManager);
+    });
+  }
+
+  // ========== ФОРМА СОЗДАНИЯ ПРОЕКТА (MODAL) ==========
+  const projectForm = document.getElementById('project-form');
+  if (projectForm) {
+    projectForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const formData = new FormData(projectForm);
+        const data = Object.fromEntries(formData);
+        const result = await http.post('/api/projects', data);
+        uiManager.showToast('Проект создан успешно', 'success');
+        projectForm.reset();
+        uiManager.closeModal('project-modal');
+        window.App.eventManager.emit('app:project-created', result);
+      } catch (error) {
+        console.error('[Project Form Error]', error);
+        uiManager.showToast('Ошибка при создании проекта', 'error');
+      }
     });
   }
 
@@ -693,37 +719,111 @@ function setupEventDelegation(eventManager, http, uiManager, navigationManager) 
  */
 async function performSearch(query, http, uiManager) {
   try {
-    const resultsContainer = document.querySelector('[data-results="search"]');
-    if (!resultsContainer) return;
+    if (!query || query.trim().length === 0) {
+      clearSearchResults();
+      return;
+    }
+
+    const resultsContainer = document.getElementById('search-results');
+    if (!resultsContainer) {
+      console.warn('[Search] Results container not found');
+      return;
+    }
 
     // Показать loading
+    resultsContainer.style.display = 'block';
     resultsContainer.innerHTML = '<div class="loading">Поиск...</div>';
 
-    const results = await http.get('/search', { query });
-    
+    // Пытаемся получить результаты с сервера
+    let results = [];
+    try {
+      const response = await http.get('/api/search', { query });
+      results = Array.isArray(response) ? response : (response.results || []);
+    } catch (apiError) {
+      console.warn('[Search] API search failed, using client-side fallback', apiError);
+      
+      // Client-side fallback: ищем в локальном хранилище/кэше
+      results = performClientSideSearch(query);
+    }
+
     if (results.length === 0) {
       resultsContainer.innerHTML = '<div class="no-results">Ничего не найдено</div>';
       return;
     }
 
     // Рендерим результаты
-    resultsContainer.innerHTML = results.map(result => `
-      <div class="search-result" data-item-id="${result.id}">
-        <h4>${escapeHtml(result.title || result.name)}</h4>
-        <p>${escapeHtml((result.description || '').slice(0, 100))}</p>
-        <small>${result.type}</small>
+    resultsContainer.innerHTML = results.slice(0, 10).map(result => `
+      <div class="search-result" data-item-id="${result.id}" data-item-type="${result.type || 'prompt'}">
+        <div class="search-result-title">${escapeHtml(result.title || result.name || 'Без названия')}</div>
+        <div class="search-result-desc">${escapeHtml((result.description || '').slice(0, 80))}</div>
+        <div class="search-result-meta">${result.type || 'prompt'}</div>
       </div>
     `).join('');
 
+    // Добавляем обработчик клика по результатам
+    resultsContainer.addEventListener('click', (e) => {
+      const result = e.target.closest('.search-result');
+      if (result) {
+        const itemId = result.getAttribute('data-item-id');
+        const itemType = result.getAttribute('data-item-type');
+        
+        if (itemType === 'prompt') {
+          window.App.navigationManager.navigateTo('editor');
+          window.App.eventManager.emit('app:edit-item', { itemId, itemType });
+        }
+        
+        clearSearchResults();
+      }
+    }, { once: true });
+
   } catch (error) {
     console.error('[Search Error]', error);
-    uiManager.showToast('Ошибка поиска', 'error');
+    const resultsContainer = document.getElementById('search-results');
+    if (resultsContainer) {
+      resultsContainer.innerHTML = '<div class="no-results">Ошибка при поиске</div>';
+    }
   }
 }
 
+/**
+ * Client-side search fallback для когда API недоступно
+ */
+function performClientSideSearch(query) {
+  const normalizedQuery = query.toLowerCase();
+  const results = [];
+
+  // Ищем в промптах из localStorage если есть
+  const prompts = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key?.startsWith('prompt_')) {
+      try {
+        const prompt = JSON.parse(localStorage.getItem(key));
+        if (prompt && (
+          prompt.title?.toLowerCase().includes(normalizedQuery) ||
+          prompt.content?.toLowerCase().includes(normalizedQuery) ||
+          prompt.description?.toLowerCase().includes(normalizedQuery)
+        )) {
+          results.push({
+            id: prompt.id,
+            title: prompt.title,
+            description: prompt.description,
+            type: 'prompt'
+          });
+        }
+      } catch (e) {
+        // Skip invalid items
+      }
+    }
+  }
+
+  return results.slice(0, 10);
+}
+
 function clearSearchResults() {
-  const resultsContainer = document.querySelector('[data-results="search"]');
+  const resultsContainer = document.getElementById('search-results');
   if (resultsContainer) {
+    resultsContainer.style.display = 'none';
     resultsContainer.innerHTML = '';
   }
 }
@@ -733,11 +833,28 @@ function clearSearchResults() {
  */
 function handleQuickAction(action, e, uiManager, navigationManager) {
   const actions = {
+    // Editor
     'new-prompt': () => navigationManager.navigateTo('editor'),
-    'new-project': () => uiManager.openModal('new-project-modal'),
-    'new-tag': () => uiManager.openModal('new-tag-modal'),
+    'open-prompt-modal': () => uiManager.openModal('prompt-modal'),
+    
+    // Projects
+    'new-project': () => uiManager.openModal('project-modal'),
+    'open-project-modal': () => uiManager.openModal('project-modal'),
+    
+    // Tags
+    'new-tag': () => window.App.tagManager.openCreateModal(),
+    
+    // Theme & Search
     'toggle-theme': () => window.App.theme.toggleTheme(),
-    'focus-search': () => document.querySelector('[data-action="search"]')?.focus()
+    'focus-search': () => document.querySelector('[data-action="search"]')?.focus(),
+    
+    // Modal controls
+    'close-modal': () => {
+      const modal = e?.target?.closest('.modal');
+      if (modal) {
+        uiManager.closeModal(modal.id);
+      }
+    }
   };
 
   const handler = actions[action];

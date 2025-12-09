@@ -117,6 +117,13 @@ class TagManager {
     }
 
     /**
+     * Alias для openCreateModal (для совместимости с handleQuickAction)
+     */
+    openCreateModal() {
+        this.showAddTagModal();
+    }
+
+    /**
      * Загружает теги с сервера
      */
     async loadTags() {

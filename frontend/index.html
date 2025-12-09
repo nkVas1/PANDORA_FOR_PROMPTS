@@ -873,114 +873,6 @@
         let searchTimeout;
 
         /**
-         * Выполняет поиск промптов через API
-         * @param {string} query - поисковый запрос
-         */
-        async function performSearch(query) {
-            if (!query.trim()) {
-                searchResults.style.display = 'none';
-                return;
-            }
-
-            try {
-                // Запрос к API endpoint
-                const response = await fetch(
-                    `${API_URL}/api/prompts/search?q=${encodeURIComponent(query)}&limit=10`,
-                    {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    }
-                );
-
-                if (!response.ok) {
-                    throw new Error(`API error: ${response.status}`);
-                }
-
-                const data = await response.json();
-                displaySearchResults(data.results || []);
-
-            } catch (error) {
-                console.error('Search error:', error);
-                // Показать сообщение об ошибке
-                searchResults.innerHTML = `
-                    <div class="search-result-item">
-                        <div class="search-result-icon">⚠️</div>
-                        <div class="search-result-content">
-                            <div class="search-result-title">Ошибка поиска</div>
-                            <div class="search-result-preview">${error.message}</div>
-                        </div>
-                    </div>
-                `;
-                searchResults.style.display = 'block';
-            }
-        }
-
-        /**
-         * Отображает результаты поиска
-         * @param {Array} results - результаты поиска
-         */
-        function displaySearchResults(results) {
-            if (!results || results.length === 0) {
-                searchResults.innerHTML = `
-                    <div class="search-result-item">
-                        <div class="search-result-icon">🔍</div>
-                        <div class="search-result-content">
-                            <div class="search-result-title">Нет результатов</div>
-                            <div class="search-result-preview">По вашему запросу ничего не найдено</div>
-                        </div>
-                    </div>
-                `;
-                searchResults.style.display = 'block';
-                return;
-            }
-
-            // Преобразовать результаты в HTML
-            const html = results.map(item => `
-                <div class="search-result-item" onclick="selectSearchResult('${item.id}', event)">
-                    <div class="search-result-icon">✨</div>
-                    <div class="search-result-content">
-                        <div class="search-result-title">${escapeHtml(item.title || item.name)}</div>
-                        <div class="search-result-preview">${escapeHtml((item.content || '').substring(0, 60))}...</div>
-                        <div class="search-result-category">${item.category || 'General'}</div>
-                    </div>
-                </div>
-            `).join('');
-
-            searchResults.innerHTML = html;
-            searchResults.style.display = 'block';
-        }
-
-        /**
-         * Обработчик выбора результата поиска
-         * @param {string} promptId - ID выбранного промпта
-         */
-        async function selectSearchResult(promptId, event) {
-            event.preventDefault();
-            event.stopPropagation();
-
-            try {
-                // Загрузить полный промпт
-                const response = await fetch(`${API_URL}/api/prompts/${promptId}`);
-                if (!response.ok) throw new Error('Failed to fetch prompt');
-
-                const prompt = await response.json();
-
-                // Открыть редактор с промптом
-                openPromptForEditing(prompt);
-
-                // Закрыть результаты поиска
-                searchResults.style.display = 'none';
-                searchInput.value = '';
-
-            } catch (error) {
-                console.error('Error selecting prompt:', error);
-                showToast('Ошибка при загрузке промпта', 'error');
-            }
-        }
-
-        /**
          * Утилита для экранирования HTML
          */
         function escapeHtml(text) {
@@ -996,24 +888,29 @@
 
         searchInput?.addEventListener('input', (e) => {
             clearTimeout(searchTimeout);
-            const query = e.target.value;
+            const query = e.target.value.trim();
             
             // Debounce search for 300ms
             searchTimeout = setTimeout(() => {
-                performSearch(query);
+                if (query && window.App?.http) {
+                    performSearch(query, window.App.http, window.App.uiManager);
+                    searchResults.style.display = 'block';
+                } else if (!query) {
+                    clearSearchResults();
+                }
             }, 300);
         });
 
         // Close search results when clicking outside
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.navbar-search')) {
-                searchResults.style.display = 'none';
+                clearSearchResults();
             }
         });
 
         // Allow selecting search results with arrow keys
         searchInput?.addEventListener('keydown', (e) => {
-            const items = searchResults.querySelectorAll('.search-result-item');
+            const items = searchResults.querySelectorAll('.search-result');
             if (items.length === 0) return;
 
             if (e.key === 'ArrowDown') {
