@@ -303,29 +303,51 @@ class DesktopApp:
                 splash.update_progress(70, "Создание окна приложения...")
                 splash.show()
             
-            self.webview_window = webview.create_window(
-                title=CONFIG['app_name'],
-                url=f"{BACKEND_URL}/",
-                width=CONFIG['window_width'],
-                height=CONFIG['window_height'],
-                min_size=(CONFIG['min_width'], CONFIG['min_height']),
-                background_color='#ffffff',
-                text_select=True,
-                fullscreen=False,
-                # Native window settings (launch as native window, not browser)
-                frameless=False,  # Show window frame
-                easy_drag=True,   # Enable drag by title bar
-                transparent=False,  # Solid window
-                on_close=self.on_close,
-                icon=CONFIG['app_icon'],
-            )
-            
-            # IMPORTANT: On Windows, explicitly disable browser engine usage
-            if sys.platform == 'win32':
-                logger.info("💻 Windows detected - Using EdgeHTML WebView2")
-                # PyWebView 5.x on Windows should use EdgeHTML by default
-            else:
-                logger.info("🐧 Linux detected - Using GTK WebView")
+            try:
+                # Try to create webview window with native backend
+                logger.info("🔧 Attempting to create PyWebView window...")
+                
+                # Prepare webview parameters
+                webview_params = {
+                    'title': CONFIG['app_name'],
+                    'url': f"{BACKEND_URL}/",
+                    'width': CONFIG['window_width'],
+                    'height': CONFIG['window_height'],
+                    'min_size': (CONFIG['min_width'], CONFIG['min_height']),
+                    'background_color': '#ffffff',
+                    'text_select': True,
+                    'fullscreen': False,
+                    'frameless': False,
+                    'easy_drag': True,
+                    'transparent': False,
+                    'on_close': self.on_close,
+                    'icon': CONFIG['app_icon'],
+                }
+                
+                # Force native webview backend (not browser fallback)
+                if sys.platform == 'win32':
+                    # Windows: use EdgeHTML/WebView2
+                    webview_params['webview_type'] = 'edgehtml'
+                    logger.info("🔧 Windows: Setting webview_type='edgehtml' for native EdgeHTML backend")
+                else:
+                    # Linux: use GTK WebView
+                    webview_params['webview_type'] = 'gtk'
+                    logger.info("🔧 Linux: Setting webview_type='gtk' for native GTK backend")
+                
+                self.webview_window = webview.create_window(**webview_params)
+                logger.info("✓ PyWebView window created successfully")
+                
+                # Log platform info
+                if sys.platform == 'win32':
+                    logger.info("💻 Running on Windows - Using EdgeHTML WebView2")
+                else:
+                    logger.info("🐧 Running on Linux - Using GTK WebView")
+                    
+            except Exception as e:
+                logger.error(f"✗ Failed to create PyWebView window: {e}")
+                import traceback
+                logger.error(traceback.format_exc())
+                raise
             
             logger.info("✓ Application window created successfully")
             logger.info(f"📍 Frontend URL: {BACKEND_URL}/")
