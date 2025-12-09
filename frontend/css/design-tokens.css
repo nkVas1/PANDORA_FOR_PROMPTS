@@ -1,7 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════════
    PANDORA v2.0 - Design Tokens System
    Универсальная система токенов для全 проекта
-   ═══════════════════════════════════════════════════════════════════ */
+   ═════════════════════════════════════════════════════════════════════ */
+
+/* Google Fonts - Modern & Artistic Typography */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
 
 :root {
   /* ─────────────────────────────────────────────────────────────
@@ -92,8 +95,9 @@
      TYPOGRAPHY - Система шрифтов
      ───────────────────────────────────────────────────────────── */
 
-  --font-family-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
-  --font-family-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  --font-family-primary: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-secondary: 'Space Grotesk', 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Courier New', monospace;
 
   /* Font Sizes */
   --font-size-xs: 12px;

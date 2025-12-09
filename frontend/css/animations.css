@@ -667,3 +667,103 @@
   animation: highlight 2s ease-out;
   border-radius: var(--radius-md);
 }
+
+/* ═════════════════════════════════════════════════════════════════
+   GRADIENT & BACKGROUND ANIMATIONS (Анимация фона)
+   ═════════════════════════════════════════════════════════════════ */
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  25% {
+    transform: translateY(-15px) translateX(10px);
+  }
+  50% {
+    transform: translateY(-20px) translateX(0px);
+  }
+  75% {
+    transform: translateY(-15px) translateX(-10px);
+  }
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-25px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.05);
+  }
+}
+
+/* Animated gradient background for body */
+body.has-animated-gradient {
+  background: linear-gradient(-45deg, 
+    var(--color-primary),
+    var(--color-secondary),
+    var(--color-accent),
+    var(--color-primary-light));
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+/* Floating orbs effect */
+.gradient-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.15;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.gradient-orb-1 {
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  top: -50px;
+  right: -50px;
+  animation: float 20s ease-in-out infinite;
+}
+
+.gradient-orb-2 {
+  width: 250px;
+  height: 250px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  bottom: 100px;
+  left: -50px;
+  animation: float-slow 25s ease-in-out infinite;
+}
+
+.gradient-orb-3 {
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  top: 50%;
+  left: 10%;
+  animation: float 30s ease-in-out infinite;
+  animation-delay: 5s;
+}

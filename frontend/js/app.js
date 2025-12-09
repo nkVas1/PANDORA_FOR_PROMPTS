@@ -11,6 +11,25 @@ if (missingModules.length > 0) {
   console.warn('Убедитесь что загружены: http-client.js, event-manager.js, navigation-manager.js');
 }
 
+/**
+ * Инициализирует анимированный gradient background с плавающими orbs
+ */
+function initializeAnimatedBackground() {
+  // Добавить класс для активирования gradient анимации
+  document.body.classList.add('has-animated-gradient');
+
+  // Создать floating orbs
+  const orbsHTML = `
+    <div class="gradient-orb gradient-orb-1"></div>
+    <div class="gradient-orb gradient-orb-2"></div>
+    <div class="gradient-orb gradient-orb-3"></div>
+  `;
+  
+  document.body.insertAdjacentHTML('afterbegin', orbsHTML);
+  
+  console.log('[Background] Animated gradient background initialized');
+}
+
 class ThemeManager {
   constructor() {
     this.htmlElement = document.documentElement;
@@ -415,6 +434,9 @@ document.addEventListener('DOMContentLoaded', () => {
   try {
     // ========== 1. ИНИЦИАЛИЗАЦИЯ CORE СИСТЕМ ==========
     console.log('[INIT] Initializing PANDORA v2.0...');
+
+    // Инициализировать animated gradient background
+    initializeAnimatedBackground();
 
     const themeManager = new ThemeManager();
     const uiManager = new UIManager();
