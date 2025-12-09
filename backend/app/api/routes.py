@@ -111,6 +111,29 @@ def list_tags(db: Session = Depends(get_db)):
     return TagService.get_all_tags(db)
 
 
+@router.put("/tags/{tag_id}", response_model=schemas.Tag)
+def update_tag(tag_id: int, tag: schemas.TagCreate, db: Session = Depends(get_db)):
+    """Обновить тег"""
+    existing_tag = TagService.get_tag_by_id(db, tag_id)
+    if not existing_tag:
+        raise HTTPException(status_code=404, detail="Tag not found")
+    
+    # Проверить что нет дубликата по названию
+    if tag.name != existing_tag.name:
+        existing_by_name = TagService.get_tag_by_name(db, tag.name)
+        if existing_by_name:
+            raise HTTPException(status_code=400, detail="Tag name already exists")
+    
+    # Обновить поля
+    existing_tag.name = tag.name
+    if hasattr(tag, 'color') and tag.color:
+        existing_tag.color = tag.color
+    
+    db.commit()
+    db.refresh(existing_tag)
+    return existing_tag
+
+
 @router.delete("/tags/{tag_id}")
 def delete_tag(tag_id: int, db: Session = Depends(get_db)):
     """Удалить тег"""

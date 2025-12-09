@@ -1,0 +1,643 @@
+/* ═══════════════════════════════════════════════════════════════════
+   PANDORA v2.0 - Enhanced Editor Styles
+   Стили для расширенного редактора с превью и контрольными панелями
+   ═══════════════════════════════════════════════════════════════════ */
+
+.editor-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+    height: calc(100vh - 160px);
+    background: var(--bg-primary);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+/* ═════════════════════════════════════════════════════════════════
+   EDITOR PANE (левая часть)
+   ═════════════════════════════════════════════════════════════════ */
+
+.editor-pane {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    overflow: hidden;
+    background: var(--glass-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+}
+
+/* Заголовок редактора */
+.editor-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.editor-title-input {
+    width: 100%;
+    padding: var(--space-3);
+    font-size: 1.5rem;
+    font-weight: 600;
+    background: var(--bg-secondary);
+    border: 2px solid transparent;
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    transition: all var(--transition-standard);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.editor-title-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.editor-title-input::placeholder {
+    color: var(--text-tertiary);
+}
+
+/* Субинформация (категория, теги) */
+.editor-meta {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.editor-category-select,
+.editor-tags-input {
+    padding: var(--space-2) var(--space-3);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: all var(--transition-standard);
+}
+
+.editor-category-select:focus,
+.editor-tags-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+/* Текстовая область (основной контент) */
+.editor-content-textarea {
+    flex: 1;
+    width: 100%;
+    padding: var(--space-3);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-family: 'Fira Code', 'Monaco', monospace;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    resize: none;
+    transition: all var(--transition-standard);
+    overflow-y: auto;
+}
+
+.editor-content-textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.editor-content-textarea::placeholder {
+    color: var(--text-tertiary);
+}
+
+/* Скролл для текстовой области */
+.editor-content-textarea::-webkit-scrollbar {
+    width: 8px;
+}
+
+.editor-content-textarea::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 4px;
+}
+
+.editor-content-textarea::-webkit-scrollbar-thumb {
+    background: var(--text-tertiary);
+    border-radius: 4px;
+}
+
+.editor-content-textarea::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* Подсветка синтаксиса */
+.editor-syntax-highlight {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: var(--space-3);
+    font-family: 'Fira Code', 'Monaco', monospace;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: transparent;
+    background: transparent;
+    overflow: hidden;
+    pointer-events: none;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.code-block {
+    background: rgba(var(--color-primary-rgb), 0.1);
+    border-left: 3px solid var(--color-primary);
+    padding: var(--space-2);
+    border-radius: var(--radius-sm);
+    margin: var(--space-2) 0;
+    display: block;
+    color: var(--text-primary);
+    font-family: 'Fira Code', monospace;
+}
+
+.inline-code {
+    background: rgba(var(--color-primary-rgb), 0.15);
+    border-radius: var(--radius-xs);
+    padding: 2px 6px;
+    color: var(--color-primary);
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9em;
+}
+
+/* ═════════════════════════════════════════════════════════════════
+   PREVIEW PANE (правая часть)
+   ═════════════════════════════════════════════════════════════════ */
+
+.preview-pane {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    overflow: hidden;
+}
+
+.editor-preview-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 600;
+    color: var(--text-primary);
+    padding: var(--space-2) 0;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.editor-preview-pane {
+    flex: 1;
+    padding: var(--space-3);
+    background: var(--glass-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    line-height: 1.8;
+    overflow-y: auto;
+    word-break: break-word;
+}
+
+.editor-preview-pane h1,
+.editor-preview-pane h2,
+.editor-preview-pane h3 {
+    margin: var(--space-3) 0 var(--space-2);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.editor-preview-pane h1 {
+    font-size: 2rem;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: var(--space-2);
+}
+
+.editor-preview-pane h2 {
+    font-size: 1.5rem;
+}
+
+.editor-preview-pane h3 {
+    font-size: 1.25rem;
+}
+
+.editor-preview-pane p {
+    margin: var(--space-2) 0;
+}
+
+.editor-preview-pane ul,
+.editor-preview-pane ol {
+    margin: var(--space-2) 0 var(--space-2) var(--space-4);
+}
+
+.editor-preview-pane li {
+    margin: var(--space-1) 0;
+}
+
+.editor-preview-pane strong {
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.editor-preview-pane em {
+    font-style: italic;
+    color: var(--color-accent);
+}
+
+.editor-preview-pane code {
+    background: rgba(var(--color-primary-rgb), 0.15);
+    border-radius: var(--radius-xs);
+    padding: 2px 6px;
+    font-family: 'Fira Code', monospace;
+    color: var(--color-primary);
+}
+
+.editor-preview-pane pre {
+    background: var(--bg-secondary);
+    border-left: 3px solid var(--color-primary);
+    padding: var(--space-2);
+    border-radius: var(--radius-sm);
+    overflow-x: auto;
+    margin: var(--space-2) 0;
+}
+
+.editor-preview-pane pre code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+    border-radius: 0;
+}
+
+/* Скролл для preview pane */
+.editor-preview-pane::-webkit-scrollbar {
+    width: 8px;
+}
+
+.editor-preview-pane::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 4px;
+}
+
+.editor-preview-pane::-webkit-scrollbar-thumb {
+    background: var(--text-tertiary);
+    border-radius: 4px;
+}
+
+.editor-preview-pane::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* ═════════════════════════════════════════════════════════════════
+   CONTROLS & STATUS BAR
+   ═════════════════════════════════════════════════════════════════ */
+
+.editor-controls {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    padding: var(--space-3);
+    background: var(--glass-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    align-items: center;
+}
+
+.editor-save-btn,
+.editor-undo-btn,
+.editor-redo-btn {
+    padding: var(--space-2) var(--space-3);
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all var(--transition-standard);
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.editor-save-btn:hover:not(:disabled),
+.editor-undo-btn:hover:not(:disabled),
+.editor-redo-btn:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.4);
+}
+
+.editor-save-btn:active:not(:disabled),
+.editor-undo-btn:active:not(:disabled),
+.editor-redo-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.editor-save-btn:disabled,
+.editor-undo-btn:disabled,
+.editor-redo-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.editor-undo-btn,
+.editor-redo-btn {
+    background: var(--color-accent);
+    font-size: 0.85rem;
+}
+
+.editor-undo-btn:hover:not(:disabled),
+.editor-redo-btn:hover:not(:disabled) {
+    background: var(--color-accent-hover);
+}
+
+/* Статусная строка */
+.editor-status-bar {
+    padding: var(--space-2) var(--space-3);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-align: center;
+    transition: all var(--transition-standard);
+}
+
+.editor-status-bar.status-dirty {
+    background: rgba(var(--color-warning-rgb), 0.1);
+    color: var(--color-warning);
+    font-weight: 600;
+}
+
+/* Счетчики */
+.editor-counters {
+    display: flex;
+    gap: var(--space-4);
+    padding: var(--space-2) var(--space-3);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.counter-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.editor-char-count,
+.editor-word-count {
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+/* ═════════════════════════════════════════════════════════════════
+   VERSION HISTORY
+   ═════════════════════════════════════════════════════════════════ */
+
+.editor-version-history {
+    max-height: 200px;
+    overflow-y: auto;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-2);
+}
+
+.version-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2);
+    margin: var(--space-1) 0;
+    background: var(--bg-primary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-standard);
+    border-left: 3px solid var(--border-color);
+}
+
+.version-item:hover {
+    background: var(--glass-bg);
+    border-left-color: var(--color-primary);
+    transform: translateX(4px);
+}
+
+.version-item.active {
+    background: rgba(var(--color-primary-rgb), 0.15);
+    border-left-color: var(--color-primary);
+    font-weight: 600;
+}
+
+.version-time {
+    font-size: 0.8rem;
+    color: var(--text-tertiary);
+    min-width: 80px;
+}
+
+.version-preview {
+    flex: 1;
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.version-stats {
+    font-size: 0.8rem;
+    color: var(--text-tertiary);
+    background: var(--color-primary);
+    color: white;
+    padding: 2px 8px;
+    border-radius: var(--radius-xs);
+}
+
+/* ═════════════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN
+   ═════════════════════════════════════════════════════════════════ */
+
+/* Планшет (768px - 1024px) */
+@media (max-width: 1024px) {
+    .editor-container {
+        grid-template-columns: 1fr;
+        height: auto;
+        max-height: none;
+    }
+
+    .editor-pane {
+        height: 400px;
+    }
+
+    .preview-pane {
+        height: 400px;
+    }
+
+    .editor-preview-pane {
+        max-height: 380px;
+    }
+}
+
+/* Мобилка (640px - 768px) */
+@media (max-width: 768px) {
+    .editor-container {
+        padding: var(--space-2);
+        gap: var(--space-2);
+    }
+
+    .editor-pane,
+    .preview-pane {
+        height: 350px;
+    }
+
+    .editor-title-input {
+        font-size: 1.25rem;
+    }
+
+    .editor-meta {
+        flex-direction: column;
+    }
+
+    .editor-category-select,
+    .editor-tags-input {
+        width: 100%;
+    }
+
+    .editor-controls {
+        flex-direction: column;
+    }
+
+    .editor-save-btn,
+    .editor-undo-btn,
+    .editor-redo-btn {
+        width: 100%;
+    }
+
+    .editor-counters {
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+}
+
+/* Мобилка портрет (320px - 640px) */
+@media (max-width: 640px) {
+    .editor-container {
+        padding: var(--space-2);
+    }
+
+    .editor-pane,
+    .preview-pane {
+        height: 300px;
+    }
+
+    .editor-title-input {
+        font-size: 1.1rem;
+        padding: var(--space-2);
+    }
+
+    .editor-content-textarea {
+        font-size: 0.9rem;
+    }
+
+    .editor-preview-pane {
+        font-size: 0.95rem;
+    }
+
+    .editor-version-history {
+        max-height: 150px;
+    }
+}
+
+/* Очень маленькие экраны */
+@media (max-width: 380px) {
+    .editor-container {
+        padding: var(--space-1);
+    }
+
+    .editor-pane,
+    .preview-pane {
+        padding: var(--space-2);
+        height: 280px;
+    }
+
+    .editor-title-input {
+        font-size: 1rem;
+    }
+
+    .editor-content-textarea {
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+
+    .editor-controls {
+        gap: var(--space-1);
+    }
+
+    .editor-save-btn,
+    .editor-undo-btn,
+    .editor-redo-btn {
+        padding: var(--space-1) var(--space-2);
+        font-size: 0.8rem;
+    }
+}
+
+/* ═════════════════════════════════════════════════════════════════
+   ACCESSIBILITY
+   ═════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+    .editor-content-textarea,
+    .editor-title-input,
+    .editor-category-select,
+    .editor-tags-input,
+    .editor-save-btn,
+    .editor-undo-btn,
+    .editor-redo-btn,
+    .version-item {
+        transition: none;
+    }
+}
+
+@media (prefers-contrast: more) {
+    .editor-content-textarea,
+    .editor-title-input {
+        border-width: 2px;
+    }
+
+    .version-item {
+        border-width: 2px;
+    }
+}
+
+/* ═════════════════════════════════════════════════════════════════
+   PRINT STYLES
+   ═════════════════════════════════════════════════════════════════ */
+
+@media print {
+    .editor-container {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+
+    .editor-controls,
+    .editor-version-history,
+    .editor-status-bar {
+        display: none;
+    }
+
+    .editor-pane,
+    .preview-pane {
+        height: auto;
+        page-break-inside: avoid;
+    }
+
+    .editor-preview-pane {
+        border: none;
+        background: white;
+        color: black;
+    }
+}
