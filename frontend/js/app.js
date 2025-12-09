@@ -154,10 +154,19 @@ class UIManager {
       return;
     }
 
+    console.log(`[UIManager] Opening modal: ${modalId}`);
     modal.classList.add('active');
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
     this.modals.set(modalId, true);
+    
+    // Сфокусировать первый input в модали для удобства
+    setTimeout(() => {
+      const firstInput = modal.querySelector('input:not([type="hidden"]), textarea, select');
+      if (firstInput) {
+        firstInput.focus();
+      }
+    }, 100);
   }
 
   closeModal(modalId) {
@@ -669,17 +678,23 @@ function setupEventDelegation(eventManager, http, uiManager, navigationManager) 
   }
   
   if (promptFormElement) {
+    console.log('[Setup] Prompt form found, attaching submit handler');
     eventManager.addEventListener(promptFormElement, 'submit', (e) => {
       e.preventDefault();
+      console.log('[Form] Prompt form submitted');
       handleCreatePrompt(new FormData(promptFormElement), http, uiManager);
     });
+  } else {
+    console.warn('[Setup] Prompt form not found in DOM');
   }
 
   // ========== ФОРМА СОЗДАНИЯ ПРОЕКТА (MODAL) ==========
   const projectForm = document.getElementById('project-form');
   if (projectForm) {
+    console.log('[Setup] Project form found, attaching submit handler');
     projectForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      console.log('[Form] Project form submitted');
       try {
         const formData = new FormData(projectForm);
         const data = Object.fromEntries(formData);
@@ -905,14 +920,25 @@ function handleQuickAction(action, e, uiManager, navigationManager) {
 async function handleCreatePrompt(formData, http, uiManager) {
   try {
     const data = Object.fromEntries(formData);
+    console.log('[Create Prompt] Data to submit:', data);
+    
     const result = await http.post('/prompts', data);
+    console.log('[Create Prompt] Success:', result);
     
     uiManager.showToast('Промпт создан', 'success');
+    
+    // Закрыть модаль и сбросить форму
+    const promptForm = document.getElementById('prompt-form');
+    if (promptForm) {
+      promptForm.reset();
+      uiManager.closeModal('prompt-modal');
+    }
+    
     window.App.eventManager.emit('app:prompt-created', result);
     
   } catch (error) {
     console.error('[Create Prompt Error]', error);
-    uiManager.showToast('Ошибка при создании промпта', 'error');
+    uiManager.showToast('Ошибка при создании промпта: ' + error.message, 'error');
   }
 }
 

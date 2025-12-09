@@ -90,6 +90,35 @@ class AnalyticsDashboard {
         this.elements.refreshBtn?.addEventListener('click', () => {
             this.loadStats();
         });
+
+        // Слушать события создания/изменения элементов
+        if (window.App?.eventManager) {
+            const em = window.App.eventManager;
+            
+            // Обновить статистику при создании промпта
+            em.on('app:prompt-created', () => {
+                console.log('[Analytics] Prompt created, refreshing stats');
+                this.loadStats();
+            });
+            
+            // Обновить статистику при создании проекта
+            em.on('app:project-created', () => {
+                console.log('[Analytics] Project created, refreshing stats');
+                this.loadStats();
+            });
+            
+            // Обновить статистику при изменении тегов
+            em.on('app:tags-changed', () => {
+                console.log('[Analytics] Tags changed, refreshing stats');
+                this.loadStats();
+            });
+            
+            // Обновить статистику при удалении элемента
+            em.on('app:item-deleted', () => {
+                console.log('[Analytics] Item deleted, refreshing stats');
+                this.loadStats();
+            });
+        }
     }
 
     /**
@@ -99,12 +128,18 @@ class AnalyticsDashboard {
         this.state.isLoading = true;
         
         try {
-            // Загрузить список промптов для расчета статистики
-            const prompts = await this.loadPrompts();
+            // Загрузить списки для расчета статистики
+            const [prompts, tags, projects] = await Promise.all([
+                this.loadPrompts(),
+                this.loadTags(),
+                this.loadProjects()
+            ]);
             
             // Расчитать статистику на клиенте
             this.state.stats = {
                 total_prompts: prompts.length,
+                total_tags: tags.length,
+                total_projects: projects.length,
                 total_categories: [...new Set(prompts.map(p => p.category))].length,
                 total_uses: prompts.reduce((sum, p) => sum + (p.use_count || 0), 0),
                 most_used: prompts.sort((a, b) => (b.use_count || 0) - (a.use_count || 0))[0]
@@ -118,7 +153,7 @@ class AnalyticsDashboard {
             this.renderTrendingPrompts(prompts);
             this.updateLastUpdated();
 
-            console.log('Stats loaded');
+            console.log('Stats loaded:', this.state.stats);
 
         } catch (error) {
             console.error('Error loading stats:', error);
@@ -136,6 +171,30 @@ class AnalyticsDashboard {
     async loadPrompts() {
         // Используем HTTP клиент
         return await this.http.get('/prompts');
+    }
+
+    /**
+     * Загружает список всех тегов
+     */
+    async loadTags() {
+        try {
+            return await this.http.get('/tags');
+        } catch (error) {
+            console.warn('Error loading tags:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Загружает список всех проектов
+     */
+    async loadProjects() {
+        try {
+            return await this.http.get('/projects');
+        } catch (error) {
+            console.warn('Error loading projects:', error);
+            return [];
+        }
     }
 
     /**
