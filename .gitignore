@@ -56,9 +56,25 @@ build/
 # PyInstaller
 *.manifest
 *.spec
+*.exe
+PANDORA_v2.0.exe
+*.pyd
 
 # IDE caches
 *.cache/
 .pytest_cache/
+.mypy_cache/
+.coverage
+
+# Build logs
+build*.log
+*.log
+rebuild.log
+exe_run.log
+pyinstaller_build.log
+
 # References (external data)
 references/
+
+# Archive
+archive/
