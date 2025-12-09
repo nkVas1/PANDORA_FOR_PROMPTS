@@ -318,9 +318,14 @@ class DesktopApp:
                 transparent=False,  # Solid window
                 on_close=self.on_close,
                 icon=CONFIG['app_icon'],
-                # Force native webview, don't open in browser
-                webview_type='edgehtml' if sys.platform == 'win32' else 'gtk',
             )
+            
+            # IMPORTANT: On Windows, explicitly disable browser engine usage
+            if sys.platform == 'win32':
+                logger.info("💻 Windows detected - Using EdgeHTML WebView2")
+                # PyWebView 5.x on Windows should use EdgeHTML by default
+            else:
+                logger.info("🐧 Linux detected - Using GTK WebView")
             
             logger.info("✓ Application window created successfully")
             logger.info(f"📍 Frontend URL: {BACKEND_URL}/")

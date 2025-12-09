@@ -47,6 +47,17 @@ html, body {
   overflow: hidden;
 }
 
+/* Animated gradient background for app container */
+#app.has-animated-gradient {
+  background: linear-gradient(-45deg, 
+    var(--color-primary-500),
+    var(--color-secondary-500),
+    var(--color-accent-500),
+    var(--color-primary-400));
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
+
 /* ═════════════════════════════════════════════════════════════════
    NAVBAR - Fixed Header
    ═════════════════════════════════════════════════════════════════ */

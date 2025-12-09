@@ -16,7 +16,13 @@ if (missingModules.length > 0) {
  */
 function initializeAnimatedBackground() {
   // Добавить класс для активирования gradient анимации
-  document.body.classList.add('has-animated-gradient');
+  const appElement = document.getElementById('app');
+  if (appElement) {
+    appElement.classList.add('has-animated-gradient');
+  } else {
+    // Fallback на body если #app не найден
+    document.body.classList.add('has-animated-gradient');
+  }
 
   // Создать floating orbs
   const orbsHTML = `
