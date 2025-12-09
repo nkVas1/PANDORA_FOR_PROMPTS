@@ -548,8 +548,9 @@
          ═════════════════════════════════════════════════════ -->
 
     <!-- PROMPT MODAL -->
-    <div id="prompt-modal" class="modal">
-        <div class="modal-content">
+    <div id="prompt-modal" class="modal-backdrop">
+        <div class="modal">
+            <div class="modal-content">
             <div class="modal-header">
                 <h2>Новый Промпт</h2>
                 <button class="modal-close" data-action="close-modal">✕</button>
@@ -594,12 +595,14 @@
                     <button type="submit" class="btn btn-primary">Создать</button>
                 </div>
             </form>
+            </div>
         </div>
     </div>
 
     <!-- PROJECT MODAL -->
-    <div id="project-modal" class="modal">
-        <div class="modal-content">
+    <div id="project-modal" class="modal-backdrop">
+        <div class="modal">
+            <div class="modal-content">
             <div class="modal-header">
                 <h2>Новый Проект</h2>
                 <button class="modal-close" data-action="close-modal">✕</button>
@@ -631,6 +634,7 @@
                     <button type="submit" class="btn btn-primary">Создать</button>
                 </div>
             </form>
+            </div>
         </div>
     </div>
 
@@ -668,312 +672,6 @@
         // Log initialization status
         console.log('[Bootstrap] PANDORA v2.0 frontend loaded');
         console.log('[Bootstrap] All managers will be initialized in app.js DOMContentLoaded handler');
-    </script>
-                    await loadStats();
-                }
-            } catch (error) {
-                console.error('Error creating prompt:', error);
-                showToast('❌ Ошибка при создании промпта', 'error');
-            }
-        }
-
-        async function loadPrompts() {
-            try {
-                const response = await fetch(`${API_URL}/api/prompts`);
-                const prompts = await response.json();
-                
-                const container = document.getElementById('prompts-list');
-                if (prompts.length === 0) {
-                    container.innerHTML = '<div class="empty-state"><p>Промптов не найдено.</p></div>';
-                } else {
-                    const cardsHtml = prompts.map(p => `
-                        <div class="card card-item">
-                            <div class="card-body">
-                                <h3 class="font-semibold mb-2">${p.title}</h3>
-                                <p class="text-sm text-neutral-400 mb-4 line-clamp-2">${p.content.substring(0, 80)}...</p>
-                                <div class="flex justify-between items-center">
-                                    <span class="badge badge-primary">${p.category}</span>
-                                    <button class="btn btn-ghost btn-sm" data-action="delete" data-item-id="${p.id}" data-item-type="prompt" title="Удалить">🗑️</button>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-                    
-                    container.innerHTML = `<div class="grid gap-4 grid-cols-auto-fill">${cardsHtml}</div>`;
-                }
-            } catch (error) {
-                console.error('Error loading prompts:', error);
-                document.getElementById('prompts-list').innerHTML = '<p class="text-neutral-400">Ошибка загрузки</p>';
-            }
-        }
-
-        async function deletePrompt(id) {
-            if (!confirm('Удалить этот промпт?')) return;
-            
-            try {
-                await fetch(`${API_URL}/api/prompts/${id}`, { method: 'DELETE' });
-                await loadPrompts();
-                await loadStats();
-                showToast('Промпт удалён', 'success');
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        }
-
-        function openProjectModal() {
-            const modal = document.getElementById('project-modal');
-            if (modal) {
-                modal.classList.add('active');
-                document.getElementById('project-form').reset();
-            }
-        }
-
-        async function createProject(event) {
-            event.preventDefault();
-            
-            const name = document.getElementById('project-name').value;
-            const description = document.getElementById('project-description').value || '';
-            const status = document.getElementById('project-status').value || 'active';
-            
-            try {
-                const response = await fetch(`${API_URL}/api/projects`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        name,
-                        description,
-                        status
-                    })
-                });
-                
-                if (response.ok) {
-                    document.getElementById('project-modal').classList.remove('active');
-                    showToast('✅ Проект успешно создан!', 'success');
-                    await loadProjects();
-                    await loadStats();
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showToast('❌ Ошибка при создании проекта', 'error');
-            }
-        }
-
-        async function loadProjects() {
-            try {
-                const response = await fetch(`${API_URL}/api/projects`);
-                const projects = await response.json();
-                
-                const container = document.getElementById('projects-list');
-                if (projects.length === 0) {
-                    container.innerHTML = '<div class="empty-state"><p>Проектов не найдено.</p></div>';
-                } else {
-                    const cardsHtml = projects.map(p => `
-                        <div class="card card-item">
-                            <div class="card-body">
-                                <h3 class="font-semibold mb-2">${p.name}</h3>
-                                <p class="text-sm text-neutral-400 mb-4">${p.description || 'Нет описания'}</p>
-                                <div class="flex justify-between items-center">
-                                    <span class="badge badge-accent">${p.status}</span>
-                                    <button class="btn btn-ghost btn-sm" data-action="delete" data-item-id="${p.id}" data-item-type="project" title="Удалить">🗑️</button>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-                    
-                    container.innerHTML = `<div class="grid gap-4 grid-cols-auto-fill">${cardsHtml}</div>`;
-                }
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        }
-            try {
-                await fetch(`${API_URL}/api/projects/${id}`, { method: 'DELETE' });
-                await loadProjects();
-                await loadStats();
-                showToast('Проект удалён', 'success');
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        }
-
-        async function loadTags() {
-            try {
-                const promptsResp = await fetch(`${API_URL}/api/prompts`);
-                const prompts = await promptsResp.json();
-                
-                const tagsByCategory = {};
-                
-                prompts.forEach(p => {
-                    if (!tagsByCategory[p.category]) {
-                        tagsByCategory[p.category] = [];
-                    }
-                    p.tags?.forEach(t => {
-                        if (!tagsByCategory[p.category].find(tag => tag.id === t.id)) {
-                            tagsByCategory[p.category].push(t);
-                        }
-                    });
-                });
-                
-                const container = document.getElementById('tags-list');
-                if (Object.keys(tagsByCategory).length === 0) {
-                    container.innerHTML = '<p class="text-neutral-400">Тегов не найдено.</p>';
-                } else {
-                    const categoriesHtml = Object.entries(tagsByCategory).map(([category, tags]) => `
-                        <div class="mb-8">
-                            <h3 class="text-primary-400 mb-4 text-capitalize font-semibold">${category}</h3>
-                            <div class="flex flex-wrap gap-2">
-                                ${tags.map(t => `
-                                    <button class="badge badge-primary cursor-pointer hover:badge-accent">
-                                        ${t.name}
-                                    </button>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `).join('');
-                    container.innerHTML = categoriesHtml;
-                }
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        }
-
-        function showToast(message, type = 'info') {
-            if (window.App && window.App.ui) {
-                window.App.ui.showToast(message, type);
-            } else {
-                alert(message);
-            }
-        }
-
-        /**
-         * Открывает промпт в редакторе
-         * @param {Object} prompt - объект промпта с полями: id, title, content, category, tags
-         */
-        function openPromptForEditing(prompt) {
-            // Заполнить форму редактирования данными промпта
-            const form = document.getElementById('prompt-form');
-            if (!form) {
-                console.error('Prompt form not found');
-                return;
-            }
-
-            // Установить значения формы
-            form.elements['name']?.setValue(prompt.title || prompt.name || '');
-            form.elements['content']?.setValue(prompt.content || '');
-            form.elements['category']?.setValue(prompt.category || 'General');
-
-            // Установить теги если есть
-            if (prompt.tags && form.elements['tags']) {
-                const tagValues = prompt.tags.map(t => t.id || t).join(',');
-                form.elements['tags'].value = tagValues;
-            }
-
-            // Прокрутить к форме
-            form.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-            // Выделить форму для привлечения внимания
-            form.classList.add('highlight');
-            setTimeout(() => form.classList.remove('highlight'), 2000);
-
-            // Сфокусировать на первый input
-            form.elements[0]?.focus?.();
-
-            showToast(`Загружен: "${prompt.title || prompt.name}"`, 'success');
-        }
-
-        // Form submit handlers
-        document.getElementById('prompt-form')?.addEventListener('submit', createPrompt);
-        document.getElementById('project-form')?.addEventListener('submit', createProject);
-
-        // Initialize
-        async function waitForAPI() {
-            let attempts = 0;
-            const maxAttempts = 30;
-            
-            while (attempts < maxAttempts) {
-                try {
-                    const response = await fetch(`${API_URL}/api/stats`, { 
-                        signal: AbortSignal.timeout(2000) 
-                    });
-                    if (response.ok) {
-                        console.log('✅ API готов');
-                        loadStats();
-                        return;
-                    }
-                } catch (error) {
-                    attempts++;
-                    console.log(`⏳ Ожидаю API... (${attempts}/${maxAttempts})`);
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                }
-            }
-            console.error('❌ API недоступен');
-        }
-
-        window.addEventListener('load', waitForAPI);
-
-        // ═════════════════════════════════════════════════════════
-        // SEARCH FUNCTIONALITY (with API integration)
-        // ═════════════════════════════════════════════════════════
-        
-        const searchInput = document.getElementById('search-input');
-        const searchResults = document.getElementById('search-results');
-        let searchTimeout;
-
-        /**
-         * Утилита для экранирования HTML
-         */
-        function escapeHtml(text) {
-            const map = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            };
-            return text.replace(/[&<>"']/g, m => map[m]);
-        }
-
-        searchInput?.addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
-            const query = e.target.value.trim();
-            
-            // Debounce search for 300ms
-            searchTimeout = setTimeout(() => {
-                if (query && window.App?.http) {
-                    performSearch(query, window.App.http, window.App.uiManager);
-                    searchResults.style.display = 'block';
-                } else if (!query) {
-                    clearSearchResults();
-                }
-            }, 300);
-        });
-
-        // Close search results when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.navbar-search')) {
-                clearSearchResults();
-            }
-        });
-
-        // Allow selecting search results with arrow keys
-        searchInput?.addEventListener('keydown', (e) => {
-            const items = searchResults.querySelectorAll('.search-result');
-            if (items.length === 0) return;
-
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                items[0].focus();
-            } else if (e.key === 'Escape') {
-                searchResults.style.display = 'none';
-            }
-        });
-
-        // ═════════════════════════════════════════════════════════
-        // INITIALIZE ENHANCED EDITOR
-        // ═════════════════════════════════════════════════════════
-        
-        // Note: Module initialization moved to app.js for proper loading order
-        // All managers are initialized in window.App after DOMContentLoaded
     </script>
     
 </body>

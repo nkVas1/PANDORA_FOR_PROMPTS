@@ -131,38 +131,40 @@ class UIManager {
   setupModals() {
     // Обработка кликов на backdrop для закрытия модали
     document.addEventListener('click', (e) => {
-      const modal = e.target.closest('.modal');
-      if (!modal) return;
+      const backdrop = e.target.closest('.modal-backdrop');
+      if (!backdrop) return;
       
       // Закрытие при клике на backdrop (вне modal-content)
-      if (e.target === modal) {
-        this.closeModal(modal.id);
+      if (e.target === backdrop) {
+        this.closeModal(backdrop.id);
         return;
       }
 
       // Закрытие при клике на close button
       if (e.target.closest('[data-action="close-modal"]')) {
-        this.closeModal(modal.id);
+        const modal = e.target.closest('.modal-backdrop');
+        if (modal) {
+          this.closeModal(modal.id);
+        }
       }
     });
   }
 
   openModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (!modal) {
+    const backdrop = document.getElementById(modalId);
+    if (!backdrop) {
       console.warn(`[UIManager] Modal not found: ${modalId}`);
       return;
     }
 
     console.log(`[UIManager] Opening modal: ${modalId}`);
-    modal.classList.add('active');
-    modal.style.display = 'flex';
+    backdrop.classList.add('active');
     document.body.style.overflow = 'hidden';
     this.modals.set(modalId, true);
     
     // Сфокусировать первый input в модали для удобства
     setTimeout(() => {
-      const firstInput = modal.querySelector('input:not([type="hidden"]), textarea, select');
+      const firstInput = backdrop.querySelector('input:not([type="hidden"]), textarea, select');
       if (firstInput) {
         firstInput.focus();
       }
@@ -170,11 +172,10 @@ class UIManager {
   }
 
   closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (!modal) return;
+    const backdrop = document.getElementById(modalId);
+    if (!backdrop) return;
 
-    modal.classList.remove('active');
-    modal.style.display = 'none';
+    backdrop.classList.remove('active');
     document.body.style.overflow = 'auto';
     this.modals.delete(modalId);
   }
@@ -554,6 +555,9 @@ document.addEventListener('DOMContentLoaded', () => {
       navigate: (page) => navigationManager.navigateTo(page),
       closeAllModals: () => uiManager.closeAllModals()
     };
+
+    // Создать глобальные aliases для HTML onclick обработчиков
+    window.tagManager = tagManager;
 
     // ========== 6. KEYBOARD SHORTCUTS FOR NAVIGATION ==========
     eventManager.on('document', 'keydown', (e) => {
