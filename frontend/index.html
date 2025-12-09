@@ -76,40 +76,87 @@
                     <h2 class="text-lg font-bold">Меню</h2>
                 </div>
 
-                <!-- Основное меню -->
+                <!-- Основное меню с категориями -->
                 <nav class="sidebar-nav">
-                    <button class="nav-link active" data-page="dashboard">
+                    <!-- Dashboard -->
+                    <button class="nav-link nav-link--primary active" data-page="dashboard">
                         <span>📊</span>
                         <span>Dashboard</span>
                     </button>
-                    <button class="nav-link" data-page="prompts">
-                        <span>✨</span>
-                        <span>Промпты</span>
-                    </button>
-                    <button class="nav-link" data-page="editor">
-                        <span>📝</span>
-                        <span>Редактор</span>
-                    </button>
-                    <button class="nav-link" data-page="tags-page">
-                        <span>🏷️</span>
-                        <span>Теги</span>
-                    </button>
-                    <button class="nav-link" data-page="analytics">
+
+                    <!-- Промпты (с dropdown) -->
+                    <div class="nav-category">
+                        <button class="nav-category-header" data-toggle-submenu="prompts-menu">
+                            <span>✨</span>
+                            <span>Промпты</span>
+                            <span class="nav-category-arrow">▼</span>
+                        </button>
+                        <div class="nav-category-menu" id="prompts-menu">
+                            <button class="nav-link nav-link--secondary" data-page="prompts">
+                                <span>📋</span>
+                                <span>Все промпты</span>
+                            </button>
+                            <button class="nav-link nav-link--secondary" data-page="editor">
+                                <span>✍️</span>
+                                <span>Новый промпт</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Теги (с dropdown) -->
+                    <div class="nav-category">
+                        <button class="nav-category-header" data-toggle-submenu="tags-menu">
+                            <span>🏷️</span>
+                            <span>Теги</span>
+                            <span class="nav-category-arrow">▼</span>
+                        </button>
+                        <div class="nav-category-menu" id="tags-menu">
+                            <button class="nav-link nav-link--secondary" data-page="tags-page">
+                                <span>📚</span>
+                                <span>Управление тегами</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Проекты (с dropdown) -->
+                    <div class="nav-category">
+                        <button class="nav-category-header" data-toggle-submenu="projects-menu">
+                            <span>📁</span>
+                            <span>Проекты</span>
+                            <span class="nav-category-arrow">▼</span>
+                        </button>
+                        <div class="nav-category-menu" id="projects-menu">
+                            <button class="nav-link nav-link--secondary" data-page="projects">
+                                <span>📂</span>
+                                <span>Мои проекты</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Аналитика -->
+                    <button class="nav-link nav-link--primary" data-page="analytics">
                         <span>📈</span>
                         <span>Аналитика</span>
                     </button>
-                    <button class="nav-link" data-page="projects">
-                        <span>📁</span>
-                        <span>Проекты</span>
-                    </button>
-                    <button class="nav-link" data-page="import">
-                        <span>📥</span>
-                        <span>Импорт</span>
-                    </button>
-                    <button class="nav-link" data-page="settings">
-                        <span>⚙️</span>
-                        <span>Настройки</span>
-                    </button>
+
+                    <!-- Инструменты (с dropdown) -->
+                    <div class="nav-category">
+                        <button class="nav-category-header" data-toggle-submenu="tools-menu">
+                            <span>🛠️</span>
+                            <span>Инструменты</span>
+                            <span class="nav-category-arrow">▼</span>
+                        </button>
+                        <div class="nav-category-menu" id="tools-menu">
+                            <button class="nav-link nav-link--secondary" data-page="import">
+                                <span>📥</span>
+                                <span>Импорт</span>
+                            </button>
+                            <button class="nav-link nav-link--secondary" data-page="settings">
+                                <span>⚙️</span>
+                                <span>Настройки</span>
+                            </button>
+                        </div>
+                    </div>
                 </nav>
             </aside>
 

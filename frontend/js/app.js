@@ -602,6 +602,20 @@ document.addEventListener('DOMContentLoaded', () => {
  * Настройка Event Delegation для всех интерактивных элементов
  */
 function setupEventDelegation(eventManager, http, uiManager, navigationManager) {
+  // ========== КАТЕГОРИЯ МЕНЮ DROPDOWN ==========
+  document.addEventListener('click', (e) => {
+    const toggle = e.target.closest('[data-toggle-submenu]');
+    if (toggle) {
+      e.preventDefault();
+      const menuId = toggle.getAttribute('data-toggle-submenu');
+      const menu = document.getElementById(menuId);
+      if (menu) {
+        const isOpen = menu.classList.toggle('open');
+        toggle.setAttribute('data-open', isOpen);
+      }
+    }
+  });
+
   // ========== НАВИГАЦИЯ ==========
   eventManager.on('.nav-link[data-page]', 'click', function(e) {
     e.preventDefault();
