@@ -57,12 +57,14 @@ html, body {
   left: 0;
   right: 0;
   height: var(--navbar-height);
-  background: var(--bg-secondary);
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border-color);
   z-index: var(--z-header, 100);
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .navbar-container {
@@ -135,7 +137,8 @@ html, body {
   flex-shrink: 0;
   width: var(--sidebar-width);
   height: 100%;
-  background: var(--bg-secondary);
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
   border-right: 1px solid var(--border-color);
   overflow-y: auto;
   overflow-x: hidden;
@@ -176,22 +179,49 @@ html, body {
   border-radius: var(--radius-md);
   color: var(--text-secondary);
   font-size: var(--font-size-base);
+  font-weight: 500;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-fast) cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
   text-align: left;
+  position: relative;
+  overflow: visible;
+}
+
+.nav-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 4px;
+  background: var(--color-accent-500);
+  border-radius: 0 2px 2px 0;
+  transition: width var(--transition-fast) ease;
 }
 
 .nav-link:hover {
-  background: var(--state-hover);
+  background: var(--glass-bg);
   color: var(--text-primary);
+  transform: translateX(4px);
+}
+
+.nav-link:hover::before {
+  width: 4px;
 }
 
 .nav-link.active {
-  background: var(--color-primary-500);
+  background: linear-gradient(135deg, var(--color-primary-500), var(--color-secondary-500));
   color: white;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.nav-link.active::before {
+  width: 4px;
+  background: white;
 }
 
 .nav-link span:first-child {
