@@ -590,6 +590,11 @@
     <!-- JavaScript -->
     <script src="js/app.js"></script>
     <script src="js/modals.js"></script>
+    
+    <!-- Core UI Modules (must load before dependent modules) -->
+    <script src="js/editor.js"></script>
+    <script src="js/tag-manager.js"></script>
+    <script src="js/analytics.js"></script>
     <script>
         const API_URL = 'http://127.0.0.1:8000';
         
@@ -1128,81 +1133,9 @@
         // INITIALIZE ENHANCED EDITOR
         // ═════════════════════════════════════════════════════════
         
-        // Инициализировать расширенный редактор
-        let editor = null;
-        
-        // Функция для инициализации редактора при загрузке
-        function initializeEditor() {
-            editor = new PromptEditor({
-                containerId: 'editor-container',
-                api: {
-                    baseUrl: API_URL
-                },
-                onSave: (result) => {
-                    console.log('✅ Промпт успешно сохранён:', result);
-                    showToast('Промпт сохранён!', 'success');
-                    // Обновить список промптов
-                    loadStats();
-                }
-            });
-        }
-        
-        // ═════════════════════════════════════════════════════════
-        // INITIALIZE TAG MANAGER
-        // ═════════════════════════════════════════════════════════
-        
-        let tagManager = null;
-        
-        function initializeTagManager() {
-            tagManager = new TagManager({
-                containerId: 'tags-manager',
-                api: {
-                    baseUrl: API_URL
-                },
-                onTagsChange: (tagIds) => {
-                    console.log('Tags selected:', tagIds);
-                    // При изменении выбранных тегов можно выполнить какие-то действия
-                }
-            });
-        }
-        
-        // ═════════════════════════════════════════════════════════
-        // INITIALIZE ANALYTICS DASHBOARD
-        // ═════════════════════════════════════════════════════════
-        
-        let analyticsDashboard = null;
-        
-        function initializeAnalytics() {
-            analyticsDashboard = new AnalyticsDashboard({
-                containerId: 'analytics-dashboard',
-                api: {
-                    baseUrl: API_URL
-                },
-                refreshInterval: 30000, // 30 seconds
-                onStatsUpdate: (stats) => {
-                    console.log('📊 Analytics updated:', stats);
-                }
-            });
-        }
-        
-        // Инициализировать модули при загрузке
-        document.addEventListener('DOMContentLoaded', () => {
-            // Подождать пока API будет готов
-            setTimeout(() => {
-                initializeEditor();
-                initializeTagManager();
-                initializeAnalytics();
-            }, 1000);
-        });
+        // Note: Module initialization moved to app.js for proper loading order
+        // All managers are initialized in window.App after DOMContentLoaded
     </script>
     
-    <!-- Enhanced Editor Module -->
-    <script src="js/editor.js"></script>
-    
-    <!-- Tag Manager Module -->
-    <script src="js/tag-manager.js"></script>
-    
-    <!-- Analytics Dashboard Module -->
-    <script src="js/analytics.js"></script>
 </body>
 </html>

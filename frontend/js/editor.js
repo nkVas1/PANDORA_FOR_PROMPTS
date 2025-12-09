@@ -41,6 +41,17 @@ class PromptEditor {
     }
 
     /**
+     * Построить URL для API запроса
+     * @param {string} endpoint - относительный путь (без baseUrl)
+     * @returns {string} полный URL
+     */
+    buildApiUrl(endpoint) {
+        const baseUrl = this.api.baseUrl || '/api';
+        const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+        return `${baseUrl}${cleanEndpoint}`;
+    }
+
+    /**
      * Инициализирует редактор
      */
     init() {
@@ -427,7 +438,7 @@ class PromptEditor {
             };
             
             // Отправить на сервер
-            const response = await fetch(`${this.api.baseUrl || 'http://localhost:8000'}/api/prompts`, {
+            const response = await fetch(this.buildApiUrl('prompts'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

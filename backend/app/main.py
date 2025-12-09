@@ -86,7 +86,7 @@ css_dir = frontend_dir / "css"
 if css_dir.exists():
     try:
         app.mount("/css", StaticFiles(directory=str(css_dir)), name="css")
-        print(f"[STATIC] ✓ Mounted /css → {css_dir}")
+        print(f"[STATIC] [OK] Mounted /css -> {css_dir}")
     except Exception as e:
         print(f"[STATIC] Failed to mount /css: {e}")
 else:
@@ -97,7 +97,7 @@ js_dir = frontend_dir / "js"
 if js_dir.exists():
     try:
         app.mount("/js", StaticFiles(directory=str(js_dir)), name="js")
-        print(f"[STATIC] ✓ Mounted /js → {js_dir}")
+        print(f"[STATIC] [OK] Mounted /js -> {js_dir}")
     except Exception as e:
         print(f"[STATIC] Failed to mount /js: {e}")
 else:
@@ -108,7 +108,7 @@ static_dir = frontend_dir / "static"
 if static_dir.exists():
     try:
         app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
-        print(f"[STATIC] ✓ Mounted /static → {static_dir}")
+        print(f"[STATIC] [OK] Mounted /static -> {static_dir}")
     except Exception as e:
         print(f"[STATIC] Failed to mount /static: {e}")
 
@@ -117,7 +117,7 @@ styles_dir = frontend_dir / "styles"
 if styles_dir.exists():
     try:
         app.mount("/styles", StaticFiles(directory=str(styles_dir)), name="styles")
-        print(f"[STATIC] ✓ Mounted /styles → {styles_dir}")
+        print(f"[STATIC] [OK] Mounted /styles -> {styles_dir}")
     except Exception as e:
         print(f"[STATIC] Failed to mount /styles: {e}")
 
@@ -129,7 +129,7 @@ async def root():
     if index_path.exists():
         try:
             content = index_path.read_text(encoding='utf-8')
-            print(f"[STATIC] ✓ Serving index.html from {index_path}")
+            print(f"[STATIC] [OK] Serving index.html from {index_path}")
             return content
         except Exception as e:
             print(f"[STATIC] Error reading index.html: {e}")
@@ -154,7 +154,7 @@ async def serve_static(file_path: str):
             static_resolved = static_path.resolve()
             frontend_resolved = frontend_dir.resolve()
             if not str(static_resolved).startswith(str(frontend_resolved)):
-                print(f"[STATIC] 🚫 Security violation: {static_path}")
+                print(f"[STATIC] [FORBIDDEN] Security violation: {static_path}")
                 return PlainTextResponse("Forbidden", status_code=403)
         except Exception as e:
             print(f"[STATIC] Path resolution error: {e}")
@@ -162,7 +162,7 @@ async def serve_static(file_path: str):
 
         # Check if file exists
         if static_path.exists() and static_path.is_file():
-            print(f"[STATIC] ✓ Serving {file_path}")
+            print(f"[STATIC] [OK] Serving {file_path}")
             return FileResponse(static_path)
 
         # If not found, try to serve index.html for SPA routing

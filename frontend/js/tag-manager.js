@@ -35,6 +35,18 @@ class TagManager {
     }
 
     /**
+     * Построить URL для API запроса
+     * @param {string} endpoint - относительный путь (без baseUrl)
+     * @returns {string} полный URL
+     */
+    buildApiUrl(endpoint) {
+        const baseUrl = this.api.baseUrl || '/api';
+        // Убедиться что endpoint не начинается с /
+        const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+        return `${baseUrl}${cleanEndpoint}`;
+    }
+
+    /**
      * Инициализирует менеджер
      */
     async init() {
@@ -112,7 +124,7 @@ class TagManager {
         
         try {
             const response = await fetch(
-                `${this.api.baseUrl || 'http://localhost:8000'}/api/tags`,
+                this.buildApiUrl('tags'),
                 {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' }
@@ -307,7 +319,7 @@ class TagManager {
     async createTag(name, color) {
         try {
             const response = await fetch(
-                `${this.api.baseUrl || 'http://localhost:8000'}/api/tags`,
+                this.buildApiUrl('tags'),
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -339,7 +351,7 @@ class TagManager {
     async updateTag(tagId, name, color) {
         try {
             const response = await fetch(
-                `${this.api.baseUrl || 'http://localhost:8000'}/api/tags/${tagId}`,
+                this.buildApiUrl(`tags/${tagId}`),
                 {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
@@ -381,7 +393,7 @@ class TagManager {
 
         try {
             const response = await fetch(
-                `${this.api.baseUrl || 'http://localhost:8000'}/api/tags/${tagId}`,
+                this.buildApiUrl(`tags/${tagId}`),
                 { method: 'DELETE' }
             );
 

@@ -426,12 +426,75 @@ document.addEventListener('DOMContentLoaded', () => {
   const uiManager = new UIManager();
   const keyboardShortcuts = new KeyboardShortcuts(uiManager);
 
+  // Инициализируем новые модули (Phase 3)
+  let editor = null;
+  let tagManager = null;
+
+  // Инициализация Enhanced Editor (если есть контейнер)
+  const editorContainer = document.getElementById('editor-container');
+  if (editorContainer && typeof PromptEditor !== 'undefined') {
+    editor = new PromptEditor({
+      containerId: 'editor-container',
+      api: {
+        baseUrl: '/api',
+        endpoints: {
+          savePrompt: '/prompts',
+          updatePrompt: '/prompts/{id}',
+          getTags: '/tags'
+        }
+      },
+      onSave: (promptData) => {
+        console.log('📝 Промпт сохранён:', promptData);
+      }
+    });
+    console.log('✓ Enhanced Editor инициализирован');
+  }
+
+  // Инициализация Tag Manager (если есть контейнер)
+  const tagsManagerContainer = document.getElementById('tags-manager');
+  if (tagsManagerContainer && typeof TagManager !== 'undefined') {
+    tagManager = new TagManager({
+      containerId: 'tags-manager',
+      api: {
+        baseUrl: '/api',
+        endpoints: {
+          getTags: '/tags',
+          createTag: '/tags',
+          updateTag: '/tags/{id}',
+          deleteTag: '/tags/{id}'
+        }
+      },
+      onTagsChange: (tags) => {
+        console.log('🏷️ Теги обновлены:', tags);
+      }
+    });
+    console.log('✓ Tag Manager инициализирован');
+  }
+
+  // Инициализация Analytics (если есть контейнер и модуль)
+  const analyticsContainer = document.getElementById('analytics-dashboard');
+  if (analyticsContainer && typeof AnalyticsDashboard !== 'undefined') {
+    const analytics = new AnalyticsDashboard({
+      containerId: 'analytics-dashboard',
+      api: {
+        baseUrl: '/api',
+        endpoints: {
+          getStats: '/analytics/stats',
+          getTrends: '/analytics/trends'
+        }
+      }
+    });
+    console.log('✓ Analytics Dashboard инициализирован');
+  }
+
   // Делаем доступными в глобальном окне
   window.App = {
     theme: themeManager,
     ui: uiManager,
     utils: Utilities,
-    shortcuts: keyboardShortcuts
+    shortcuts: keyboardShortcuts,
+    editor: editor,
+    tagManager: tagManager
   };
 
   console.log('PANDORA v2.0 инициализирована ✨');

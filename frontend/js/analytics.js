@@ -32,6 +32,17 @@ class AnalyticsDashboard {
     }
 
     /**
+     * Построить URL для API запроса
+     * @param {string} endpoint - относительный путь (без baseUrl)
+     * @returns {string} полный URL
+     */
+    buildApiUrl(endpoint) {
+        const baseUrl = this.api.baseUrl || '/api';
+        const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+        return `${baseUrl}${cleanEndpoint}`;
+    }
+
+    /**
      * Инициализирует dashboard
      */
     async init() {
@@ -88,20 +99,17 @@ class AnalyticsDashboard {
         this.state.isLoading = true;
         
         try {
-            // Загрузить основную статистику
-            const statsResponse = await fetch(
-                `${this.api.baseUrl || 'http://localhost:8000'}/api/stats`,
-                { method: 'GET', headers: { 'Content-Type': 'application/json' } }
-            );
-
-            if (!statsResponse.ok) {
-                throw new Error(`API error: ${statsResponse.status}`);
-            }
-
-            this.state.stats = await statsResponse.json();
-
-            // Загрузить разбор по категориям
+            // Загрузить список промптов для расчета статистики
             const prompts = await this.loadPrompts();
+            
+            // Расчитать статистику на клиенте
+            this.state.stats = {
+                total_prompts: prompts.length,
+                total_categories: [...new Set(prompts.map(p => p.category))].length,
+                total_uses: prompts.reduce((sum, p) => sum + (p.use_count || 0), 0),
+                most_used: prompts.sort((a, b) => (b.use_count || 0) - (a.use_count || 0))[0]
+            };
+
             this.state.categoryStats = this.calculateCategoryStats(prompts);
 
             // Отобразить
@@ -110,12 +118,12 @@ class AnalyticsDashboard {
             this.renderTrendingPrompts(prompts);
             this.updateLastUpdated();
 
-            console.log('✅ Статистика загружена');
+            console.log('Stats loaded');
 
         } catch (error) {
-            console.error('❌ Error loading stats:', error);
+            console.error('Error loading stats:', error);
             if (this.elements.statsGrid) {
-                this.elements.statsGrid.innerHTML = `<p class="text-error">Ошибка загрузки статистики: ${error.message}</p>`;
+                this.elements.statsGrid.innerHTML = `<p class="text-error">Error loading statistics: ${error.message}</p>`;
             }
         } finally {
             this.state.isLoading = false;
@@ -127,7 +135,7 @@ class AnalyticsDashboard {
      */
     async loadPrompts() {
         const response = await fetch(
-            `${this.api.baseUrl || 'http://localhost:8000'}/api/prompts`,
+            this.buildApiUrl('prompts'),
             { method: 'GET', headers: { 'Content-Type': 'application/json' } }
         );
 
