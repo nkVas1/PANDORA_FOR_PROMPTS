@@ -312,6 +312,12 @@ class DesktopApp:
                 background_color='#ffffff',
                 text_select=True,
                 fullscreen=False,
+                # Native window settings (launch as native window, not browser)
+                frameless=False,  # Show window frame
+                easy_drag=True,   # Enable drag by title bar
+                transparent=False,  # Solid window
+                on_close=self.on_close,
+                icon=CONFIG['app_icon'],
             )
             
             logger.info("✓ Application window created successfully")

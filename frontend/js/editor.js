@@ -10,12 +10,12 @@ class PromptEditor {
      * Инициализирует редактор промптов
      * @param {Object} config - конфигурация редактора
      * @param {string} config.containerId - ID контейнера
-     * @param {Object} config.api - API конфиг
+     * @param {HTTPClient} config.http - HTTP клиент (от app.js)
      * @param {Function} config.onSave - callback при сохранении
      */
     constructor(config = {}) {
         this.containerId = config.containerId || 'editor-container';
-        this.api = config.api || {};
+        this.http = config.http || window.App?.http; // Используем глобальный HTTP клиент
         this.onSave = config.onSave || (() => {});
         
         // Состояние редактора
@@ -41,13 +41,13 @@ class PromptEditor {
     }
 
     /**
-     * Построить URL для API запроса
-     * @param {string} endpoint - относительный путь (без baseUrl)
-     * @returns {string} полный URL
+     * Сохраняет промпт на сервер
+     * @param {Object} data - данные для сохранения
+     * @returns {Promise}
      */
-    buildApiUrl(endpoint) {
-        const baseUrl = this.api.baseUrl || '/api';
-        const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    async save(data = {}) {
+        if (this.state.isSaving) return;
+        this.state.isSaving = true;
         return `${baseUrl}${cleanEndpoint}`;
     }
 
@@ -437,20 +437,8 @@ class PromptEditor {
                 tags: this.state.tags
             };
             
-            // Отправить на сервер
-            const response = await fetch(this.buildApiUrl('prompts'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
-            
-            if (!response.ok) {
-                throw new Error(`API error: ${response.status}`);
-            }
-            
-            const result = await response.json();
+            // Отправить на сервер (используем HTTP клиент)
+            const result = await this.http.post('/prompts', data);
             
             // Вызвать callback
             this.onSave(result);

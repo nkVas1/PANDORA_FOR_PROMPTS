@@ -232,13 +232,17 @@ main {
    ═════════════════════════════════════════════════════════════════ */
 
 .page {
-  display: none;
+  display: block;
   width: 100%;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  pointer-events: none;
   animation: fade-in var(--transition-standard);
 }
 
 .page.active {
-  display: block;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .page-header {

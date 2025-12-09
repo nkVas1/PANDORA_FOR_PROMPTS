@@ -10,11 +10,11 @@ class AnalyticsDashboard {
      * Инициализирует аналитическую панель
      * @param {Object} config - конфигурация
      * @param {string} config.containerId - ID контейнера
-     * @param {Object} config.api - API конфиг
+     * @param {HTTPClient} config.http - HTTP клиент (от app.js)
      */
     constructor(config = {}) {
         this.containerId = config.containerId || 'analytics-dashboard';
-        this.api = config.api || {};
+        this.http = config.http || window.App?.http; // Используем глобальный HTTP клиент
         
         // Состояние
         this.state = {
@@ -134,16 +134,8 @@ class AnalyticsDashboard {
      * Загружает список всех промптов
      */
     async loadPrompts() {
-        const response = await fetch(
-            this.buildApiUrl('prompts'),
-            { method: 'GET', headers: { 'Content-Type': 'application/json' } }
-        );
-
-        if (!response.ok) {
-            throw new Error('Failed to load prompts');
-        }
-
-        return await response.json();
+        // Используем HTTP клиент
+        return await this.http.get('/prompts');
     }
 
     /**

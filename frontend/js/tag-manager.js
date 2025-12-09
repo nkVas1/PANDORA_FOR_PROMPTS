@@ -10,12 +10,12 @@ class TagManager {
      * Инициализирует менеджер тегов
      * @param {Object} config - конфигурация
      * @param {string} config.containerId - ID контейнера
-     * @param {Object} config.api - API конфиг
+     * @param {HTTPClient} config.http - HTTP клиент (от app.js)
      * @param {Function} config.onTagsChange - callback при изменении тегов
      */
     constructor(config = {}) {
         this.containerId = config.containerId || 'tags-manager';
-        this.api = config.api || {};
+        this.http = config.http || window.App?.http; // Используем глобальный HTTP клиент
         this.onTagsChange = config.onTagsChange || (() => {});
         
         // Состояние
@@ -123,19 +123,8 @@ class TagManager {
         this.state.isLoading = true;
         
         try {
-            const response = await fetch(
-                this.buildApiUrl('tags'),
-                {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' }
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error(`API error: ${response.status}`);
-            }
-
-            const data = await response.json();
+            // Используем HTTP клиент с кэшированием
+            const data = await this.http.get('/tags');
             this.state.tags = Array.isArray(data) ? data : data.tags || [];
             
             this.renderTags();
@@ -318,21 +307,8 @@ class TagManager {
      */
     async createTag(name, color) {
         try {
-            const response = await fetch(
-                this.buildApiUrl('tags'),
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, color })
-                }
-            );
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.detail || 'Failed to create tag');
-            }
-
-            const newTag = await response.json();
+            // Используем HTTP клиент
+            const newTag = await this.http.post('/tags', { name, color });
             this.state.tags.push(newTag);
             this.renderTags();
             this.renderTagCloud();
@@ -350,21 +326,8 @@ class TagManager {
      */
     async updateTag(tagId, name, color) {
         try {
-            const response = await fetch(
-                this.buildApiUrl(`tags/${tagId}`),
-                {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, color })
-                }
-            );
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.detail || 'Failed to update tag');
-            }
-
-            const updated = await response.json();
+            // Используем HTTP клиент
+            const updated = await this.http.put(`/tags/${tagId}`, { name, color });
             const index = this.state.tags.findIndex(t => t.id === tagId);
             if (index !== -1) {
                 this.state.tags[index] = updated;

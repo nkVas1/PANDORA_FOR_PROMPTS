@@ -588,141 +588,40 @@
     </div>
 
     <!-- JavaScript -->
+    <!-- ═════════════════════════════════════════════════════════
+         LOAD ORDER (critical for dependencies):
+         1. Advanced systems (HTTP, Event, Navigation)
+         2. Core app (app.js - depends on above)
+         3. Feature modules (editor, tags, analytics)
+         ═════════════════════════════════════════════════════════ -->
+    
+    <!-- Phase 4: Advanced Systems (no dependencies) -->
+    <script src="js/http-client.js"></script>
+    <script src="js/event-manager.js"></script>
+    <script src="js/navigation-manager.js"></script>
+    
+    <!-- Phase 3: Core Application (depends on advanced systems) -->
     <script src="js/app.js"></script>
     <script src="js/modals.js"></script>
     
-    <!-- Core UI Modules (must load before dependent modules) -->
+    <!-- Phase 2: Feature Modules (depends on core app + HTTP client) -->
     <script src="js/editor.js"></script>
     <script src="js/tag-manager.js"></script>
     <script src="js/analytics.js"></script>
+    
+    <!-- Startup & Configuration (executed after all modules loaded) -->
     <script>
-        const API_URL = 'http://127.0.0.1:8000';
-        
-        // Theme Toggle
-        document.getElementById('theme-toggle').addEventListener('click', () => {
-            if (window.App && window.App.theme) {
-                window.App.theme.toggleTheme();
-            }
-        });
+        // Configuration
+        window.PANDORA_CONFIG = {
+            API_URL: 'http://127.0.0.1:8000',
+            API_BASE: '/api',
+            DEBUG: false
+        };
 
-        // Page Navigation
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', (e) => {
-                const pageName = e.currentTarget.dataset.page;
-                switchPage(pageName);
-                
-                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-                e.currentTarget.classList.add('active');
-            });
-        });
-
-        // Modal Actions
-        document.querySelectorAll('[data-action="open-prompt-modal"]').forEach(btn => {
-            btn.addEventListener('click', openPromptModal);
-        });
-
-        document.querySelectorAll('[data-action="open-project-modal"]').forEach(btn => {
-            btn.addEventListener('click', openProjectModal);
-        });
-
-        document.querySelectorAll('[data-action="close-modal"]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const modal = e.target.closest('.modal');
-                if (modal) modal.classList.remove('active');
-            });
-        });
-
-        // Close modals on background click
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.classList.remove('active');
-                }
-            });
-        });
-
-        function switchPage(pageName) {
-            // Hide all pages
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            
-            // Show selected page
-            const page = document.getElementById(pageName);
-            if (page) {
-                page.classList.add('active');
-                
-                // Load page-specific data
-                if (pageName === 'dashboard') {
-                    loadStats();
-                } else if (pageName === 'prompts') {
-                    loadPrompts();
-                } else if (pageName === 'projects') {
-                    loadProjects();
-                } else if (pageName === 'tags') {
-                    loadTags();
-                }
-            }
-        }
-
-        async function loadStats() {
-            try {
-                const response = await fetch(`${API_URL}/api/stats`);
-                const data = await response.json();
-
-                const updateStatWithAnimation = (elementId, value) => {
-                    const element = document.getElementById(elementId);
-                    if (element) {
-                        element.textContent = value || 0;
-                    }
-                };
-
-                updateStatWithAnimation('stat-prompts', data.total_prompts);
-                updateStatWithAnimation('stat-tags', data.total_tags);
-                updateStatWithAnimation('stat-projects', data.total_projects);
-                updateStatWithAnimation('stat-categories', data.total_categories);
-
-                updateStatWithAnimation('header-prompts', data.total_prompts);
-                updateStatWithAnimation('header-projects', data.total_projects);
-                updateStatWithAnimation('header-tags', data.total_tags);
-            } catch (error) {
-                console.error('Error loading stats:', error);
-            }
-        }
-
-        function openPromptModal() {
-            const modal = document.getElementById('prompt-modal');
-            if (modal) {
-                modal.classList.add('active');
-                document.getElementById('prompt-form').reset();
-            }
-        }
-
-        async function createPrompt(event) {
-            event.preventDefault();
-            
-            const title = document.getElementById('prompt-title').value;
-            const content = document.getElementById('prompt-content').value;
-            const description = document.getElementById('prompt-description').value || '';
-            const category = document.getElementById('prompt-category').value || 'general';
-            const version = document.getElementById('prompt-version').value || '1.0';
-            
-            try {
-                const response = await fetch(`${API_URL}/api/prompts`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        title,
-                        content,
-                        description,
-                        category,
-                        version,
-                        tag_ids: []
-                    })
-                });
-                
-                if (response.ok) {
-                    document.getElementById('prompt-modal').classList.remove('active');
-                    showToast('✅ Промпт успешно создан!', 'success');
-                    await loadPrompts();
+        // Log initialization status
+        console.log('[Bootstrap] PANDORA v2.0 frontend loaded');
+        console.log('[Bootstrap] All managers will be initialized in app.js DOMContentLoaded handler');
+    </script>
                     await loadStats();
                 }
             } catch (error) {
@@ -747,7 +646,7 @@
                                 <p class="text-sm text-neutral-400 mb-4 line-clamp-2">${p.content.substring(0, 80)}...</p>
                                 <div class="flex justify-between items-center">
                                     <span class="badge badge-primary">${p.category}</span>
-                                    <button class="btn btn-ghost btn-sm" onclick="deletePrompt(${p.id})">🗑️</button>
+                                    <button class="btn btn-ghost btn-sm" data-action="delete" data-item-id="${p.id}" data-item-type="prompt" title="Удалить">🗑️</button>
                                 </div>
                             </div>
                         </div>
@@ -828,7 +727,7 @@
                                 <p class="text-sm text-neutral-400 mb-4">${p.description || 'Нет описания'}</p>
                                 <div class="flex justify-between items-center">
                                     <span class="badge badge-accent">${p.status}</span>
-                                    <button class="btn btn-ghost btn-sm" onclick="deleteProject(${p.id})">🗑️</button>
+                                    <button class="btn btn-ghost btn-sm" data-action="delete" data-item-id="${p.id}" data-item-type="project" title="Удалить">🗑️</button>
                                 </div>
                             </div>
                         </div>
@@ -840,10 +739,6 @@
                 console.error('Error:', error);
             }
         }
-
-        async function deleteProject(id) {
-            if (!confirm('Удалить этот проект?')) return;
-            
             try {
                 await fetch(`${API_URL}/api/projects/${id}`, { method: 'DELETE' });
                 await loadProjects();
