@@ -1,0 +1,323 @@
+/* ═══════════════════════════════════════════════════════════════════
+   PANDORA v2.0 - Design Tokens System
+   Универсальная система токенов для全 проекта
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ─────────────────────────────────────────────────────────────
+     COLOR PALETTE - Основные цвета
+     ───────────────────────────────────────────────────────────── */
+
+  /* Primary Colors */
+  --color-primary-50: #f0f4ff;
+  --color-primary-100: #e0e7ff;
+  --color-primary-200: #c7d2fe;
+  --color-primary-300: #a5b4fc;
+  --color-primary-400: #818cf8;
+  --color-primary-500: #6366f1;
+  --color-primary-600: #4f46e5;
+  --color-primary-700: #4338ca;
+  --color-primary-800: #3730a3;
+  --color-primary-900: #312e81;
+
+  /* Secondary Colors (Фиолетовый) */
+  --color-secondary-50: #faf5ff;
+  --color-secondary-100: #f3e8ff;
+  --color-secondary-200: #e9d5ff;
+  --color-secondary-300: #d8b4fe;
+  --color-secondary-400: #c084fc;
+  --color-secondary-500: #a855f7;
+  --color-secondary-600: #9333ea;
+  --color-secondary-700: #7e22ce;
+  --color-secondary-800: #6b21a8;
+  --color-secondary-900: #581c87;
+
+  /* Accent Colors (Розовый) */
+  --color-accent-50: #fdf2f8;
+  --color-accent-100: #fce7f3;
+  --color-accent-200: #fbcfe8;
+  --color-accent-300: #f8b4d9;
+  --color-accent-400: #f472b6;
+  --color-accent-500: #ec4899;
+  --color-accent-600: #db2777;
+  --color-accent-700: #be185d;
+  --color-accent-800: #9d174d;
+  --color-accent-900: #831843;
+
+  /* Neutral Colors */
+  --color-neutral-50: #f9fafb;
+  --color-neutral-100: #f3f4f6;
+  --color-neutral-200: #e5e7eb;
+  --color-neutral-300: #d1d5db;
+  --color-neutral-400: #9ca3af;
+  --color-neutral-500: #6b7280;
+  --color-neutral-600: #4b5563;
+  --color-neutral-700: #374151;
+  --color-neutral-800: #1f2937;
+  --color-neutral-900: #111827;
+
+  /* Status Colors */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  /* Dark Mode Background */
+  --color-dark-bg-primary: #0f172a;
+  --color-dark-bg-secondary: #1e293b;
+  --color-dark-bg-tertiary: #334155;
+  --color-dark-text-primary: #f1f5f9;
+  --color-dark-text-secondary: #cbd5e1;
+  --color-dark-border: rgba(148, 163, 184, 0.2);
+
+  /* Light Mode Background */
+  --color-light-bg-primary: #ffffff;
+  --color-light-bg-secondary: #f8fafc;
+  --color-light-bg-tertiary: #f1f5f9;
+  --color-light-text-primary: #0f172a;
+  --color-light-text-secondary: #475569;
+  --color-light-border: rgba(15, 23, 42, 0.1);
+
+  /* ─────────────────────────────────────────────────────────────
+     GRADIENTS - Красивые переливающиеся градиенты
+     ───────────────────────────────────────────────────────────── */
+
+  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  --gradient-accent: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
+  --gradient-warm: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+  --gradient-cool: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+  --gradient-vibrant: linear-gradient(135deg, #ec4899 0%, #f59e0b 100%);
+
+  /* ─────────────────────────────────────────────────────────────
+     TYPOGRAPHY - Система шрифтов
+     ───────────────────────────────────────────────────────────── */
+
+  --font-family-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+
+  /* Font Sizes */
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 32px;
+  --font-size-4xl: 40px;
+  --font-size-5xl: 48px;
+
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Line Heights */
+  --line-height-tight: 1.2;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+
+  /* Letter Spacing */
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: 0em;
+  --letter-spacing-wide: 0.05em;
+
+  /* ─────────────────────────────────────────────────────────────
+     SPACING - Система отступов (8px grid)
+     ───────────────────────────────────────────────────────────── */
+
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 36px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* ─────────────────────────────────────────────────────────────
+     BORDER RADIUS - Мягкие скругленные углы
+     ───────────────────────────────────────────────────────────── */
+
+  --radius-none: 0;
+  --radius-sm: 4px;
+  --radius-base: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-3xl: 32px;
+  --radius-full: 9999px;
+
+  /* ─────────────────────────────────────────────────────────────
+     SHADOWS - Тени для глубины
+     ───────────────────────────────────────────────────────────── */
+
+  --shadow-none: none;
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-base: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 25px 50px rgba(0, 0, 0, 0.25);
+  --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.25);
+
+  /* Glass morphism shadow */
+  --shadow-glass: 0 8px 32px rgba(31, 38, 135, 0.37);
+
+  /* ─────────────────────────────────────────────────────────────
+     TRANSITIONS & ANIMATIONS - Timing functions
+     ───────────────────────────────────────────────────────────── */
+
+  --transition-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-standard: 250ms cubic-bezier(0.2, 0, 0, 1);
+  --transition-slow: 500ms cubic-bezier(0.33, 0, 0.66, 0);
+  --transition-smooth: 300ms ease-out;
+
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+
+  /* ─────────────────────────────────────────────────────────────
+     BREAKPOINTS - Responsive design
+     ───────────────────────────────────────────────────────────── */
+
+  --breakpoint-xs: 320px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+
+  /* ─────────────────────────────────────────────────────────────
+     Z-INDEX - Слои интерфейса
+     ───────────────────────────────────────────────────────────── */
+
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+
+  /* ─────────────────────────────────────────────────────────────
+     SEMANTIC TOKENS - Семантические переменные
+     ───────────────────────────────────────────────────────────── */
+
+  /* Light Mode (по умолчанию) */
+  --bg-primary: var(--color-light-bg-primary);
+  --bg-secondary: var(--color-light-bg-secondary);
+  --bg-tertiary: var(--color-light-bg-tertiary);
+  --text-primary: var(--color-light-text-primary);
+  --text-secondary: var(--color-light-text-secondary);
+  --border-color: var(--color-light-border);
+
+  /* Glass effect */
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-blur: blur(10px);
+  --glass-backdrop: rgba(255, 255, 255, 0.7);
+
+  /* Component states */
+  --state-hover: rgba(99, 102, 241, 0.1);
+  --state-active: rgba(99, 102, 241, 0.2);
+  --state-focus: rgba(99, 102, 241, 0.3);
+  --state-disabled: rgba(0, 0, 0, 0.4);
+}
+
+/* ═════════════════════════════════════════════════════════════════
+   DARK MODE
+   ═════════════════════════════════════════════════════════════════ */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: var(--color-dark-bg-primary);
+    --bg-secondary: var(--color-dark-bg-secondary);
+    --bg-tertiary: var(--color-dark-bg-tertiary);
+    --text-primary: var(--color-dark-text-primary);
+    --text-secondary: var(--color-dark-text-secondary);
+    --border-color: var(--color-dark-border);
+
+    --glass-bg: rgba(15, 23, 42, 0.6);
+    --glass-backdrop: rgba(15, 23, 42, 0.4);
+
+    --state-hover: rgba(99, 102, 241, 0.2);
+    --state-active: rgba(99, 102, 241, 0.3);
+    --state-focus: rgba(99, 102, 241, 0.4);
+  }
+}
+
+[data-theme="dark"] {
+  --bg-primary: var(--color-dark-bg-primary);
+  --bg-secondary: var(--color-dark-bg-secondary);
+  --bg-tertiary: var(--color-dark-bg-tertiary);
+  --text-primary: var(--color-dark-text-primary);
+  --text-secondary: var(--color-dark-text-secondary);
+  --border-color: var(--color-dark-border);
+
+  --glass-bg: rgba(15, 23, 42, 0.6);
+  --glass-backdrop: rgba(15, 23, 42, 0.4);
+}
+
+[data-theme="light"] {
+  --bg-primary: var(--color-light-bg-primary);
+  --bg-secondary: var(--color-light-bg-secondary);
+  --bg-tertiary: var(--color-light-bg-tertiary);
+  --text-primary: var(--color-light-text-primary);
+  --text-secondary: var(--color-light-text-secondary);
+  --border-color: var(--color-light-border);
+
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-backdrop: rgba(255, 255, 255, 0.7);
+}
+
+/* ═════════════════════════════════════════════════════════════════
+   UTILITIES
+   ═════════════════════════════════════════════════════════════════ */
+
+.glass-morphism {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.gradient-primary {
+  background: var(--gradient-primary);
+}
+
+.gradient-accent {
+  background: var(--gradient-accent);
+}
+
+.gradient-warm {
+  background: var(--gradient-warm);
+}
+
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.transition-fast {
+  transition: all var(--transition-fast);
+}
+
+.transition-standard {
+  transition: all var(--transition-standard);
+}
+
+.transition-smooth {
+  transition: all var(--transition-smooth);
+}
