@@ -318,6 +318,8 @@ class DesktopApp:
                 transparent=False,  # Solid window
                 on_close=self.on_close,
                 icon=CONFIG['app_icon'],
+                # Force native webview, don't open in browser
+                webview_type='edgehtml' if sys.platform == 'win32' else 'gtk',
             )
             
             logger.info("✓ Application window created successfully")

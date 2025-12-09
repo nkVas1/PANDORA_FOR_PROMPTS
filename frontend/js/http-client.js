@@ -349,8 +349,13 @@ class HTTPClient {
     // Инвалидировать GET запросы для этого endpoint
     const keysToInvalidate = [];
     for (const [key] of this.cache) {
-      if (key.includes(endpoint) || endpoint.includes(key.split(':')[1].split('?')[0])) {
-        keysToInvalidate.push(key);
+      try {
+        const cacheKey = key.split(':')[1]?.split('?')[0];
+        if (key.includes(endpoint) || (cacheKey && endpoint.includes(cacheKey))) {
+          keysToInvalidate.push(key);
+        }
+      } catch (e) {
+        // Skip invalid cache keys
       }
     }
 
