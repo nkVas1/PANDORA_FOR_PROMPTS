@@ -618,6 +618,7 @@
   animation: hero-entrance 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+
 /* Stagger children entrance (используется с .delay-* classes) */
 .animate-stagger > * {
   animation: slide-up var(--transition-standard);
@@ -641,4 +642,28 @@
 
 .animate-stagger > *:nth-child(n+5) {
   animation-delay: 400ms;
+}
+
+/* ═════════════════════════════════════════════════════════════════
+   HIGHLIGHT EFFECT (для выделения загруженных элементов)
+   ═════════════════════════════════════════════════════════════════ */
+
+@keyframes highlight {
+  0% {
+    background-color: transparent;
+    box-shadow: 0 0 0 0 rgba(var(--color-accent-rgb), 0.5);
+  }
+  50% {
+    background-color: rgba(var(--color-accent-rgb), 0.1);
+    box-shadow: 0 0 20px 0 rgba(var(--color-accent-rgb), 0.3);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: 0 0 0 0 rgba(var(--color-accent-rgb), 0);
+  }
+}
+
+.highlight {
+  animation: highlight 2s ease-out;
+  border-radius: var(--radius-md);
 }
