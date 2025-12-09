@@ -1,0 +1,284 @@
+/* ═════════════════════════════════════════════════════════════════
+   LOADING SCREEN - Заставка при запуске
+   ═════════════════════════════════════════════════════════════════ */
+
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0f172a 0%, #1a202c 50%, #0f172a 100%);
+  background-size: 200% 200%;
+  z-index: 9999;
+  overflow: hidden;
+  
+  /* Плавная анимация фона */
+  animation: loading-screen-bg 20s ease infinite;
+  
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.loading-screen--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.loading-screen:not(.loading-screen--visible) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Фоновая анимация с орбами */
+.loading-screen__background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Движущиеся орбы в фоне */
+.loading-screen__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0.15;
+  animation: float 20s ease-in-out infinite;
+}
+
+.loading-screen__orb--1 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, #6366f1, transparent);
+  top: -100px;
+  left: -100px;
+  animation-delay: 0s;
+  animation-duration: 25s;
+}
+
+.loading-screen__orb--2 {
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, #3b82f6, transparent);
+  bottom: -50px;
+  right: -50px;
+  animation-delay: -8s;
+  animation-duration: 30s;
+}
+
+.loading-screen__orb--3 {
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, #1e40af, transparent);
+  top: 50%;
+  right: -100px;
+  animation-delay: -15s;
+  animation-duration: 28s;
+}
+
+/* Контент загрузочного экрана (поверх фона) */
+.loading-screen__content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+/* Логотип */
+.loading-screen__logo {
+  font-size: 4rem;
+  animation: pulse-scale 2s ease-in-out infinite;
+}
+
+.loading-screen__logo-emoji {
+  display: inline-block;
+  animation: rotate 10s linear infinite;
+}
+
+/* Заголовок */
+.loading-screen__title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.loading-screen__subtitle {
+  font-size: 1rem;
+  color: #94a3b8;
+  margin: 0;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+/* Контейнер прогресса */
+.loading-screen__progress-container {
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+/* Шкала прогресса */
+.loading-screen__progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.loading-screen__progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #6366f1, #3b82f6);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.6);
+}
+
+/* Текст прогресса */
+.loading-screen__progress-text {
+  font-size: 0.875rem;
+  color: #cbd5e1;
+  margin: 0;
+  text-align: center;
+  min-height: 1.2em;
+  font-weight: 500;
+}
+
+/* Статус элементы */
+.loading-screen__status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  max-width: 280px;
+}
+
+.loading-screen__status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #94a3b8;
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+.loading-screen__status-item[data-status="1"] {
+  color: #86efac;
+}
+
+.loading-screen__status-item[data-status="2"] {
+  color: #fbbf24;
+}
+
+.status-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  font-weight: bold;
+  font-size: 0.75em;
+  letter-spacing: 0.1em;
+}
+
+.loading-screen__status-item[data-status="0"] .status-icon {
+  color: #64748b;
+  animation: none;
+}
+
+.loading-screen__status-item[data-status="1"] .status-icon {
+  color: #86efac;
+  animation: checkmark 0.4s ease;
+}
+
+.loading-screen__status-item[data-status="2"] .status-icon {
+  color: #fbbf24;
+  animation: spin 1s linear infinite;
+}
+
+/* ═════════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═════════════════════════════════════════════════════════════════ */
+
+@keyframes loading-screen-bg {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  25% {
+    transform: translateY(-30px) translateX(30px);
+  }
+  50% {
+    transform: translateY(-60px) translateX(0px);
+  }
+  75% {
+    transform: translateY(-30px) translateX(-30px);
+  }
+}
+
+@keyframes pulse-scale {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes checkmark {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

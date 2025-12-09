@@ -5,6 +5,7 @@
 
 /* Импорт всех CSS модулей */
 @import url('./design-tokens.css');
+@import url('./loading-screen.css');
 @import url('./layout-system.css');
 @import url('./components.css');
 @import url('./animations.css');

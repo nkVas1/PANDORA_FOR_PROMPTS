@@ -324,24 +324,17 @@ class DesktopApp:
                     'icon': CONFIG['app_icon'],
                 }
                 
-                # Force native webview backend (not browser fallback)
-                if sys.platform == 'win32':
-                    # Windows: use EdgeHTML/WebView2
-                    webview_params['webview_type'] = 'edgehtml'
-                    logger.info("🔧 Windows: Setting webview_type='edgehtml' for native EdgeHTML backend")
-                else:
-                    # Linux: use GTK WebView
-                    webview_params['webview_type'] = 'gtk'
-                    logger.info("🔧 Linux: Setting webview_type='gtk' for native GTK backend")
-                
+                # Create window - PyWebView will automatically use native backend
+                # On Windows: CEF/Chromium if available, EdgeHTML as fallback
+                # On Linux: GTK WebView
                 self.webview_window = webview.create_window(**webview_params)
                 logger.info("✓ PyWebView window created successfully")
                 
                 # Log platform info
                 if sys.platform == 'win32':
-                    logger.info("💻 Running on Windows - Using EdgeHTML WebView2")
+                    logger.info("💻 Running on Windows")
                 else:
-                    logger.info("🐧 Running on Linux - Using GTK WebView")
+                    logger.info("🐧 Running on Linux")
                     
             except Exception as e:
                 logger.error(f"✗ Failed to create PyWebView window: {e}")
