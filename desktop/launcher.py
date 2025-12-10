@@ -335,6 +335,8 @@ class AppLauncher:
             
             if not self.backend.start():
                 self._log("Failed to start backend", "error")
+                if self.splash:
+                    self.splash.close(error_delay=True)
                 return False
             
             time.sleep(0.5)
@@ -346,6 +348,8 @@ class AppLauncher:
             frontend_url = self._get_frontend_url()
             if not frontend_url:
                 self._log("Cannot determine frontend URL", "error")
+                if self.splash:
+                    self.splash.close(error_delay=True)
                 self.backend.stop()
                 return False
             
@@ -353,6 +357,8 @@ class AppLauncher:
             
             if not HAS_WEBVIEW:
                 self._log("PyWebView is required. Install: pip install pywebview", "error")
+                if self.splash:
+                    self.splash.close(error_delay=True)
                 return False
             
             # Создаём окно - ОДИН РАЗ
@@ -387,7 +393,11 @@ class AppLauncher:
             except Exception as e:
                 self._log(f"Failed to create window: {e}", "error")
                 import traceback
-                logger.error(traceback.format_exc())
+                error_msg = traceback.format_exc()
+                logger.error(error_msg)
+                self._log(f"Traceback: {error_msg}", "error")
+                if self.splash:
+                    self.splash.close(error_delay=True)
                 return False
             
             return True
@@ -395,12 +405,15 @@ class AppLauncher:
         except Exception as e:
             self._log(f"Error: {e}", "error")
             import traceback
-            logger.error(traceback.format_exc())
+            error_msg = traceback.format_exc()
+            logger.error(error_msg)
+            self._log(f"Traceback: {error_msg}", "error")
+            if self.splash:
+                self.splash.close(error_delay=True)
             return False
         
         finally:
             self.backend.stop()
-            self._log("Application shutdown", "info")
 
 
 # ==================== MAIN ====================
@@ -408,40 +421,58 @@ def main():
     """Entry point for PANDORA application
     
     Initializes splash screen if available and starts the application.
+    Logs all errors to file for debugging.
     """
     global _splash, _manager
     
-    # Инициализируем splash screen если доступен
-    if HAS_SPLASH:
-        try:
-            from splash_screen_pro import create_splash_and_manager
-            _splash, _manager = create_splash_and_manager()
-            _splash.show()
-            
-            # Добавляем шаги инициализации
-            _manager.add_step("Starting Backend Server", "Initializing API and loading prompts")
-            _manager.add_step("Loading Frontend", "Preparing UI components")
-            _manager.add_step("Creating Window", "Launching application window")
-            
-            # Запускаем приложение в контексте splash
-            launcher = AppLauncher(_splash, _manager)
-            success = launcher.run()
-            
-        except Exception as e:
-            logger.warning(f"Splash screen initialization failed: {e}")
-            logger.warning("Falling back to standard startup without splash")
-            
-            _splash = None
-            _manager = None
+    try:
+        # Инициализируем splash screen если доступен
+        if HAS_SPLASH:
+            try:
+                from splash_screen_pro import create_splash_and_manager
+                _splash, _manager = create_splash_and_manager()
+                _splash.show()
+                
+                # Добавляем шаги инициализации
+                _manager.add_step("Starting Backend Server", "Initializing API and loading prompts")
+                _manager.add_step("Loading Frontend", "Preparing UI components")
+                _manager.add_step("Creating Window", "Launching application window")
+                
+                # Запускаем приложение в контексте splash
+                launcher = AppLauncher(_splash, _manager)
+                success = launcher.run()
+                
+            except Exception as e:
+                logger.error(f"Splash screen error: {e}", exc_info=True)
+                logger.warning("Falling back to standard startup without splash")
+                
+                # Если splash создана, закрыть её с задержкой
+                if _splash:
+                    try:
+                        _splash.close(error_delay=True)
+                    except:
+                        pass
+                
+                _splash = None
+                _manager = None
+                launcher = AppLauncher()
+                success = launcher.run()
+        else:
+            # Без splash screen
+            logger.info("Splash screen not available (splash_screen_pro module missing)")
             launcher = AppLauncher()
             success = launcher.run()
-    else:
-        # Без splash screen
-        logger.info("Splash screen not available (splash_screen_pro module missing)")
-        launcher = AppLauncher()
-        success = launcher.run()
+        
+        sys.exit(0 if success else 1)
     
-    sys.exit(0 if success else 1)
+    except Exception as e:
+        logger.error(f"Critical error in main: {e}", exc_info=True)
+        if _splash:
+            try:
+                _splash.close(error_delay=True)
+            except:
+                pass
+        sys.exit(1)
 
 
 if __name__ == "__main__":

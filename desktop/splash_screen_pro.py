@@ -12,6 +12,8 @@ import time
 from typing import Callable, Optional, List
 from datetime import datetime
 import sys
+import os
+from pathlib import Path
 
 class LoadingScreen:
     """Профессиональный экран загрузки"""
@@ -41,8 +43,24 @@ class LoadingScreen:
         self.total_steps = 0
         self.logs: List[str] = []
         
+        # Логирование в файл
+        self.log_file = Path(os.environ.get("APPDATA", ".")) / "PANDORA" / "logs" / "splash.log"
+        self.log_file.parent.mkdir(parents=True, exist_ok=True)
+        
+        self._write_log_file(f"\n{'='*80}")
+        self._write_log_file(f"[{datetime.now()}] PANDORA Splash Screen Started")
+        self._write_log_file(f"{'='*80}")
+        
         self._create_ui()
         self.window.update()
+    
+    def _write_log_file(self, message: str):
+        """Логировать сообщение в файл"""
+        try:
+            with open(self.log_file, "a", encoding="utf-8") as f:
+                f.write(message + "\n")
+        except Exception as e:
+            print(f"Failed to write log: {e}", file=sys.stderr)
     
     def _create_ui(self):
         """Создать UI элементы"""
@@ -153,7 +171,10 @@ class LoadingScreen:
         }
         
         color = colors.get(status, "#94a3b8")
-        log_line = f"[{timestamp}] {message}"
+        log_line = f"[{timestamp}] [{status.upper()}] {message}"
+        
+        # Логировать в файл
+        self._write_log_file(log_line)
         
         self.log_text.config(state=tk.NORMAL)
         self.log_text.insert(tk.END, log_line + "\n", status)
@@ -195,9 +216,15 @@ class LoadingScreen:
         """Скрыть окно"""
         self.window.withdraw()
     
-    def close(self):
-        """Закрыть окно"""
+    def close(self, error_delay: bool = False):
+        """Закрыть окно. Если error_delay=True, ждет 10 секунд"""
         try:
+            if error_delay:
+                # Если была ошибка, даем время на чтение логов
+                self._write_log_file(f"\n[ERROR] Waiting 10 seconds before close...")
+                self.add_log("Ошибка при запуске. Закрытие через 10 секунд...", "error")
+                self.add_log(f"Логи сохранены: {self.log_file}", "info")
+                time.sleep(10)
             self.window.destroy()
         except:
             pass
