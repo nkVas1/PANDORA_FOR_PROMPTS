@@ -79,13 +79,10 @@ a = Analysis(
         # Backend files
         (str(PROJECT_ROOT / "backend" / "app"), "app"),
         
-        # Frontend files
-        (str(PROJECT_ROOT / "frontend" / "css"), "frontend/css"),
-        (str(PROJECT_ROOT / "frontend" / "js"), "frontend/js"),
+        # Frontend files (Vanilla JS + Static)
         (str(PROJECT_ROOT / "frontend" / "index.html"), "frontend"),
         (str(PROJECT_ROOT / "frontend" / "src"), "frontend/src"),
-        (str(PROJECT_ROOT / "frontend" / "styles"), "frontend/styles"),
-        (str(PROJECT_ROOT / "frontend" / "lib"), "frontend/lib"),
+        (str(PROJECT_ROOT / "frontend" / "dist"), "frontend/dist"),
         
         # Data files
         (str(PROJECT_ROOT / "data"), "data"),

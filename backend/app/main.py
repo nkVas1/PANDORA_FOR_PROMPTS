@@ -81,45 +81,27 @@ print(f"[STATIC] Frontend directory resolved to: {frontend_dir}")
 print(f"[STATIC] Frontend dir exists: {frontend_dir.exists()}")
 
 # Mount static directories FIRST (before catch-all route)
-# Mount CSS
-css_dir = frontend_dir / "css"
-if css_dir.exists():
+# Mount dist folder (compiled/distributed assets)
+dist_dir = frontend_dir / "dist"
+if dist_dir.exists():
     try:
-        app.mount("/css", StaticFiles(directory=str(css_dir)), name="css")
-        print(f"[STATIC] [OK] Mounted /css -> {css_dir}")
+        app.mount("/dist", StaticFiles(directory=str(dist_dir)), name="dist")
+        print(f"[STATIC] [OK] Mounted /dist -> {dist_dir}")
     except Exception as e:
-        print(f"[STATIC] Failed to mount /css: {e}")
+        print(f"[STATIC] Failed to mount /dist: {e}")
 else:
-    print(f"[STATIC] CSS dir not found at {css_dir}")
+    print(f"[STATIC] dist dir not found at {dist_dir}")
 
-# Mount JS
-js_dir = frontend_dir / "js"
-if js_dir.exists():
+# Mount src folder (source assets)
+src_dir = frontend_dir / "src"
+if src_dir.exists():
     try:
-        app.mount("/js", StaticFiles(directory=str(js_dir)), name="js")
-        print(f"[STATIC] [OK] Mounted /js -> {js_dir}")
+        app.mount("/src", StaticFiles(directory=str(src_dir)), name="src")
+        print(f"[STATIC] [OK] Mounted /src -> {src_dir}")
     except Exception as e:
-        print(f"[STATIC] Failed to mount /js: {e}")
+        print(f"[STATIC] Failed to mount /src: {e}")
 else:
-    print(f"[STATIC] JS dir not found at {js_dir}")
-
-# Mount static files directory if it exists
-static_dir = frontend_dir / "static"
-if static_dir.exists():
-    try:
-        app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
-        print(f"[STATIC] [OK] Mounted /static -> {static_dir}")
-    except Exception as e:
-        print(f"[STATIC] Failed to mount /static: {e}")
-
-# Mount styles directory if it exists
-styles_dir = frontend_dir / "styles"
-if styles_dir.exists():
-    try:
-        app.mount("/styles", StaticFiles(directory=str(styles_dir)), name="styles")
-        print(f"[STATIC] [OK] Mounted /styles -> {styles_dir}")
-    except Exception as e:
-        print(f"[STATIC] Failed to mount /styles: {e}")
+    print(f"[STATIC] src dir not found at {src_dir}")
 
 # ROOT route - serve index.html
 @app.get("/", response_class=HTMLResponse)
