@@ -119,7 +119,7 @@ def print_warning(message: str):
     print(f"{Color.YELLOW}[WARN] {message}{Color.END}")
 
 
-def print_separator(char: str = "─"):
+def print_separator(char: str = "-"):
     """Разделитель"""
     print(f"{Color.DIM}{char * 70}{Color.END}")
 
