@@ -116,8 +116,17 @@ export default function createPromptsView() {
             currentPage = 1;
             renderPrompts();
             
+            // Show success message if loaded prompts
+            if (allPrompts.length > 0) {
+                window.Toast?.success(`Loaded ${allPrompts.length} prompts`, 2000);
+            }
+            
         } catch (error) {
             console.error('Failed to load prompts:', error);
+            
+            // Show error toast
+            window.Toast?.error(`Failed to load prompts: ${error.message}`);
+            
             prompts.innerHTML = `
                 <div class="error-message">
                     <p>Failed to load prompts</p>
@@ -245,9 +254,10 @@ export default function createPromptsView() {
                     try {
                         await window.http.delete(`/api/prompts/${id}`);
                         loadPrompts();
-                        showToast('Prompt deleted');
+                        window.Toast?.success('Prompt deleted successfully');
                     } catch (err) {
                         console.error('Delete failed:', err);
+                        window.Toast?.error(`Failed to delete prompt: ${err.message}`);
                     }
                 }
             });

@@ -15,6 +15,7 @@ import StateManager from './state-manager.js';
 import Router from './router.js';
 import { HTTPClient } from '../utils/http.js';
 import { CommandPalette } from '../components/CommandPalette.js';
+import Toast from '../components/Toast.js';
 
 /**
  * Инициализация приложения
@@ -163,6 +164,7 @@ function initApp() {
     
     // ==================== HTTP CLIENT ====================
     // Создаем простой HTTP client для API запросов
+    // Интегрируем с Toast для отображения ошибок
     window.http = {
         baseURL: 'http://127.0.0.1:8000/api',
         
@@ -192,6 +194,11 @@ function initApp() {
                 
                 if (!response.ok) {
                     console.error(`[HTTP] Error: ${response.status} ${response.statusText}`);
+                    
+                    // Show error toast
+                    const errorMsg = `Error ${response.status}: ${response.statusText}`;
+                    Toast.error(errorMsg);
+                    
                     const error = new Error(`HTTP ${response.status}`);
                     error.response = response;
                     throw error;
@@ -202,6 +209,12 @@ function initApp() {
                 return responseData;
             } catch (error) {
                 console.error(`[HTTP] ✗ Request failed:`, error);
+                
+                // Show error toast if not already shown
+                if (error.message && !error.message.includes('HTTP')) {
+                    Toast.error(`Request failed: ${error.message}`);
+                }
+                
                 throw error;
             }
         },
@@ -222,6 +235,9 @@ function initApp() {
             return this.request('DELETE', endpoint);
         }
     };
+    
+    // Глобальный доступ к Toast
+    window.Toast = Toast;
     
     console.log('[APP] HTTP Client ready at:', window.http.baseURL);
     

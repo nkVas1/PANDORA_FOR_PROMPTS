@@ -1,0 +1,141 @@
+/**
+ * Toast Notifications CSS
+ * 
+ * Стили для toast уведомлений
+ */
+
+/* Toast Container */
+#toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+/* Toast Notification */
+.toast {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    pointer-events: auto;
+    cursor: pointer;
+    animation: slideInRight 0.3s ease;
+    min-width: 300px;
+    max-width: 400px;
+    word-break: break-word;
+    transition: all 0.2s ease;
+}
+
+.toast:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    transform: translateX(-2px);
+}
+
+/* Toast Types */
+.toast-success {
+    background-color: #10b981;
+    color: #ffffff;
+}
+
+.toast-error {
+    background-color: #ef4444;
+    color: #ffffff;
+}
+
+.toast-warning {
+    background-color: #f59e0b;
+    color: #ffffff;
+}
+
+.toast-info {
+    background-color: #3b82f6;
+    color: #ffffff;
+}
+
+/* Toast Icon */
+.toast::before {
+    content: '';
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+/* Toast Close Button */
+.toast button {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0;
+    margin-left: auto;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    font-weight: bold;
+}
+
+.toast button:hover {
+    opacity: 1;
+}
+
+/* Animations */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(400px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(400px);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #toast-container {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        flex-direction: column-reverse;
+    }
+
+    .toast {
+        min-width: auto;
+        max-width: none;
+        width: 100%;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .toast {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .toast:hover {
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+    }
+}
