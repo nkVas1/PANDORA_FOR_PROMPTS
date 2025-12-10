@@ -10,7 +10,45 @@
  * - Загружает Dashboard по умолчанию
  */
 
-import Router from './router.js';
+// Simple Router implementation for hash-based routing
+class Router {
+    constructor({ container, defaultRoute = '/dashboard' } = {}) {
+        this.container = container;
+        this.routes = new Map();
+        this.currentRoute = defaultRoute;
+        this.setupHashListener();
+    }
+
+    addRoute(path, handler) {
+        this.routes.set(path, handler);
+    }
+
+    async navigate(path) {
+        const handler = this.routes.get(path);
+        if (!handler) {
+            console.warn(`[Router] Route not found: ${path}`);
+            return;
+        }
+        try {
+            const view = await handler();
+            if (this.container && view) {
+                this.container.innerHTML = '';
+                this.container.appendChild(view);
+                this.currentRoute = path;
+                window.location.hash = path;
+            }
+        } catch (error) {
+            console.error(`[Router] Error navigating to ${path}:`, error);
+        }
+    }
+
+    setupHashListener() {
+        window.addEventListener('hashchange', () => {
+            const path = window.location.hash.slice(1) || this.currentRoute;
+            this.navigate(path);
+        });
+    }
+}
 
 /**
  * Инициализация приложения
@@ -81,27 +119,27 @@ function initApp() {
     
     // Регистрируем маршруты
     window.router.addRoute('/dashboard', async () => {
-        const { default: Dashboard } = await import('../views/Dashboard.js');
+        const { default: Dashboard } = await import('./Dashboard.js');
         return Dashboard();
     });
     
     window.router.addRoute('/prompts', async () => {
-        const { default: PromptsView } = await import('../views/PromptsView.js');
+        const { default: PromptsView } = await import('./PromptsView.js');
         return PromptsView();
     });
     
     window.router.addRoute('/projects', async () => {
-        const { default: ProjectsView } = await import('../views/ProjectsView.js');
+        const { default: ProjectsView } = await import('./ProjectsView.js');
         return ProjectsView();
     });
     
     window.router.addRoute('/editor', async () => {
-        const { default: EditorView } = await import('../views/EditorView.js');
+        const { default: EditorView } = await import('./EditorView.js');
         return EditorView();
     });
     
     window.router.addRoute('/analytics', async () => {
-        const { default: AnalyticsView } = await import('../views/AnalyticsView.js');
+        const { default: AnalyticsView } = await import('./AnalyticsView.js');
         return AnalyticsView();
     });
     

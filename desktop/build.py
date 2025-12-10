@@ -82,10 +82,10 @@ def print_banner():
     """Красивый заголовок"""
     banner = f"""
     {Color.CYAN}{Color.BOLD}
-    ╔════════════════════════════════════════════════════════════╗
-    ║           PANDORA v2.0 - Windows EXE Builder              ║
-    ║              Professional Build System                     ║
-    ╚════════════════════════════════════════════════════════════╝
+    ========================================================
+         PANDORA v2.0 - Windows EXE Builder
+         Professional Build System
+    ========================================================
     {Color.END}
     """
     print(banner)
@@ -106,17 +106,17 @@ def print_info(component: str, message: str):
 
 def print_success(message: str):
     """Успешное сообщение"""
-    print(f"{Color.GREEN}✅ {message}{Color.END}")
+    print(f"{Color.GREEN}[OK] {message}{Color.END}")
 
 
 def print_error(message: str):
     """Ошибка"""
-    print(f"{Color.RED}❌ {message}{Color.END}")
+    print(f"{Color.RED}[ERROR] {message}{Color.END}")
 
 
 def print_warning(message: str):
     """Предупреждение"""
-    print(f"{Color.YELLOW}⚠️  {message}{Color.END}")
+    print(f"{Color.YELLOW}[WARN] {message}{Color.END}")
 
 
 def print_separator(char: str = "─"):

@@ -1,682 +1,174 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="PANDORA - Профессиональный менеджер подсказок и промптов для AI">
-    <meta name="theme-color" content="#6366F1">
-    <title>PANDORA v2.0 - Менеджер промптов</title>
-
-    <!-- Preconnect для оптимизации загрузки шрифтов -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-
-    <!-- Главная таблица стилей v2.0 (импортирует все остальное) -->
-    <link rel="stylesheet" href="css/styles.css">
-
+    <meta name="description" content="PANDORA v2.0 - Professional Prompt Manager">
+    <title>PANDORA v2.0 - Professional Prompt Manager</title>
+    
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75' font-family='system-ui' fill='%236366F1'>P</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="./css/tokens.css">
+    <link rel="stylesheet" href="./css/components.css">
+    <link rel="stylesheet" href="./css/views.css">
+    <link rel="stylesheet" href="./css/animations.css">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        #app {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .main-layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background-color: var(--color-bg-secondary);
+            border-right: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        .sidebar-header {
+            padding: var(--spacing-4);
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+        }
+        
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            flex: 1;
+            padding: var(--spacing-2);
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            padding: var(--spacing-2) var(--spacing-4);
+            color: var(--color-text-secondary);
+            border-radius: var(--radius-lg);
+            transition: all var(--transition-base);
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .nav-item:hover {
+            background-color: var(--color-bg-tertiary);
+            color: var(--color-text-primary);
+        }
+        
+        .nav-item.active {
+            background-color: var(--color-primary);
+            color: var(--color-white);
+        }
+        
+        .nav-icon {
+            font-size: 1.25rem;
+        }
+        
+        .nav-label {
+            flex: 1;
+            font-size: var(--font-size-sm);
+        }
+        
+        .content-area {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+            background-color: var(--color-bg-primary);
+        }
+        
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-4);
+            background-color: var(--color-bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            height: 60px;
+        }
+        
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-4);
+        }
+        
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-4);
+        }
+        
+        .command-palette-btn {
+            padding: var(--spacing-2) var(--spacing-4);
+            background-color: var(--color-bg-tertiary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            font-size: var(--font-size-xs);
+            transition: all var(--transition-base);
+        }
+        
+        .command-palette-btn:hover {
+            background-color: var(--color-border);
+            color: var(--color-text-primary);
+        }
+        
+        .views-container {
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .view {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .view.hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <div id="app" class="app-layout">
-        <!-- ═════════════════════════════════════════════════════
-             NAVBAR
-             ═════════════════════════════════════════════════════ -->
-        <nav class="navbar">
-            <div class="navbar-container">
-                <div class="navbar-brand">
-                    <a href="/" class="flex items-center gap-2">
-                        <span class="text-2xl">🎨</span>
-                        <span class="font-bold text-lg">PANDORA</span>
-                    </a>
-                </div>
-                
-                <div class="navbar-search">
-                    <input 
-                        type="text" 
-                        class="input" 
-                        placeholder="Поиск промптов..."
-                        id="search-input"
-                        data-action="focus-search"
-                    >
-                    <div id="search-results" class="search-results" style="display: none;"></div>
-                </div>
-
-                <div class="navbar-actions flex gap-2 items-center">
-                    <div class="stat-badge">
-                        <div class="stat-number" id="header-prompts">0</div>
-                        <div class="stat-label">Промпты</div>
-                    </div>
-                    <div class="stat-badge">
-                        <div class="stat-number" id="header-projects">0</div>
-                        <div class="stat-label">Проекты</div>
-                    </div>
-                    <div class="stat-badge">
-                        <div class="stat-number" id="header-tags">0</div>
-                        <div class="stat-label">Теги</div>
-                    </div>
-                    <button id="theme-toggle" class="btn btn-ghost" title="Переключить тему">
-                        🌙
-                    </button>
-                </div>
-            </div>
-        </nav>
-
-        <!-- ═════════════════════════════════════════════════════
-             MAIN LAYOUT (SIDEBAR + CONTENT)
-             ═════════════════════════════════════════════════════ -->
-        <div class="main-layout">
-            <!-- SIDEBAR НАВИГАЦИЯ -->
-            <aside class="sidebar-wrapper">
-                <!-- Шапка sidebar -->
-                <div class="sidebar-header">
-                    <h2 class="text-lg font-bold">Меню</h2>
-                </div>
-
-                <!-- Основное меню с категориями -->
-                <nav class="sidebar-nav">
-                    <!-- Dashboard -->
-                    <button class="nav-link nav-link--primary active" data-page="dashboard">
-                        <span>📊</span>
-                        <span>Dashboard</span>
-                    </button>
-
-                    <!-- Промпты (с dropdown) -->
-                    <div class="nav-category">
-                        <button class="nav-category-header" data-toggle-submenu="prompts-menu">
-                            <span>✨</span>
-                            <span>Промпты</span>
-                            <span class="nav-category-arrow">▼</span>
-                        </button>
-                        <div class="nav-category-menu" id="prompts-menu">
-                            <button class="nav-link nav-link--secondary" data-page="prompts">
-                                <span>📋</span>
-                                <span>Все промпты</span>
-                            </button>
-                            <button class="nav-link nav-link--secondary" data-page="editor">
-                                <span>✍️</span>
-                                <span>Новый промпт</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Теги (с dropdown) -->
-                    <div class="nav-category">
-                        <button class="nav-category-header" data-toggle-submenu="tags-menu">
-                            <span>🏷️</span>
-                            <span>Теги</span>
-                            <span class="nav-category-arrow">▼</span>
-                        </button>
-                        <div class="nav-category-menu" id="tags-menu">
-                            <button class="nav-link nav-link--secondary" data-page="tags-page">
-                                <span>📚</span>
-                                <span>Управление тегами</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Проекты (с dropdown) -->
-                    <div class="nav-category">
-                        <button class="nav-category-header" data-toggle-submenu="projects-menu">
-                            <span>📁</span>
-                            <span>Проекты</span>
-                            <span class="nav-category-arrow">▼</span>
-                        </button>
-                        <div class="nav-category-menu" id="projects-menu">
-                            <button class="nav-link nav-link--secondary" data-page="projects">
-                                <span>📂</span>
-                                <span>Мои проекты</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Аналитика -->
-                    <button class="nav-link nav-link--primary" data-page="analytics">
-                        <span>📈</span>
-                        <span>Аналитика</span>
-                    </button>
-
-                    <!-- Инструменты (с dropdown) -->
-                    <div class="nav-category">
-                        <button class="nav-category-header" data-toggle-submenu="tools-menu">
-                            <span>🛠️</span>
-                            <span>Инструменты</span>
-                            <span class="nav-category-arrow">▼</span>
-                        </button>
-                        <div class="nav-category-menu" id="tools-menu">
-                            <button class="nav-link nav-link--secondary" data-page="import">
-                                <span>📥</span>
-                                <span>Импорт</span>
-                            </button>
-                            <button class="nav-link nav-link--secondary" data-page="settings">
-                                <span>⚙️</span>
-                                <span>Настройки</span>
-                            </button>
-                        </div>
-                    </div>
-                </nav>
-            </aside>
-
-            <!-- ОСНОВНОЕ СОДЕРЖИМОЕ -->
-            <main class="content-wrapper">
-                <!-- Dashboard Page -->
-                <div id="dashboard" class="page active">
-                    <div class="page-header">
-                        <h1 class="page-title">Добро пожаловать в PANDORA</h1>
-                        <p class="page-subtitle">Ваш AI-ассистент для управления промптами и проектами</p>
-                    </div>
-
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-value">
-                                <span id="stat-prompts">0</span>
-                            </div>
-                            <div class="stat-label">Промптов</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value">
-                                <span id="stat-projects">0</span>
-                            </div>
-                            <div class="stat-label">Проектов</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value">
-                                <span id="stat-tags">0</span>
-                            </div>
-                            <div class="stat-label">Тегов</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value">
-                                <span id="stat-categories">0</span>
-                            </div>
-                            <div class="stat-label">Категорий</div>
-                        </div>
-                    </div>
-
-                    <div class="section mt-12">
-                        <h2 class="text-2xl font-bold mb-6">Быстрый старт</h2>
-                        <p class="text-neutral-400 leading-relaxed mb-6">
-                            PANDORA - это революционный инструмент для управления AI промптами. Создавайте, организуйте и делитесь вашими промптами с миром. Используйте встроенный ИИ для автотегирования и категоризации ваших данных.
-                        </p>
-                        <button class="btn btn-primary" data-action="open-prompt-modal">
-                            ➕ Создать промпт
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Prompts Page -->
-                <div id="prompts" class="page">
-                    <div class="page-header">
-                        <h1 class="page-title">Ваши Промпты</h1>
-                        <p class="page-subtitle">Управляйте и оптимизируйте вашу коллекцию промптов</p>
-                    </div>
-
-                    <div class="mb-8">
-                        <button class="btn btn-primary" data-action="open-prompt-modal">
-                            ➕ Новый Промпт
-                        </button>
-                    </div>
-
-                    <div id="prompts-list" class="empty-state">
-                        <p>Загружаю промпты...</p>
-                    </div>
-                </div>
-
-                <!-- Projects Page -->
-                <div id="projects" class="page">
-                    <div class="page-header">
-                        <h1 class="page-title">Ваши Проекты</h1>
-                        <p class="page-subtitle">Организуйте работу по проектам и отслеживайте прогресс</p>
-                    </div>
-
-                    <div class="mb-8">
-                        <button class="btn btn-primary" data-action="open-project-modal">
-                            ➕ Новый Проект
-                        </button>
-                    </div>
-
-                    <div id="projects-list" class="empty-state">
-                        <p>Загружаю проекты...</p>
-                    </div>
-                </div>
-
-                <!-- Tags Page -->
-                <div id="tags" class="page">
-                    <div class="page-header">
-                        <h1 class="page-title">Теги и Категории</h1>
-                        <p class="page-subtitle">Управляйте тегами для лучшей организации</p>
-                    </div>
-
-                    <div id="tags-list" class="empty-state">
-                        <p>Загружаю теги...</p>
-                    </div>
-                </div>
-
-                <!-- Import Page -->
-                <div id="import" class="page">
-                    <div class="page-header">
-                        <h1 class="page-title">Импорт Данных</h1>
-                        <p class="page-subtitle">Загрузите промпты из JSON файла</p>
-                    </div>
-
-                    <div class="card mt-8">
-                        <div class="card-body">
-                            <div class="text-center">
-                                <p class="text-neutral-400 mb-6">Перетащите JSON файл сюда или выберите файл</p>
-                                <input type="file" id="import-file" accept=".json" style="display: none;" />
-                                <button class="btn btn-primary" onclick="document.getElementById('import-file').click();">
-                                    📂 Выбрать файл
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Settings Page -->
-                <div id="settings" class="page">
-                    <div class="page-header">
-                        <h1 class="page-title">Настройки</h1>
-                        <p class="page-subtitle">Конфигурация приложения и данные</p>
-                    </div>
-
-                    <div class="card mt-8">
-                        <div class="card-header">
-                            <h3>О приложении</h3>
-                        </div>
-                        <div class="card-body">
-                            <p class="mb-3"><strong>Версия:</strong> 2.0.0 Premium</p>
-                            <p class="mb-3"><strong>Backend:</strong> FastAPI + SQLite</p>
-                            <p class="mb-6"><strong>Последнее обновление:</strong> 9 декабря 2025</p>
-                            
-                            <div class="flex gap-3">
-                                <button class="btn btn-secondary" onclick="alert('Экспортирование данных...');">
-                                    📤 Экспортировать
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Enhanced Editor Page -->
-                <div id="editor" class="page">
-                    <div class="page-header">
-                        <h1 class="page-title">Расширенный редактор</h1>
-                        <p class="page-subtitle">Создавайте и редактируйте промпты с предпросмотром</p>
-                    </div>
-
-                    <!-- Editor Container -->
-                    <div id="editor-container" class="editor-container">
-                        <!-- Editor Pane (левая часть) -->
-                        <div class="editor-pane">
-                            <div class="editor-header">
-                                <input 
-                                    type="text" 
-                                    class="editor-title-input" 
-                                    placeholder="Введите название промпта..." 
-                                    name="name">
-                            </div>
-
-                            <div class="editor-meta">
-                                <select class="editor-category-select" name="category">
-                                    <option value="General">General</option>
-                                    <option value="Development">Development</option>
-                                    <option value="Writing">Writing</option>
-                                    <option value="Analysis">Analysis</option>
-                                    <option value="Creative">Creative</option>
-                                    <option value="Business">Business</option>
-                                    <option value="Education">Education</option>
-                                </select>
-
-                                <input 
-                                    type="text" 
-                                    class="editor-tags-input" 
-                                    placeholder="Теги (через запятую)" 
-                                    name="tags">
-                            </div>
-
-                            <textarea 
-                                class="editor-content-textarea" 
-                                placeholder="Введите содержание промпта...
-Используйте Markdown для форматирования:
-# Заголовок
-**жирный** текст
-`код` и ```код блоками```
-[ссылка](url)
-- пункт списка"
-                                name="content"></textarea>
-
-                            <div class="editor-syntax-highlight"></div>
-                        </div>
-
-                        <!-- Preview Pane (правая часть) -->
-                        <div class="preview-pane">
-                            <div class="editor-preview-label">
-                                👁️ Предпросмотр Markdown
-                            </div>
-                            <div class="editor-preview-pane"></div>
-                        </div>
-                    </div>
-
-                    <!-- Controls & Stats -->
-                    <div class="editor-controls">
-                        <button class="editor-save-btn">
-                            💾 Сохранить промпт
-                        </button>
-                        <button class="editor-undo-btn">
-                            ↶ Отмена (Ctrl+Z)
-                        </button>
-                        <button class="editor-redo-btn">
-                            ↷ Повтор (Ctrl+Shift+Z)
-                        </button>
-
-                        <div class="editor-counters" style="margin-left: auto;">
-                            <span class="counter-item">
-                                📝 <span class="editor-char-count">0 символов</span>
-                            </span>
-                            <span class="counter-item">
-                                📄 <span class="editor-word-count">0 слов</span>
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="editor-status-bar">
-                        ✅ Готов к редактированию
-                    </div>
-
-                    <!-- Version History -->
-                    <div class="mt-8">
-                        <h3 class="text-lg font-semibold mb-4">История версий</h3>
-                        <div class="editor-version-history">
-                            <p class="text-neutral-400">История версий пуста</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tags Management Page -->
-                <div id="tags-page" class="page">
-                    <div class="page-header">
-                        <h1 class="page-title">Управление тегами</h1>
-                        <p class="page-subtitle">Создавайте и организуйте теги для промптов</p>
-                    </div>
-
-                    <!-- Tags Manager Container -->
-                    <div id="tags-manager" class="tags-manager">
-                        <!-- Controls -->
-                        <div class="card">
-                            <div class="tags-controls">
-                                <input 
-                                    type="text" 
-                                    class="tags-search-input" 
-                                    placeholder="🔍 Поиск по названию тега...">
-                                <button class="tags-add-btn">
-                                    ➕ Добавить тег
-                                </button>
-                                <button class="tags-clear-btn">
-                                    🗑️ Очистить выбор
-                                </button>
-                                <select class="tags-sort-select">
-                                    <option value="name">Сортировка: По названию</option>
-                                    <option value="usage">Сортировка: По использованию</option>
-                                    <option value="recent">Сортировка: По свежести</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Statistics -->
-                        <div class="tags-stats">
-                            <div class="stat-box">
-                                <div class="stat-value">
-                                    <span class="tags-stats-count">0</span>
-                                </div>
-                                <div class="stat-label">Тегов всего</div>
-                            </div>
-                            <div class="stat-box">
-                                <div class="stat-value">
-                                    <span class="tags-stats-usage">0</span>
-                                </div>
-                                <div class="stat-label">Использований</div>
-                            </div>
-                        </div>
-
-                        <!-- Tag Cloud -->
-                        <div class="card">
-                            <div class="card-header">
-                                <h3>☁️ Облако тегов</h3>
-                            </div>
-                            <div class="card-body">
-                                <div class="tag-cloud">
-                                    <p class="text-neutral-400">Облако тегов загружается...</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tags List -->
-                        <div class="card">
-                            <div class="card-header">
-                                <h3>📋 Список тегов</h3>
-                            </div>
-                            <div class="card-body">
-                                <div class="tags-list">
-                                    <p class="text-neutral-400">Загрузка тегов...</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Analytics Dashboard Page -->
-                <div id="analytics" class="page">
-                    <div class="page-header">
-                        <h1 class="page-title">Аналитика</h1>
-                        <p class="page-subtitle">Статистика и аналитика промптов</p>
-                    </div>
-
-                    <div id="analytics-dashboard" class="analytics-dashboard">
-                        <!-- Header with Refresh Button -->
-                        <div class="analytics-header">
-                            <h2>📈 Статистика</h2>
-                            <div class="flex items-center gap-3">
-                                <span class="analytics-last-updated">Последнее обновление: только что</span>
-                                <button class="analytics-refresh-btn">🔄 Обновить</button>
-                            </div>
-                        </div>
-
-                        <!-- Stats Grid -->
-                        <div class="analytics-stats-section">
-                            <h3 class="analytics-stats-title">Обзор</h3>
-                            <div class="stats-grid">
-                                <div class="stat-card">
-                                    <div class="stat-icon">✨</div>
-                                    <div class="stat-content">
-                                        <div class="stat-value" data-stat="total-prompts">0</div>
-                                        <div class="stat-label">Промптов</div>
-                                    </div>
-                                </div>
-
-                                <div class="stat-card">
-                                    <div class="stat-icon">🏷️</div>
-                                    <div class="stat-content">
-                                        <div class="stat-value" data-stat="total-tags">0</div>
-                                        <div class="stat-label">Тегов</div>
-                                    </div>
-                                </div>
-
-                                <div class="stat-card">
-                                    <div class="stat-icon">📁</div>
-                                    <div class="stat-content">
-                                        <div class="stat-value" data-stat="total-projects">0</div>
-                                        <div class="stat-label">Проектов</div>
-                                    </div>
-                                </div>
-
-                                <div class="stat-card">
-                                    <div class="stat-icon">📚</div>
-                                    <div class="stat-content">
-                                        <div class="stat-value" data-stat="total-categories">0</div>
-                                        <div class="stat-label">Категорий</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Category Breakdown -->
-                        <div class="category-breakdown">
-                            <h3 class="category-title">📊 Распределение по категориям</h3>
-                            <div class="category-chart" id="category-chart">
-                                <p class="text-neutral-400">Загрузка данных...</p>
-                            </div>
-                        </div>
-
-                        <!-- Trending Prompts -->
-                        <div class="trending-section">
-                            <h3 class="trending-title">🔥 Популярные промпты</h3>
-                            <div class="trending-list" id="trending-list">
-                                <p class="text-neutral-400">Загрузка популярных промптов...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        </div>
+    <div id="app">
+        <!-- Layout will be injected by app.js -->
     </div>
-
-    <!-- ═════════════════════════════════════════════════════
-         MODALS
-         ═════════════════════════════════════════════════════ -->
-
-    <!-- PROMPT MODAL -->
-    <div id="prompt-modal" class="modal-backdrop">
-        <div class="modal">
-            <div class="modal-content">
-            <div class="modal-header">
-                <h2>Новый Промпт</h2>
-                <button class="modal-close" data-action="close-modal">✕</button>
-            </div>
-            
-            <form id="prompt-form" class="form-grid">
-                <div class="form-group">
-                    <label class="form-label">Название</label>
-                    <input type="text" id="prompt-title" class="input" required placeholder="Введите название промпта">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Содержание</label>
-                    <textarea id="prompt-content" class="input" required placeholder="Введите содержание промпта" style="min-height: 120px;"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Описание (опционально)</label>
-                    <input type="text" id="prompt-description" class="input" placeholder="Краткое описание">
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Категория</label>
-                        <select id="prompt-category" class="input">
-                            <option>general</option>
-                            <option>writing</option>
-                            <option>coding</option>
-                            <option>analysis</option>
-                            <option>creative</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Версия</label>
-                        <input type="text" id="prompt-version" class="input" placeholder="1.0" value="1.0">
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-action="close-modal">Отмена</button>
-                    <button type="submit" class="btn btn-primary">Создать</button>
-                </div>
-            </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- PROJECT MODAL -->
-    <div id="project-modal" class="modal-backdrop">
-        <div class="modal">
-            <div class="modal-content">
-            <div class="modal-header">
-                <h2>Новый Проект</h2>
-                <button class="modal-close" data-action="close-modal">✕</button>
-            </div>
-            
-            <form id="project-form" class="form-grid">
-                <div class="form-group">
-                    <label class="form-label">Название проекта</label>
-                    <input type="text" id="project-name" class="input" required placeholder="Введите название проекта">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Описание</label>
-                    <textarea id="project-description" class="input" placeholder="Описание проекта" style="min-height: 100px;"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Статус</label>
-                    <select id="project-status" class="input">
-                        <option>active</option>
-                        <option>paused</option>
-                        <option>completed</option>
-                        <option>archived</option>
-                    </select>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-action="close-modal">Отмена</button>
-                    <button type="submit" class="btn btn-primary">Создать</button>
-                </div>
-            </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- JavaScript -->
-    <!-- ═════════════════════════════════════════════════════════
-         LOAD ORDER (critical for dependencies):
-         1. Advanced systems (HTTP, Event, Navigation)
-         2. Core app (app.js - depends on above)
-         3. Feature modules (editor, tags, analytics)
-         ═════════════════════════════════════════════════════════ -->
     
-    <!-- Loading Screen Manager (must be first) -->
-    <script src="js/loading-screen.js"></script>
-    
-    <!-- Phase 4: Advanced Systems (no dependencies) -->
-    <script src="js/http-client.js"></script>
-    <script src="js/event-manager.js"></script>
-    <script src="js/navigation-manager.js"></script>
-    
-    <!-- Phase 3: Core Application (depends on advanced systems) -->
-    <script src="js/app.js"></script>
-    <!-- DEPRECATED: Old modal system - use UIManager in app.js instead -->
-    <!-- <script src="js/modals.js"></script> -->
-    
-    <!-- Phase 2: Feature Modules (depends on core app + HTTP client) -->
-    <script src="js/editor.js"></script>
-    <script src="js/tag-manager.js"></script>
-    <script src="js/analytics.js"></script>
-    
-    <!-- Startup & Configuration (executed after all modules loaded) -->
-    <script>
-        // Configuration
-        window.PANDORA_CONFIG = {
-            API_URL: 'http://127.0.0.1:8000',
-            API_BASE: '/api',
-            DEBUG: false
-        };
-
-        // Log initialization status
-        console.log('[Bootstrap] PANDORA v2.0 frontend loaded');
-        console.log('[Bootstrap] All managers will be initialized in app.js DOMContentLoaded handler');
-    </script>
-    
+    <!-- Core Application Script -->
+    <script type="module" src="./js/app.js"></script>
 </body>
 </html>
