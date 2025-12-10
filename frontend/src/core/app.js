@@ -10,45 +10,11 @@
  * - Initial data loading
  */
 
-// Simple Router implementation for hash-based routing
-class Router {
-    constructor({ container, defaultRoute = '/dashboard' } = {}) {
-        this.container = container;
-        this.routes = new Map();
-        this.currentRoute = defaultRoute;
-        this.setupHashListener();
-    }
-
-    addRoute(path, handler) {
-        this.routes.set(path, handler);
-    }
-
-    async navigate(path) {
-        const handler = this.routes.get(path);
-        if (!handler) {
-            console.warn(`[Router] Route not found: ${path}`);
-            return;
-        }
-        try {
-            const view = await handler();
-            if (this.container && view) {
-                this.container.innerHTML = '';
-                this.container.appendChild(view);
-                this.currentRoute = path;
-                window.location.hash = path;
-            }
-        } catch (error) {
-            console.error(`[Router] Error navigating to ${path}:`, error);
-        }
-    }
-
-    setupHashListener() {
-        window.addEventListener('hashchange', () => {
-            const path = window.location.hash.slice(1) || this.currentRoute;
-            this.navigate(path);
-        });
-    }
-}
+// Import dependencies
+import StateManager from './state-manager.js';
+import Router from './router.js';
+import { HTTPClient } from '../utils/http.js';
+import { CommandPalette } from '../components/CommandPalette.js';
 
 /**
  * Инициализация приложения
@@ -119,27 +85,27 @@ function initApp() {
     
     // Регистрируем маршруты
     window.router.addRoute('/dashboard', async () => {
-        const { default: Dashboard } = await import('./Dashboard.js');
+        const { default: Dashboard } = await import('../views/Dashboard.js');
         return Dashboard();
     });
     
     window.router.addRoute('/prompts', async () => {
-        const { default: PromptsView } = await import('./PromptsView.js');
+        const { default: PromptsView } = await import('../views/PromptsView.js');
         return PromptsView();
     });
     
     window.router.addRoute('/projects', async () => {
-        const { default: ProjectsView } = await import('./ProjectsView.js');
+        const { default: ProjectsView } = await import('../views/ProjectsView.js');
         return ProjectsView();
     });
     
     window.router.addRoute('/editor', async () => {
-        const { default: EditorView } = await import('./EditorView.js');
+        const { default: EditorView } = await import('../views/EditorView.js');
         return EditorView();
     });
     
     window.router.addRoute('/analytics', async () => {
-        const { default: AnalyticsView } = await import('./AnalyticsView.js');
+        const { default: AnalyticsView } = await import('../views/AnalyticsView.js');
         return AnalyticsView();
     });
     
@@ -166,105 +132,86 @@ function initApp() {
      * Инициализируем StateManager для реактивного состояния
      * Стейт будет синхронизирован с LocalStorage
      */
-    if (window.StateManager) {
-        window.appState = new window.StateManager({
-            prompts: [],
-            projects: [],
-            tags: [],
-            user: {
-                preferences: {
-                    theme: 'dark',
-                    sidebarOpen: true
-                }
-            },
-            ui: {
-                loading: false,
-                notification: null,
-                sidebarOpen: true,
-                currentView: 'dashboard'
+    window.appState = new StateManager({
+        prompts: [],
+        projects: [],
+        tags: [],
+        user: {
+            preferences: {
+                theme: 'dark',
+                sidebarOpen: true
             }
-        });
-        
-        // Восстанавливаем состояние из LocalStorage
-        window.appState.restore('pandora-app-state');
-        
-        // Сохраняем состояние при изменениях
-        window.appState.observe('*', () => {
-            window.appState.persist('pandora-app-state');
-        });
-        
-        console.log('[APP] StateManager initialized');
-    } else {
-        window.appState = {
-            state: {
-                prompts: [],
-                projects: [],
-                tags: [],
-                user: {},
-                ui: {}
-            },
-            get(key) { return this.state[key]; },
-            set(key, value) { this.state[key] = value; },
-            observe() {},
-            persist() {},
-            restore() {}
-        };
-    }
+        },
+        ui: {
+            loading: false,
+            notification: null,
+            sidebarOpen: true,
+            currentView: 'dashboard'
+        }
+    });
+    
+    // Восстанавливаем состояние из LocalStorage
+    window.appState.restore('pandora-app-state');
+    
+    // Сохраняем состояние при изменениях
+    window.appState.observe('*', () => {
+        window.appState.persist('pandora-app-state');
+    });
+    
+    console.log('[APP] StateManager initialized');
     
     // ==================== HTTP CLIENT ====================
-    if (!window.http) {
-        window.http = {
-            async get(endpoint, options = {}) {
-                const url = new URL(endpoint, window.location.origin);
-                if (options.params) {
-                    Object.entries(options.params).forEach(([k, v]) => {
-                        url.searchParams.append(k, v);
-                    });
-                }
-                const response = await fetch(url.toString());
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                return await response.json();
-            },
-            async post(endpoint, data) {
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                return await response.json();
-            },
-            async put(endpoint, data) {
-                const response = await fetch(endpoint, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                return await response.json();
-            },
-            async delete(endpoint) {
-                const response = await fetch(endpoint, { method: 'DELETE' });
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                return await response.json();
-            }
-        };
-    }
+    window.http = new HTTPClient('http://127.0.0.1:8000/api');
+    
+    // Add request interceptor for auth token (if exists)
+    window.http.addInterceptor('request', (options) => {
+        const token = localStorage.getItem('auth-token');
+        if (token) {
+            options.headers = options.headers || {};
+            options.headers['Authorization'] = `Bearer ${token}`;
+        }
+        return options;
+    });
     
     console.log('[APP] HTTPClient ready');
     
     // ==================== COMMAND PALETTE ====================
-    if (window.CommandPalette) {
-        window.commandPalette = new window.CommandPalette();
-        window.commandPalette.registerCommand({
-            id: 'nav-dashboard',
-            title: 'Go to Dashboard',
-            category: 'Navigation',
-            icon: '📊',
-            action: () => window.router.navigate('/dashboard')
-        });
-        console.log('[APP] CommandPalette initialized');
-    }
+    window.commandPalette = new CommandPalette();
+    
+    // Register basic commands
+    window.commandPalette.registerCommand({
+        id: 'nav-dashboard',
+        label: 'Go to Dashboard',
+        description: 'Navigate to the main dashboard',
+        category: 'Navigation',
+        action: () => window.router.navigate('/dashboard')
+    });
+    
+    window.commandPalette.registerCommand({
+        id: 'nav-prompts',
+        label: 'Go to Prompts',
+        description: 'View all prompts',
+        category: 'Navigation',
+        action: () => window.router.navigate('/prompts')
+    });
+    
+    window.commandPalette.registerCommand({
+        id: 'nav-projects',
+        label: 'Go to Projects',
+        description: 'View all projects',
+        category: 'Navigation',
+        action: () => window.router.navigate('/projects')
+    });
+    
+    window.commandPalette.registerCommand({
+        id: 'new-prompt',
+        label: 'New Prompt',
+        description: 'Create a new prompt',
+        category: 'Actions',
+        action: () => window.router.navigate('/editor')
+    });
+    
+    console.log('[APP] CommandPalette initialized');
     
     // ==================== NAVIGATE TO DEFAULT ====================
     window.router.navigate('/dashboard');

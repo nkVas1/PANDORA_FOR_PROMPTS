@@ -33,8 +33,8 @@ class LoadingScreen:
         y = (self.window.winfo_screenheight() // 2) - (600 // 2)
         self.window.geometry(f"+{x}+{y}")
         
-        # Prevent close
-        self.window.protocol("WM_DELETE_WINDOW", lambda: None)
+        # Prevent close (но позволить через нашу функцию)
+        self.window.protocol("WM_DELETE_WINDOW", self._on_window_close)
         
         # Dark theme
         self.window.configure(bg="#1a1a2e")
@@ -67,10 +67,15 @@ class LoadingScreen:
         self._write_log_file(f"{'='*80}")
         
         self._create_ui()
+        
+        # Явно показываем окно и обновляем
+        self.window.deiconify()
+        self.window.lift()
+        self.window.attributes('-topmost', True)
         self.window.update()
         
-        # Запускаем processing loop для queue
-        self._process_queue()
+        # Запускаем processing loop для queue через after (не блокирующий)
+        self.window.after(100, self._process_queue)
     
     def _write_log_file(self, message: str):
         """Логировать сообщение в файл"""
@@ -79,6 +84,10 @@ class LoadingScreen:
                 f.write(message + "\n")
         except Exception as e:
             print(f"Failed to write log: {e}", file=sys.stderr)
+    
+    def _on_window_close(self):
+        """Обработка закрытия окна (Ctrl+C или кнопка X)"""
+        self.close()
     
     def _create_ui(self):
         """Создать UI элементы"""
@@ -194,24 +203,26 @@ class LoadingScreen:
         # Логировать в файл (безопасно из любого потока)
         self._write_log_file(log_line)
         
-        # Добавить в queue для обновления из главного потока
-        try:
-            self.update_queue.put(("log", {
-                "text": log_line,
-                "status": status,
-                "color": color
-            }), block=False)
-        except queue.Full:
-            pass  # Игнорируем если queue переполнена
+        # Добавить в queue для обновления из главного потока (если UI готов)
+        if hasattr(self, 'update_queue') and hasattr(self, 'log_text'):
+            try:
+                self.update_queue.put(("log", {
+                    "text": log_line,
+                    "status": status,
+                    "color": color
+                }), block=False)
+            except (queue.Full, queue.Empty, AttributeError, RuntimeError):
+                pass  # Игнорируем если queue переполнена или пусто
         
         self.logs.append(log_line)
     
     def _process_queue(self):
-        """Обработать очередь обновлений (thread-safe)"""
+        """Обработать очередь обновлений (thread-safe) - вызывается периодически из after()"""
         try:
-            while self.is_running:
+            # Обработать всё что есть в очереди (но не блокируя)
+            while True:
                 try:
-                    action, data = self.update_queue.get(timeout=0.1)
+                    action, data = self.update_queue.get(timeout=0)  # Неблокирующий get
                     
                     if action == "log" and hasattr(self, 'log_text'):
                         try:
@@ -224,7 +235,7 @@ class LoadingScreen:
                             self.log_text.tag_configure(status, foreground=color)
                             self.log_text.see(tk.END)
                             self.log_text.config(state=tk.DISABLED)
-                        except Exception:
+                        except Exception as e:
                             pass
                     
                     elif action == "progress" and hasattr(self, 'progress_bar'):
@@ -237,25 +248,40 @@ class LoadingScreen:
                             self.total_steps = total
                             percent = int((step / total) * 100) if total > 0 else 0
                             
-                            self.progress_bar['value'] = percent
-                            self.step_label.config(text=f"Step {step}/{total}: {step_name}")
-                        except Exception:
+                            # Update canvas-based progress bar
+                            width = self.progress_bar.winfo_width()
+                            if width > 1:
+                                bar_width = int((percent / 100) * width)
+                                self.progress_bar.delete("bar")
+                                self.progress_bar.create_rectangle(0, 0, bar_width, 8, fill="#6366f1", outline="", tags="bar")
+                            
+                            # Update percentage label
+                            if hasattr(self, 'percent_label'):
+                                self.percent_label.config(text=f"{percent}%")
+                            
+                            # Update step label
+                            if hasattr(self, 'step_label'):
+                                self.step_label.config(text=f"Шаг {step}/{total}: {step_name}")
+                        except Exception as e:
                             pass
                 
                 except queue.Empty:
-                    pass
-                
-                # Обновить окно
-                try:
-                    self.window.update()
-                except:
+                    # Очередь пуста, выходим из цикла
                     break
         
+        except Exception as e:
+            pass
+        
+        # Обновить окно
+        try:
+            if self.window.winfo_exists():
+                self.window.update()
         except:
             pass
         
-        if self.window.winfo_exists():
-            self.window.after(100, self._process_queue)
+        # Запланировать следующий процесс очереди
+        if self.is_running and self.window.winfo_exists():
+            self.window.after(50, self._process_queue)  # Каждые 50мс проверяем очередь
     
     def update_progress(self, step: int, total: int, message: str = ""):
         """Обновить прогресс (thread-safe через queue)"""
@@ -268,43 +294,65 @@ class LoadingScreen:
         except queue.Full:
             pass
         
+        # Calculate percentage
+        percent = int((step / total) * 100) if total > 0 else 0
+        
         # Update progress bar
-        width = self.progress_bar.winfo_width()
-        if width > 1:
-            bar_width = int((percent / 100) * width)
-            self.progress_bar.delete("bar")
-            self.progress_bar.create_rectangle(0, 0, bar_width, 8, fill="#6366f1", outline="", tags="bar")
-        
-        # Update percentage
-        self.percent_label.config(text=f"{percent}%")
-        
-        # Update step text
-        if message:
-            self.current_step = message
-            self.step_label.config(text=f"Шаг {step}/{total}: {message}")
-        
-        self.window.update()
+        try:
+            width = self.progress_bar.winfo_width()
+            if width > 1:
+                bar_width = int((percent / 100) * width)
+                self.progress_bar.delete("bar")
+                self.progress_bar.create_rectangle(0, 0, bar_width, 8, fill="#6366f1", outline="", tags="bar")
+            
+            # Update percentage
+            self.percent_label.config(text=f"{percent}%")
+            
+            # Update step text
+            if message:
+                self.current_step = message
+                self.step_label.config(text=f"Шаг {step}/{total}: {message}")
+            
+            self.window.update()
+        except Exception as e:
+            pass
     
     def show(self):
         """Показать окно"""
-        self.window.deiconify()
+        try:
+            self.window.deiconify()
+            self.window.lift()
+            self.window.attributes('-topmost', True)
+            self.window.update()
+        except:
+            pass
     
     def hide(self):
         """Скрыть окно"""
-        self.window.withdraw()
+        try:
+            self.window.withdraw()
+        except:
+            pass
     
     def close(self, error_delay: bool = False):
         """Закрыть окно. Если error_delay=True, ждет 10 секунд"""
         try:
+            self.is_running = False
+            
             if error_delay:
-                # Если была ошибка, даем время на чтение логов
                 self._write_log_file(f"\n[ERROR] Waiting 10 seconds before close...")
                 self.add_log("Ошибка при запуске. Закрытие через 10 секунд...", "error")
                 self.add_log(f"Логи сохранены: {self.log_file}", "info")
+                self.window.update()
                 time.sleep(10)
+            
+            self.window.protocol("WM_DELETE_WINDOW", self.window.destroy)
             self.window.destroy()
-        except:
-            pass
+        except Exception as e:
+            try:
+                self.window.quit()
+            except:
+                pass
     
     def run_loading_sequence(self, callback: Callable):
         """Запустить callback в отдельном потоке с обновлением UI"""
@@ -335,13 +383,17 @@ class InitializationManager:
     def step(self, index: int, name: str, message: str = ""):
         """Отметить шаг как выполненный"""
         self.current_step = index + 1
-        self.splash.update_progress(
-            self.current_step,
-            len(self.steps),
-            name
-        )
+        try:
+            self.splash.update_progress(
+                self.current_step,
+                len(self.steps),
+                name
+            )
+        except Exception as e:
+            pass  # Игнорируем ошибки обновления прогресса
+        
         if message:
-            self.splash.add_log(message, "step")
+            self.splash.add_log(message, "info")
     
     def log_info(self, message: str):
         """Логировать информацию"""

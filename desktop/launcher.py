@@ -33,6 +33,7 @@ import atexit
 from pathlib import Path
 from typing import Optional
 from threading import Thread, Event
+from datetime import datetime
 
 # ==================== КОНФИГУРАЦИЯ ЛОГИРОВАНИЯ ====================
 logging.basicConfig(
@@ -67,7 +68,7 @@ except ImportError:
     logger.warning("[WARN] requests not installed. Install: pip install requests")
 
 try:
-    from splash_screen_pro import create_splash_and_manager
+    from splash_screen_v3 import create_splash_and_manager
     HAS_SPLASH = True
 except ImportError:
     HAS_SPLASH = False
@@ -79,15 +80,23 @@ IS_DEV = not FROZEN
 
 if FROZEN:
     # Запускается из exe (PyInstaller)
+    # В этом режиме _MEIPASS содержит распакованные файлы:
+    # _MEI*/ (это APP_ROOT)
+    #   ├── app/              (backend app модуль)
+    #   ├── frontend/         
+    #   ├── data/
     APP_ROOT = Path(sys._MEIPASS)
+    BACKEND_DIR = APP_ROOT  # Сам _MEIPASS содержит app модуль
+    FRONTEND_DIST = APP_ROOT / 'frontend' / 'dist'
+    DATA_DIR = APP_ROOT / 'data'
 else:
-    # Запускается из Python напрямую
+    # Запускается из Python напрямо
+    # Структура: project_root/desktop/launcher.py
     LAUNCHER_ROOT = Path(__file__).parent
     APP_ROOT = LAUNCHER_ROOT.parent
-
-BACKEND_DIR = APP_ROOT / 'backend'
-FRONTEND_DIST = APP_ROOT / 'frontend' / 'dist'
-DATA_DIR = APP_ROOT / 'data'
+    BACKEND_DIR = APP_ROOT / 'backend'
+    FRONTEND_DIST = APP_ROOT / 'frontend' / 'dist'
+    DATA_DIR = APP_ROOT / 'data'
 
 # Backend
 BACKEND_HOST = '127.0.0.1'
@@ -168,42 +177,126 @@ class UvicornBackend:
             # Убедимся что директории существуют
             BACKEND_DIR.mkdir(parents=True, exist_ok=True)
             DATA_DIR.mkdir(parents=True, exist_ok=True)
+            self._log(f"✓ Directories created/verified", "success")
+            
+            # Проверим структуру - app модуль должен быть где-то в BACKEND_DIR
+            # В FROZEN режиме: PyInstaller может распаковать файлы в разные подкаталоги
+            # поэтому ищем папку 'app' в нескольких типичных местах.
+            if FROZEN:
+                candidates = [
+                    APP_ROOT / 'app',
+                    APP_ROOT / 'backend' / 'app',
+                    APP_ROOT / '_internal' / 'app',
+                    APP_ROOT / 'PANDORA' / 'app',
+                    APP_ROOT / 'backend',
+                ]
+
+                app_dir = None
+                for cand in candidates:
+                    try:
+                        if cand.exists():
+                            app_dir = cand
+                            break
+                    except Exception:
+                        continue
+
+                if app_dir is None:
+                    # Fallback - assume app under BACKEND_DIR/app
+                    app_dir = BACKEND_DIR / 'app'
+                    self._log(f"✗ App directory not found in common locations. Fallback to {app_dir}", "warning")
+                else:
+                    # Если мы нашли папку app, убедимся, что sys.path содержит её родителя
+                    backend_dir_candidate = app_dir.parent if app_dir.name == 'app' else app_dir
+                    # Avoid declaring `global` after using the name in the function
+                    # set module-level BACKEND_DIR via globals() so Python's scoping rules are respected
+                    globals()['BACKEND_DIR'] = backend_dir_candidate
+                    self._log(f"✓ Detected backend app at: {app_dir}", "success")
+                    self._log(f"✓ Using BACKEND_DIR={BACKEND_DIR}", "info")
+
+            else:
+                app_dir = BACKEND_DIR / 'app'
+
+            if not app_dir.exists():
+                # Попробуем найти app через прямой импорт для диагностики
+                self._log(f"✗ App directory not found at {app_dir}", "warning")
+                self._log(f"  Searching for app.main module via import...", "info")
+                try:
+                    from app.main import app as test_app
+                    self._log(f"✓ Found app via direct import", "success")
+                except ImportError:
+                    raise FileNotFoundError(f"Backend app directory not found: {app_dir}")
+            else:
+                self._log(f"✓ Backend app directory found at {app_dir}", "success")
             
             # Добавим backend в Python path
-            sys.path.insert(0, str(BACKEND_DIR))
-            self._log(f"Added to path: {BACKEND_DIR}")
+            if str(BACKEND_DIR) not in sys.path:
+                sys.path.insert(0, str(BACKEND_DIR))
+                self._log(f"✓ Added to path: {BACKEND_DIR}", "success")
             
             # Импортируем FastAPI app
             try:
-                self._log("Importing FastAPI app...")
+                self._log("Importing FastAPI app from app.main...", "info")
                 from app.main import app
-                self._log("FastAPI app imported successfully", "success")
+                self._log("✓ FastAPI app imported successfully", "success")
             except ImportError as e:
-                self._log(f"Failed to import app.main: {e}", "error")
+                self._log(f"✗ Import error: {e}", "error")
+                self._log(f"  Trying to diagnose...", "warning")
+                # Пробуем импортировать app.config отдельно для диагностики
+                try:
+                    from app.config import settings
+                    self._log(f"  - app.config OK", "info")
+                except ImportError as e2:
+                    self._log(f"  - app.config FAILED: {e2}", "error")
+                raise
+            except Exception as e:
+                self._log(f"✗ Unexpected error importing app: {e}", "error")
+                import traceback
+                self._log(f"  Traceback: {traceback.format_exc()}", "error")
                 raise
             
             # Конфигурируем Uvicorn
-            self._log(f"Configuring Uvicorn (port {BACKEND_PORT})...", "info")
-            config = uvicorn.Config(
-                app=app,
-                host=BACKEND_HOST,
-                port=BACKEND_PORT,
-                log_level="error",  # Меньше логов от Uvicorn
-                access_log=False,
-                reload=False,
-            )
+            self._log(f"Configuring Uvicorn server...", "info")
+            self._log(f"  - Host: {BACKEND_HOST}", "info")
+            self._log(f"  - Port: {BACKEND_PORT}", "info")
             
-            server = uvicorn.Server(config)
+            try:
+                config = uvicorn.Config(
+                    app=app,
+                    host=BACKEND_HOST,
+                    port=BACKEND_PORT,
+                    log_level="error",
+                    access_log=False,
+                    reload=False,
+                )
+                self._log("✓ Uvicorn config created", "success")
+            except Exception as e:
+                self._log(f"✗ Failed to create Uvicorn config: {e}", "error")
+                raise
+            
+            # Создаём server
+            try:
+                server = uvicorn.Server(config)
+                self._log("✓ Uvicorn server created", "success")
+            except Exception as e:
+                self._log(f"✗ Failed to create Uvicorn server: {e}", "error")
+                raise
             
             # Запускаем server (блокирующий вызов)
-            self._log("Starting Uvicorn server...", "info")
+            self._log("=" * 70)
+            self._log("Starting Uvicorn server (blocking call)...", "info")
+            self._log("=" * 70)
             self.is_running = True
-            server.run()
+            
+            try:
+                server.run()
+            except Exception as e:
+                self._log(f"✗ Server runtime error: {e}", "error")
+                raise
             
         except Exception as e:
-            self._log(f"Backend error: {e}", "error")
+            self._log(f"✗ Backend error: {type(e).__name__}: {e}", "error")
             import traceback
-            logger.error(traceback.format_exc())
+            logger.error(f"Backend exception:\n{traceback.format_exc()}")
             self.exception = e
             self.is_running = False
     
@@ -331,6 +424,8 @@ class AppLauncher:
                     self.window.destroy()
                 except:
                     pass
+            if self.backend:
+                self.backend.stop()
             sys.exit(0)
         
         signal.signal(signal.SIGINT, signal_handler)
@@ -338,8 +433,15 @@ class AppLauncher:
         
         try:
             # Запускаем backend
-            if self.manager:
-                self.manager.step(0, "Starting Backend")
+            try:
+                if self.manager:
+                    self.manager.step(0, "Starting Backend")
+            except Exception as e:
+                logger.error(f"Manager step error: {e}", exc_info=True)
+            
+            self._log("=" * 70)
+            self._log("Starting Backend initialization...", "info")
+            self._log("=" * 70)
             
             if not self.backend.start():
                 self._log("Failed to start backend", "error")
@@ -391,12 +493,17 @@ class AppLauncher:
                 if self.splash:
                     try:
                         self.splash.close()
-                    except:
-                        pass
+                    except Exception as e:
+                        logger.warning(f"Failed to close splash: {e}")
                 
                 # Запускаем event loop - блокирующий вызов
                 self._log("Starting UI event loop...", "info")
+                self._log("=" * 70)
                 webview.start(debug=False, http_server=False)
+                
+                # После webview.start() - программа завершается
+                self._log("UI event loop closed", "info")
+                return True
                 
             except Exception as e:
                 self._log(f"Failed to create window: {e}", "error")
@@ -421,7 +528,20 @@ class AppLauncher:
             return False
         
         finally:
-            self.backend.stop()
+            # Гарантируем остановку backend
+            try:
+                if self.backend:
+                    self.backend.stop()
+                self._log("Backend stopped", "info")
+            except Exception as e:
+                logger.error(f"Error stopping backend: {e}", exc_info=True)
+            
+            # Закрываем splash если открыта
+            try:
+                if self.splash:
+                    self.splash.is_running = False
+            except:
+                pass
 
 
 # ==================== MAIN ====================
@@ -439,12 +559,20 @@ def main():
             try:
                 from splash_screen_pro import create_splash_and_manager
                 _splash, _manager = create_splash_and_manager()
-                _splash.show()
+                
+                # Убедимся что окно видимо
+                _splash.window.deiconify()
+                _splash.window.update()
                 
                 # Добавляем шаги инициализации
                 _manager.add_step("Starting Backend Server", "Initializing API and loading prompts")
                 _manager.add_step("Loading Frontend", "Preparing UI components")
                 _manager.add_step("Creating Window", "Launching application window")
+                
+                # Выводим начальное сообщение
+                _manager.log_info("=" * 70)
+                _manager.log_info("PANDORA v2.0 Initialization Started")
+                _manager.log_info("=" * 70)
                 
                 # Запускаем приложение в контексте splash
                 launcher = AppLauncher(_splash, _manager)
