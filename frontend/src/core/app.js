@@ -18,13 +18,64 @@ import Router from './router.js';
 function initApp() {
     console.log('[APP] Initializing PANDORA v2.0...');
     
+    // ==================== LAYOUT ====================
+    const app = document.getElementById('app');
+    app.innerHTML = `
+        <div class="main-layout">
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-logo">
+                        <span>📚</span>
+                        <span>PANDORA</span>
+                    </div>
+                </div>
+                <nav class="sidebar-nav" id="sidebar-nav">
+                    <div class="nav-item active" data-route="dashboard">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-label">Dashboard</span>
+                    </div>
+                    <div class="nav-item" data-route="prompts">
+                        <span class="nav-icon">📝</span>
+                        <span class="nav-label">Prompts</span>
+                    </div>
+                    <div class="nav-item" data-route="projects">
+                        <span class="nav-icon">📁</span>
+                        <span class="nav-label">Projects</span>
+                    </div>
+                    <div class="nav-item" data-route="editor">
+                        <span class="nav-icon">✏️</span>
+                        <span class="nav-label">Editor</span>
+                    </div>
+                    <div class="nav-item" data-route="analytics">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-label">Analytics</span>
+                    </div>
+                </nav>
+            </aside>
+            
+            <div class="content-area">
+                <div class="top-bar">
+                    <div class="top-bar-left">
+                        <h2 style="margin: 0; font-size: 1.25rem;">PANDORA v2.0</h2>
+                    </div>
+                    <div class="top-bar-right">
+                        <button class="command-palette-btn" id="cmd-palette-btn">
+                            ⌘ K - Command Palette
+                        </button>
+                    </div>
+                </div>
+                <div class="views-container" id="views-container"></div>
+            </div>
+        </div>
+    `;
+    
     // ==================== ROUTER ====================
     /**
      * Создаем Router для управления навигацией
      * Используется hash-based routing (#/dashboard, #/prompts, etc.)
      */
     window.router = new Router({
-        container: document.getElementById('app') || document.body,
+        container: document.getElementById('views-container') || document.body,
         defaultRoute: '/dashboard'
     });
     
@@ -55,6 +106,22 @@ function initApp() {
     });
     
     console.log('[APP] Router initialized');
+    
+    // ==================== SIDEBAR NAVIGATION ====================
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Update active state
+            navItems.forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            
+            // Navigate to route
+            const route = item.dataset.route;
+            window.router.navigate(`/${route}`);
+        });
+    });
     
     // ==================== STATE MANAGER ====================
     /**
@@ -90,7 +157,6 @@ function initApp() {
         
         console.log('[APP] StateManager initialized');
     } else {
-        // Fallback если StateManager не загружен
         window.appState = {
             state: {
                 prompts: [],
@@ -99,25 +165,27 @@ function initApp() {
                 user: {},
                 ui: {}
             },
-            observe: () => {},
-            persist: () => {},
-            restore: () => {}
+            get(key) { return this.state[key]; },
+            set(key, value) { this.state[key] = value; },
+            observe() {},
+            persist() {},
+            restore() {}
         };
     }
     
     // ==================== HTTP CLIENT ====================
-    /**
-     * HTTPClient для API запросов
-     * Уже инициализирован в utils/http.js
-     * window.http должен быть доступен глобально
-     */
     if (!window.http) {
-        // Fallback: простой HTTP клиент
         window.http = {
-            async get(endpoint) {
-                const response = await fetch(endpoint);
+            async get(endpoint, options = {}) {
+                const url = new URL(endpoint, window.location.origin);
+                if (options.params) {
+                    Object.entries(options.params).forEach(([k, v]) => {
+                        url.searchParams.append(k, v);
+                    });
+                }
+                const response = await fetch(url.toString());
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                return { data: await response.json() };
+                return await response.json();
             },
             async post(endpoint, data) {
                 const response = await fetch(endpoint, {
@@ -126,7 +194,7 @@ function initApp() {
                     body: JSON.stringify(data)
                 });
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                return { data: await response.json() };
+                return await response.json();
             },
             async put(endpoint, data) {
                 const response = await fetch(endpoint, {
@@ -135,12 +203,12 @@ function initApp() {
                     body: JSON.stringify(data)
                 });
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                return { data: await response.json() };
+                return await response.json();
             },
             async delete(endpoint) {
                 const response = await fetch(endpoint, { method: 'DELETE' });
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                return { data: await response.json() };
+                return await response.json();
             }
         };
     }
@@ -148,80 +216,21 @@ function initApp() {
     console.log('[APP] HTTPClient ready');
     
     // ==================== COMMAND PALETTE ====================
-    /**
-     * Инициализируем CommandPalette (Cmd+K)
-     * Если не загружена, создаем simplified версию
-     */
     if (window.CommandPalette) {
         window.commandPalette = new window.CommandPalette();
-        
-        // Добавляем основные команды
         window.commandPalette.registerCommand({
             id: 'nav-dashboard',
             title: 'Go to Dashboard',
             category: 'Navigation',
             icon: '📊',
-            keywords: ['home', 'main', 'dashboard'],
             action: () => window.router.navigate('/dashboard')
         });
-        
-        window.commandPalette.registerCommand({
-            id: 'nav-prompts',
-            title: 'Go to Prompts',
-            category: 'Navigation',
-            icon: '📝',
-            keywords: ['prompts', 'list'],
-            action: () => window.router.navigate('/prompts')
-        });
-        
-        window.commandPalette.registerCommand({
-            id: 'nav-projects',
-            title: 'Go to Projects',
-            category: 'Navigation',
-            icon: '📁',
-            keywords: ['projects'],
-            action: () => window.router.navigate('/projects')
-        });
-        
-        window.commandPalette.registerCommand({
-            id: 'new-prompt',
-            title: 'Create New Prompt',
-            category: 'Actions',
-            icon: '✨',
-            keywords: ['new', 'create', 'prompt'],
-            shortcut: 'Ctrl+N',
-            action: () => window.router.navigate('/editor')
-        });
-        
         console.log('[APP] CommandPalette initialized');
     }
     
-    // ==================== ANIMATED BACKGROUND ====================
-    /**
-     * Инициализируем анимированный фон с градиентными сферами
-     * Если не загружена, это просто визуальное улучшение
-     */
-    try {
-        if (window.AnimatedGradientMesh && !document.querySelector('.animated-gradient-mesh')) {
-            new window.AnimatedGradientMesh(document.body, {
-                orbCount: 5,
-                opacity: 0.4,
-                blur: 50,
-                speed: 0.3
-            });
-            console.log('[APP] AnimatedGradientMesh initialized');
-        }
-    } catch (error) {
-        console.warn('[APP] AnimatedGradientMesh initialization failed:', error);
-    }
-    
-    // ==================== NAVIGATE TO DEFAULT VIEW ====================
-    /**
-     * Переходим на Dashboard по умолчанию
-     */
+    // ==================== NAVIGATE TO DEFAULT ====================
     window.router.navigate('/dashboard');
-    
-    console.log('[APP] PANDORA v2.0 initialized successfully!');
+    console.log('[APP] ✓ PANDORA v2.0 ready');
 }
 
 /**

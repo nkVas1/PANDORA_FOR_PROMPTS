@@ -1,0 +1,410 @@
+/**
+ * Animations and Transitions
+ * Плавные анимации и переходы
+ */
+
+/* ==================== ОСНОВНЫЕ АНИМАЦИИ ====================*/
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideOutDown {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOutLeft {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes scaleOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes floating {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes glowPulse {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(99, 102, 241, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
+    }
+}
+
+/* ==================== VIEW TRANSITIONS ====================*/
+
+.view {
+    animation: slideInUp 300ms ease-out;
+}
+
+.view.hidden {
+    animation: slideOutDown 300ms ease-out;
+}
+
+/* ==================== CARD ANIMATIONS ====================*/
+
+.card {
+    animation: fadeIn 200ms ease-out;
+}
+
+.card:hover {
+    animation: none;
+}
+
+.glass-card {
+    animation: slideInUp 300ms ease-out;
+}
+
+/* ==================== BUTTON ANIMATIONS ====================*/
+
+.btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    transition: left 300ms ease-out;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn:active {
+    animation: scaleIn 150ms ease-out;
+}
+
+/* ==================== FORM ANIMATIONS ====================*/
+
+.form-group {
+    animation: slideInUp 300ms ease-out backwards;
+}
+
+.form-group:nth-child(1) { animation-delay: 0ms; }
+.form-group:nth-child(2) { animation-delay: 50ms; }
+.form-group:nth-child(3) { animation-delay: 100ms; }
+.form-group:nth-child(4) { animation-delay: 150ms; }
+.form-group:nth-child(5) { animation-delay: 200ms; }
+
+.form-input:focus {
+    animation: none;
+}
+
+/* ==================== LOADING ANIMATIONS ====================*/
+
+.loading {
+    animation: fadeIn 200ms ease-out;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+.skeleton {
+    animation: shimmer 2s infinite;
+    background-size: 1000px 100%;
+}
+
+/* ==================== NOTIFICATION ANIMATIONS ====================*/
+
+.toast-notification {
+    animation: slideInUp 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.toast-notification.fade-out {
+    animation: slideOutDown 300ms ease-out;
+}
+
+/* ==================== MODAL ANIMATIONS ====================*/
+
+.modal-backdrop {
+    animation: fadeIn 200ms ease-out;
+}
+
+.modal {
+    animation: scaleIn 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal.closing {
+    animation: scaleOut 200ms ease-out;
+}
+
+/* ==================== DROPDOWN ANIMATIONS ====================*/
+
+.dropdown-menu {
+    animation: slideInUp 150ms ease-out;
+    transform-origin: center top;
+}
+
+.dropdown-menu.closing {
+    animation: slideOutUp 150ms ease-out;
+}
+
+/* ==================== LIST ITEM ANIMATIONS ====================*/
+
+.list-item {
+    animation: slideInLeft 200ms ease-out backwards;
+}
+
+.list-item:nth-child(1) { animation-delay: 0ms; }
+.list-item:nth-child(2) { animation-delay: 50ms; }
+.list-item:nth-child(3) { animation-delay: 100ms; }
+.list-item:nth-child(4) { animation-delay: 150ms; }
+.list-item:nth-child(5) { animation-delay: 200ms; }
+
+/* ==================== GRADIENT ANIMATIONS ====================*/
+
+.gradient-text {
+    background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 3s ease infinite;
+}
+
+.gradient-bg {
+    background: linear-gradient(45deg, #6366f1, #8b5cf6);
+    background-size: 200% 200%;
+    animation: gradientShift 3s ease infinite;
+}
+
+/* ==================== HOVER EFFECTS ====================*/
+
+.hover-lift {
+    transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+}
+
+.hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.hover-glow {
+    transition: box-shadow 200ms ease-out;
+}
+
+.hover-glow:hover {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+}
+
+/* ==================== TRANSITION UTILITIES ====================*/
+
+.transition-all {
+    transition: all var(--transition-base);
+}
+
+.transition-fast {
+    transition: all var(--transition-fast);
+}
+
+.transition-slow {
+    transition: all var(--transition-slow);
+}
+
+/* ==================== MICRO-INTERACTIONS ====================*/
+
+.bounce-in {
+    animation: slideInUp 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pulse-once {
+    animation: pulse 1s ease-out;
+}
+
+.float {
+    animation: floating 3s ease-in-out infinite;
+}
+
+/* ==================== RESPONSIVE ANIMATIONS ====================*/
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    .glow-pulse {
+        animation: glowPulse 2s ease-in-out infinite;
+    }
+}
+
+/* ==================== STAGGER ANIMATIONS ====================*/
+
+.stagger-animation {
+    animation: slideInUp 300ms ease-out backwards;
+}
+
+@for $i from 1 through 10 {
+    .stagger-animation:nth-child(#{$i}) {
+        animation-delay: #{$i * 50}ms;
+    }
+}
+
+/* CSS-only stagger fallback */
+.stagger-animation:nth-child(1) { animation-delay: 50ms; }
+.stagger-animation:nth-child(2) { animation-delay: 100ms; }
+.stagger-animation:nth-child(3) { animation-delay: 150ms; }
+.stagger-animation:nth-child(4) { animation-delay: 200ms; }
+.stagger-animation:nth-child(5) { animation-delay: 250ms; }
+.stagger-animation:nth-child(6) { animation-delay: 300ms; }
+.stagger-animation:nth-child(7) { animation-delay: 350ms; }
+.stagger-animation:nth-child(8) { animation-delay: 400ms; }
+.stagger-animation:nth-child(9) { animation-delay: 450ms; }
+.stagger-animation:nth-child(10) { animation-delay: 500ms; }
