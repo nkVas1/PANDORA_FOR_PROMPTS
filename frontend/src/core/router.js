@@ -200,9 +200,14 @@ class Router {
         ViewClass = await ViewClass;
       }
       
-      // Создать новый view
+      // Очистить контейнер ДО загрузки view
+      this.container.innerHTML = '';
+      
+      // Вызвать view функцию/фабрику
+      // Views это фабрики, которые возвращают DOM элементы
       if (typeof ViewClass === 'function') {
-        this.currentView = new ViewClass({
+        // Пример: Dashboard функция возвращает готовый DOM элемент
+        this.currentView = ViewClass({
           router: this,
           route: route.options,
           path: path
@@ -211,15 +216,16 @@ class Router {
         this.currentView = ViewClass;
       }
       
-      // Очистить контейнер
-      this.container.innerHTML = '';
-      
       // Отобразить view
-      if (typeof this.currentView.render === 'function') {
-        const element = this.currentView.render();
-        this.container.appendChild(element);
-      } else if (this.currentView instanceof HTMLElement) {
+      if (this.currentView instanceof HTMLElement) {
+        // Это уже готовый DOM элемент
         this.container.appendChild(this.currentView);
+      } else if (typeof this.currentView === 'object' && this.currentView.render) {
+        // Если это объект с методом render()
+        const element = this.currentView.render();
+        if (element instanceof HTMLElement) {
+          this.container.appendChild(element);
+        }
       }
       
       // Trigger animation
@@ -229,11 +235,13 @@ class Router {
       
     } catch (error) {
       console.error('Error loading view:', error);
+      console.error('Stack:', error.stack);
       this.container.innerHTML = `
-        <div class="error-view">
-          <h2>Error loading page</h2>
-          <p>${error.message}</p>
-          <button onclick="window.router.navigate('${this.defaultRoute}')">
+        <div class="error-view" style="padding: 40px; text-align: center;">
+          <h2 style="color: #ef4444;">Error loading page</h2>
+          <p style="color: #94a3b8; margin: 10px 0;">${error.message}</p>
+          <p style="color: #64748b; font-size: 0.9rem; font-family: monospace;">${error.stack}</p>
+          <button onclick="window.router.navigate('${this.defaultRoute}')" style="padding: 10px 20px; margin-top: 20px; cursor: pointer;">
             Go Home
           </button>
         </div>

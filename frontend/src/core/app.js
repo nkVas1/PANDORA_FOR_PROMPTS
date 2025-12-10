@@ -85,28 +85,28 @@ function initApp() {
     
     // Регистрируем маршруты
     window.router.addRoute('/dashboard', async () => {
-        const { default: Dashboard } = await import('../views/Dashboard.js');
-        return Dashboard();
+        const { default: createDashboard } = await import('../views/Dashboard.js');
+        return createDashboard();
     });
     
     window.router.addRoute('/prompts', async () => {
-        const { default: PromptsView } = await import('../views/PromptsView.js');
-        return PromptsView();
+        const { default: createPromptsView } = await import('../views/PromptsView.js');
+        return createPromptsView();
     });
     
     window.router.addRoute('/projects', async () => {
-        const { default: ProjectsView } = await import('../views/ProjectsView.js');
-        return ProjectsView();
+        const { default: createProjectsView } = await import('../views/ProjectsView.js');
+        return createProjectsView();
     });
     
     window.router.addRoute('/editor', async () => {
-        const { default: EditorView } = await import('../views/EditorView.js');
-        return EditorView();
+        const { default: createEditorView } = await import('../views/EditorView.js');
+        return createEditorView();
     });
     
     window.router.addRoute('/analytics', async () => {
-        const { default: AnalyticsView } = await import('../views/AnalyticsView.js');
-        return AnalyticsView();
+        const { default: createAnalyticsView } = await import('../views/AnalyticsView.js');
+        return createAnalyticsView();
     });
     
     console.log('[APP] Router initialized');
@@ -123,6 +123,7 @@ function initApp() {
             
             // Navigate to route
             const route = item.dataset.route;
+            console.log('[APP] Navigating to:', route);
             window.router.navigate(`/${route}`);
         });
     });

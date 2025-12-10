@@ -10,7 +10,7 @@
  * - Context menu actions
  */
 
-import { createGlassCard } from '../components/GlassCard.js';
+import { createGlassCard } from '../components/Card.js';
 import { createButton } from '../components/Button.js';
 
 export default function createPromptsView() {

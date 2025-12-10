@@ -134,7 +134,21 @@ class LoadingScreen:
         
         # Логирование в файл
         if getattr(sys, 'frozen', False):
-            base_dir = Path(sys.executable).parent
+            # В режиме EXE логи должны быть рядом с exe
+            # Ищем папку dist/PANDORA/ ыгда exe создавался PyInstaller
+            # Если не найдем - используем %USERPROFILE%/AppData/Local/PANDORA/logs
+            import os
+            possible_dirs = [
+                Path(sys.executable).parent,  # _MEI* временная папка
+                Path(sys.executable).parent.parent,  # Может быть выше?
+                Path(os.getenv('APPDATA')) / 'PANDORA',  # %APPDATA%/PANDORA/
+                Path(os.getenv('LOCALAPPDATA')) / 'PANDORA',  # %LOCALAPPDATA%/PANDORA/
+            ]
+            base_dir = possible_dirs[-1]  # По умолчанию LOCALAPPDATA
+            for dir_candidate in possible_dirs[:-1]:
+                if dir_candidate.exists() and (dir_candidate / 'frontend').exists():
+                    base_dir = dir_candidate
+                    break
         else:
             base_dir = Path(__file__).parent
         

@@ -81,14 +81,17 @@ IS_DEV = not FROZEN
 if FROZEN:
     # Запускается из exe (PyInstaller)
     # В этом режиме _MEIPASS содержит распакованные файлы:
-    # _MEI*/ (это APP_ROOT)
+    # _MEI*/ (это APP_ROOT - временная папка)
     #   ├── app/              (backend app модуль)
-    #   ├── frontend/         
-    #   ├── data/
+    #   ├── frontend/         (фронтенд файлы)
+    #   ├── data/             (шаблоны и рефы)
     APP_ROOT = Path(sys._MEIPASS)
     BACKEND_DIR = APP_ROOT  # Сам _MEIPASS содержит app модуль
     FRONTEND_DIST = APP_ROOT / 'frontend' / 'dist'
-    DATA_DIR = APP_ROOT / 'data'
+    # DATA_DIR и LOGS должны быть в LOCALAPPDATA чтобы не потеряться при удалении _MEI*
+    APPDATA_DIR = Path(os.getenv('LOCALAPPDATA')) / 'PANDORA'
+    DATA_DIR = APPDATA_DIR / 'data'
+    LOGS_DIR = APPDATA_DIR / 'logs'
 else:
     # Запускается из Python напрямо
     # Структура: project_root/desktop/launcher.py
@@ -97,6 +100,7 @@ else:
     BACKEND_DIR = APP_ROOT / 'backend'
     FRONTEND_DIST = APP_ROOT / 'frontend' / 'dist'
     DATA_DIR = APP_ROOT / 'data'
+    LOGS_DIR = APP_ROOT / 'logs'
 
 # Backend
 BACKEND_HOST = '127.0.0.1'
@@ -557,7 +561,7 @@ def main():
         # Инициализируем splash screen если доступен
         if HAS_SPLASH:
             try:
-                from splash_screen_pro import create_splash_and_manager
+                from splash_screen_v3 import create_splash_and_manager
                 _splash, _manager = create_splash_and_manager()
                 
                 # Убедимся что окно видимо
