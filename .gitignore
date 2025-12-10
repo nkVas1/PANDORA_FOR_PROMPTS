@@ -37,7 +37,6 @@ logs/
 tmp/
 temp/
 *.tmp
-launcher.py
 
 # Node modules (frontend)
 node_modules/
