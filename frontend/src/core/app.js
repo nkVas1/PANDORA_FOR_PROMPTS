@@ -1,13 +1,13 @@
 /**
- * PANDORA v2.0 - Main Application Bootstrap
+ * PANDORA v2.0 - Main Application Initialization
  * 
- * Инициализирует основное приложение:
- * - Создает Router для навигации
- * - Инициализирует StateManager для реактивного состояния
- * - Создает HTTPClient для API запросов
- * - Запускает CommandPalette (Cmd+K)
- * - Инициализирует AnimatedGradientMesh фон
- * - Загружает Dashboard по умолчанию
+ * Главная инициализация:
+ * - StateManager (реактивное состояние)
+ * - Router (навигация между views)
+ * - HTTP Client (запросы к API)
+ * - UI Components (CommandPalette, AnimatedBg)
+ * - Theme management
+ * - Initial data loading
  */
 
 // Simple Router implementation for hash-based routing

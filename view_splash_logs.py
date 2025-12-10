@@ -10,12 +10,26 @@ from pathlib import Path
 
 def view_splash_logs():
     """View the latest splash screen logs"""
-    log_file = Path.home() / "AppData" / "Roaming" / "PANDORA" / "logs" / "splash.log"
+    # Логи находятся рядом с EXE в папке dist/logs
+    # или в папке с исходным кодом если запущен скрипт
+    
+    # Пытаемся найти папку dist
+    dist_path = Path.cwd().parent / "dist" / "PANDORA"
+    
+    # Если не найдена, пытаемся относительно текущей папки
+    if not dist_path.exists():
+        dist_path = Path.cwd() / "build" / "PANDORA"
+    
+    # Если всё ещё не найдена, используем абсолютный путь
+    if not dist_path.exists():
+        dist_path = Path(__file__).parent / "dist" / "PANDORA"
+    
+    log_file = dist_path / "logs" / "splash.log"
     
     print("=" * 80)
     print("PANDORA Splash Screen Logs")
     print("=" * 80)
-    print(f"\nLog file: {log_file}")
+    print(f"\nLooking for log file at: {log_file}")
     print(f"Exists: {log_file.exists()}")
     
     if not log_file.exists():

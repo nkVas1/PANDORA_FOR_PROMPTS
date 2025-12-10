@@ -1,7 +1,7 @@
 # 🎨 PANDORA - Professional Prompt Manager
-## Desktop Application | AI-Powered | Modern UI | 1,355+ Prompts
+## Desktop Application | AI-Powered | Modern UI | 2.0 Architecture
 
-![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)
+![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10.11-green.svg)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.124.0-red.svg)
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)
@@ -11,43 +11,46 @@
 
 ## 📋 Описание
 
-**PANDORA v1.2.0** - это современное и мощное десктопное приложение для управления AI промптами с интуитивным интерфейсом, встроенным редактором и системой управления проектами. Включает 1,355+ готовых промптов из лучших библиотек.
+**PANDORA v2.0.0** - это профессиональное десктопное приложение для управления AI промптами с полной переработкой архитектуры, современным интерфейсом и продвинутым функционалом. Включает 5 полноценных views, реактивное управление состоянием и аналитику.
 
-### ✨ Новые улучшения v1.2.0
+### ✨ What's New in v2.0
 
-- 🎨 **Animated Splash Screen** - Модерный загрузочный экран с анимированным прогресс-баром
-- ⚡ **Оптимизированный запуск** - Сокращен с 90+ сек до ~20 сек
-- ✏️ **Встроенный редактор** - Модальное окно с просмотром, редактированием и копированием
-- 📊 **Менеджер проектов** - Управление задачами и статистикой проектов
-- ☁️ **Облака тегов** - Красивая визуализация тегов по категориям
-- 🏷️ **Фильтрация по тегам** - Клик на тег → список всех промптов с этим тегом
-- 🔧 **Расширенная валидация** - Поддержка 13 категорий промптов
+- 🎨 **Новая архитектура фронтенда** - Дизайн система, реактивный стейт, профессиональный роутер
+- 📊 **Аналитика и статистика** - 3 новых endpoint'а для insights и метрик
+- 🧵 **Thread-safe splash screen** - Красивый загрузочный экран с очередью обновлений
+- 💾 **Улучшенное логирование** - Все логи в `dist/logs/` с удобным форматом
+- 🏠 **5 полных Views** - Dashboard, Prompts, Editor, Projects, Analytics
+- 🔄 **Продвинутый стейт** - Undo/Redo, computed properties, middleware support
+- 🛣️ **Профессиональный роутер** - Guards, hooks, параметры, история
+- ⚡ **Оптимизированный запуск** - < 5 сек от splash к UI
 
 ---
 
-## 🏗️ Архитектура
+## 🏗️ Архитектура v2.0
 
-### Backend Stack
+### Frontend Stack (2,100+ lines)
+
+- **Design System**: CSS переменные, типография, палитра, анимации (`tokens.css`)
+- **State Management**: Реактивный proxy, observers, computed properties (`state-manager.js`)
+- **Router**: Hash-based navigation с guards и hooks (`router.js`)
+- **Views**: 5 complete implementations (Dashboard, Prompts, Editor, Projects, Analytics)
+- **App Init**: Полная инициализация компонентов (`app.js`)
+
+### Backend Stack (650+ lines)
 
 - **Framework**: FastAPI 0.124.0
 - **Server**: Uvicorn 0.38.0
-- **Database**: SQLite (local, no setup required)
+- **Database**: SQLite (local)
 - **ORM**: SQLAlchemy 2.0.44
-- **Validation**: Pydantic 2.12.5
-
-### Frontend Stack
-
-- **Type**: Single Page Application (SPA)
-- **Technologies**: HTML5, CSS3, Vanilla JavaScript
-- **Browser**: Embedded Chromium/Edge via PyWebView 6.1
-- **Styling**: Pure CSS (no frameworks) - for maximum compatibility
+- **API**: 50+ endpoints covering all operations
 
 ### Desktop Stack
 
-- **Framework**: PyWebView 6.1 (Embedded WebKit)
-- **Compiler**: PyInstaller 6.17.0
+- **Framework**: PyWebView 6.1
+- **Launcher**: Professional manager with daemon threading
+- **Splash**: Thread-safe UI with queue-based updates
+- **Builder**: PyInstaller with optimized configuration
 - **OS**: Windows 10/11 (x64)
-- **Deployment**: Single executable (.exe) file
 
 ---
 

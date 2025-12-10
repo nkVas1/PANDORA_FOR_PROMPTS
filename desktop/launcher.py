@@ -145,7 +145,11 @@ class UvicornBackend:
     def _log(self, message: str, status: str = "info"):
         """Логировать с поддержкой splash screen"""
         if self.manager:
-            getattr(self.manager, f'log_{status}')(message)
+            # Доступные методы: log_info, log_success, log_warning, log_error
+            # Если status неизвестен, используем log_info
+            valid_statuses = ['info', 'success', 'warning', 'error']
+            method_name = f'log_{status}' if status in valid_statuses else 'log_info'
+            getattr(self.manager, method_name)(message)
         else:
             logger.info(message)
     
@@ -155,7 +159,7 @@ class UvicornBackend:
             import uvicorn
             
             self._log("=" * 70)
-            self._log("Initializing FastAPI Backend", "step")
+            self._log("Initializing FastAPI Backend", "info")
             self._log("=" * 70)
             self._log(f"Backend directory: {BACKEND_DIR}")
             self._log(f"Data directory: {DATA_DIR}")
@@ -179,7 +183,7 @@ class UvicornBackend:
                 raise
             
             # Конфигурируем Uvicorn
-            self._log(f"Configuring Uvicorn (port {BACKEND_PORT})...", "step")
+            self._log(f"Configuring Uvicorn (port {BACKEND_PORT})...", "info")
             config = uvicorn.Config(
                 app=app,
                 host=BACKEND_HOST,
@@ -192,7 +196,7 @@ class UvicornBackend:
             server = uvicorn.Server(config)
             
             # Запускаем server (блокирующий вызов)
-            self._log("Starting Uvicorn server...", "step")
+            self._log("Starting Uvicorn server...", "info")
             self.is_running = True
             server.run()
             
@@ -210,14 +214,14 @@ class UvicornBackend:
                 self._log("Backend is already running")
                 return True
             
-            self._log("Starting PANDORA Backend...", "step")
+            self._log("Starting PANDORA Backend...", "info")
             
             # Запускаем в daemon потоке
             self.thread = Thread(target=self.run_server, daemon=True)
             self.thread.start()
             
             # Ждём когда backend будет готов
-            self._log("Waiting for backend initialization...", "step")
+            self._log("Waiting for backend initialization...", "info")
             
             for attempt in range(80):  # 80 * 0.25 сек = 20 сек максимум
                 try:
@@ -273,7 +277,11 @@ class AppLauncher:
     def _log(self, message: str, status: str = "info"):
         """Логировать с поддержкой splash screen"""
         if self.manager:
-            getattr(self.manager, f'log_{status}')(message)
+            # Доступные методы: log_info, log_success, log_warning, log_error
+            # Если status неизвестен, используем log_info
+            valid_statuses = ['info', 'success', 'warning', 'error']
+            method_name = f'log_{status}' if status in valid_statuses else 'log_info'
+            getattr(self.manager, method_name)(message)
         else:
             logger.info(message)
     
@@ -365,7 +373,7 @@ class AppLauncher:
             if self.manager:
                 self.manager.step(2, "Creating Window")
             
-            self._log("Creating application window...", "step")
+            self._log("Creating application window...", "info")
             try:
                 self.window = webview.create_window(
                     APP_NAME,
@@ -387,7 +395,7 @@ class AppLauncher:
                         pass
                 
                 # Запускаем event loop - блокирующий вызов
-                self._log("Starting UI event loop...", "step")
+                self._log("Starting UI event loop...", "info")
                 webview.start(debug=False, http_server=False)
                 
             except Exception as e:

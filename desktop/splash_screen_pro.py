@@ -3,6 +3,7 @@
 """
 PANDORA v2.0 - Professional Loading Screen
 Красивый splash screen с прогресс-баром, анимацией и логами загрузки
+Thread-safe версия для безопасного обновления из других потоков
 """
 
 import tkinter as tk
@@ -14,9 +15,11 @@ from datetime import datetime
 import sys
 import os
 from pathlib import Path
+import queue
+
 
 class LoadingScreen:
-    """Профессиональный экран загрузки"""
+    """Профессиональный экран загрузки с thread-safe обновлениями"""
     
     def __init__(self, title: str = "PANDORA v2.0", subtitle: str = "Professional Prompt Manager"):
         self.window = tk.Tk()
@@ -36,6 +39,10 @@ class LoadingScreen:
         # Dark theme
         self.window.configure(bg="#1a1a2e")
         
+        # Thread-safe queue для обновлений
+        self.update_queue: queue.Queue = queue.Queue()
+        self.is_running = True
+        
         self.title_text = title
         self.subtitle_text = subtitle
         self.current_step = ""
@@ -43,8 +50,16 @@ class LoadingScreen:
         self.total_steps = 0
         self.logs: List[str] = []
         
-        # Логирование в файл
-        self.log_file = Path(os.environ.get("APPDATA", ".")) / "PANDORA" / "logs" / "splash.log"
+        # Логирование в файл (рядом с EXE в dist/logs)
+        # Получаем папку где находится скрипт
+        if getattr(sys, 'frozen', False):
+            # Если запущен как EXE
+            base_dir = Path(sys.executable).parent
+        else:
+            # Если запущен как скрипт
+            base_dir = Path(__file__).parent
+        
+        self.log_file = base_dir / "logs" / "splash.log"
         self.log_file.parent.mkdir(parents=True, exist_ok=True)
         
         self._write_log_file(f"\n{'='*80}")
@@ -53,6 +68,9 @@ class LoadingScreen:
         
         self._create_ui()
         self.window.update()
+        
+        # Запускаем processing loop для queue
+        self._process_queue()
     
     def _write_log_file(self, message: str):
         """Логировать сообщение в файл"""
@@ -158,7 +176,7 @@ class LoadingScreen:
         self.log_text.config(state=tk.DISABLED)
     
     def add_log(self, message: str, status: str = "info"):
-        """Добавить сообщение в логи"""
+        """Добавить сообщение в логи (thread-safe через queue)"""
         timestamp = datetime.now().strftime("%H:%M:%S")
         
         # Color mapping
@@ -173,23 +191,82 @@ class LoadingScreen:
         color = colors.get(status, "#94a3b8")
         log_line = f"[{timestamp}] [{status.upper()}] {message}"
         
-        # Логировать в файл
+        # Логировать в файл (безопасно из любого потока)
         self._write_log_file(log_line)
         
-        self.log_text.config(state=tk.NORMAL)
-        self.log_text.insert(tk.END, log_line + "\n", status)
-        self.log_text.tag_configure(status, foreground=color)
-        self.log_text.see(tk.END)
-        self.log_text.config(state=tk.DISABLED)
+        # Добавить в queue для обновления из главного потока
+        try:
+            self.update_queue.put(("log", {
+                "text": log_line,
+                "status": status,
+                "color": color
+            }), block=False)
+        except queue.Full:
+            pass  # Игнорируем если queue переполнена
         
         self.logs.append(log_line)
-        self.window.update()
+    
+    def _process_queue(self):
+        """Обработать очередь обновлений (thread-safe)"""
+        try:
+            while self.is_running:
+                try:
+                    action, data = self.update_queue.get(timeout=0.1)
+                    
+                    if action == "log" and hasattr(self, 'log_text'):
+                        try:
+                            text = data.get("text", "")
+                            status = data.get("status", "info")
+                            color = data.get("color", "#94a3b8")
+                            
+                            self.log_text.config(state=tk.NORMAL)
+                            self.log_text.insert(tk.END, text + "\n", status)
+                            self.log_text.tag_configure(status, foreground=color)
+                            self.log_text.see(tk.END)
+                            self.log_text.config(state=tk.DISABLED)
+                        except Exception:
+                            pass
+                    
+                    elif action == "progress" and hasattr(self, 'progress_bar'):
+                        try:
+                            step = data.get("step", 0)
+                            total = data.get("total", 1)
+                            step_name = data.get("step_name", "")
+                            
+                            self.progress = step
+                            self.total_steps = total
+                            percent = int((step / total) * 100) if total > 0 else 0
+                            
+                            self.progress_bar['value'] = percent
+                            self.step_label.config(text=f"Step {step}/{total}: {step_name}")
+                        except Exception:
+                            pass
+                
+                except queue.Empty:
+                    pass
+                
+                # Обновить окно
+                try:
+                    self.window.update()
+                except:
+                    break
+        
+        except:
+            pass
+        
+        if self.window.winfo_exists():
+            self.window.after(100, self._process_queue)
     
     def update_progress(self, step: int, total: int, message: str = ""):
-        """Обновить прогресс"""
-        self.progress = step
-        self.total_steps = total
-        percent = int((step / total) * 100) if total > 0 else 0
+        """Обновить прогресс (thread-safe через queue)"""
+        try:
+            self.update_queue.put(("progress", {
+                "step": step,
+                "total": total,
+                "step_name": message
+            }), block=False)
+        except queue.Full:
+            pass
         
         # Update progress bar
         width = self.progress_bar.winfo_width()

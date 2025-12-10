@@ -537,3 +537,132 @@ def get_all_categories(db: Session = Depends(get_db)):
         "categories": category_list,
         "count": len(category_list)
     }
+
+
+# ================ ANALYTICS ENDPOINTS ================
+
+@router.get("/analytics/dashboard")
+def get_analytics_dashboard(db: Session = Depends(get_db)):
+    """Get comprehensive dashboard analytics"""
+    from sqlalchemy import func, distinct
+    from datetime import datetime, timedelta
+    from app.db.models import Prompt, Project, Tag
+    
+    try:
+        # Total counts
+        total_prompts = db.query(func.count(Prompt.id)).scalar() or 0
+        total_projects = db.query(func.count(Project.id)).scalar() or 0
+        total_tags = db.query(func.count(Tag.id)).scalar() or 0
+        
+        # Growth metrics
+        now = datetime.utcnow()
+        week_ago = now - timedelta(days=7)
+        month_ago = now - timedelta(days=30)
+        
+        prompts_7d = db.query(func.count(Prompt.id)).filter(
+            Prompt.created_at >= week_ago
+        ).scalar() or 0
+        
+        prompts_30d = db.query(func.count(Prompt.id)).filter(
+            Prompt.created_at >= month_ago
+        ).scalar() or 0
+        
+        # Popular prompts
+        popular = db.query(Prompt).order_by(
+            Prompt.usage_count.desc()
+        ).limit(10).all()
+        
+        # Category distribution
+        category_stats = db.query(
+            Prompt.category,
+            func.count(Prompt.id).label('count')
+        ).group_by(Prompt.category).all()
+        
+        category_dist = [
+            {'category': cat or 'Uncategorized', 'count': count}
+            for cat, count in category_stats
+        ]
+        
+        return {
+            'totals': {
+                'prompts': total_prompts,
+                'projects': total_projects,
+                'tags': total_tags
+            },
+            'growth': {
+                'prompts_7d': prompts_7d,
+                'prompts_30d': prompts_30d
+            },
+            'popular_prompts': [
+                {'id': p.id, 'title': p.title, 'usage_count': p.usage_count}
+                for p in popular
+            ],
+            'category_distribution': category_dist
+        }
+    except Exception as e:
+        return {
+            'error': str(e),
+            'totals': {'prompts': 0, 'projects': 0, 'tags': 0}
+        }
+
+
+@router.get("/analytics/insights")
+def get_analytics_insights(db: Session = Depends(get_db)):
+    """Get AI-powered insights and recommendations"""
+    from datetime import datetime, timedelta
+    from sqlalchemy import func
+    from app.db.models import Prompt
+    
+    try:
+        insights = []
+        recommendations = []
+        
+        # Unused prompts
+        unused_threshold = datetime.utcnow() - timedelta(days=90)
+        unused_count = db.query(func.count(Prompt.id)).filter(
+            Prompt.last_used_at < unused_threshold
+        ).scalar() or 0
+        
+        if unused_count > 0:
+            insights.append({
+                'type': 'unused_prompts',
+                'title': 'Prompts Not Used Recently',
+                'description': f'You have {unused_count} unused prompts',
+                'severity': 'info'
+            })
+        
+        # Uncategorized prompts
+        uncategorized = db.query(func.count(Prompt.id)).filter(
+            Prompt.category == None
+        ).scalar() or 0
+        
+        if uncategorized > 0:
+            recommendations.append({
+                'title': 'Add Categories',
+                'description': f'{uncategorized} prompts need categorization',
+                'priority': 'medium'
+            })
+        
+        return {
+            'insights': insights,
+            'recommendations': recommendations
+        }
+    except Exception as e:
+        return {'error': str(e), 'insights': [], 'recommendations': []}
+
+
+@router.get("/analytics/summary")
+def get_analytics_summary(db: Session = Depends(get_db)):
+    """Quick summary for dashboard"""
+    from sqlalchemy import func
+    from app.db.models import Prompt, Project, Tag
+    
+    try:
+        return {
+            'total_prompts': db.query(func.count(Prompt.id)).scalar() or 0,
+            'total_projects': db.query(func.count(Project.id)).scalar() or 0,
+            'total_tags': db.query(func.count(Tag.id)).scalar() or 0,
+            'total_usage': db.query(func.sum(Prompt.usage_count)).scalar() or 0
+        }
+    except:
+        return {'total_prompts': 0, 'total_projects': 0, 'total_tags': 0, 'total_usage': 0}
