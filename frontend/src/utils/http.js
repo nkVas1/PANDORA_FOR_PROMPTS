@@ -2,6 +2,10 @@
  * HTTP Client with interceptors, retry logic, caching
  */
 
+import Logger from './logger.js';
+
+Logger.setModule('HTTPClient');
+
 export class HTTPClient {
   constructor(baseURL = '') {
     this.baseURL = baseURL;
@@ -12,6 +16,8 @@ export class HTTPClient {
     };
     this.cache = new Map();
     this.pendingRequests = new Map();
+    
+    Logger.info('HTTPClient initialized', { baseURL });
   }
 
   /**
@@ -49,13 +55,17 @@ export class HTTPClient {
     const fullURL = url.startsWith('http') ? url : this.baseURL + url;
     const cacheKey = `${options.method || 'GET'}:${fullURL}`;
 
+    Logger.debug(`HTTP ${options.method || 'GET'} ${url}`, { fullURL });
+
     // Check cache
     if (options.cache && this.cache.has(cacheKey)) {
+      Logger.debug(`Cache hit for ${url}`);
       return this.cache.get(cacheKey);
     }
 
     // Check pending request deduplication
     if (this.pendingRequests.has(cacheKey)) {
+      Logger.debug(`Using pending request for ${url}`);
       return this.pendingRequests.get(cacheKey);
     }
 
@@ -98,8 +108,11 @@ export class HTTPClient {
         };
 
         if (!res.ok) {
+          Logger.warn(`HTTP ${res.status} ${res.statusText} for ${url}`, { data });
           throw response;
         }
+
+        Logger.info(`HTTP ${res.status} ${options.method || 'GET'} ${url}`, { status: res.status });
 
         // Run response interceptors
         for (const interceptor of this.interceptors.response) {
@@ -114,6 +127,8 @@ export class HTTPClient {
         return response;
       })
       .catch(async error => {
+        Logger.error(`HTTP error on ${url}`, error);
+        
         // Run error interceptors
         for (const interceptor of this.interceptors.error) {
           try {
@@ -126,6 +141,7 @@ export class HTTPClient {
         // Retry logic
         if (finalOptions.retry && !finalOptions._retryCount) {
           finalOptions._retryCount = 1;
+          Logger.info(`Retrying ${url}...`);
           await new Promise(r => setTimeout(r, 1000));
           return this.request(url, finalOptions);
         }

@@ -16,12 +16,16 @@ import Router from './router.js';
 import { HTTPClient } from '../utils/http.js';
 import { CommandPalette } from '../components/CommandPalette.js';
 import Toast from '../components/Toast.js';
+import { Logger } from '../utils/logger.js';
 
 /**
  * Инициализация приложения
  */
 function initApp() {
-    console.log('[APP] Initializing PANDORA v2.0...');
+    Logger.info('[APP] Initializing PANDORA v2.0...');
+    
+    // Глобальный доступ к Logger
+    window.Logger = Logger;
     
     // ==================== LAYOUT ====================
     const app = document.getElementById('app');

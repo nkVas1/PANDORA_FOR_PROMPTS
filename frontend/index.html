@@ -172,7 +172,7 @@
     <!-- Core Application Script -->
     <script type="module">
         // Dynamic import with error handling
-        import('./js/app.js').catch(err => {
+        import('./core/app.js').catch(err => {
             console.error('Failed to load app.js:', err);
             document.body.innerHTML = `
                 <div style="padding: 40px; text-align: center; color: #ef4444; font-family: monospace;">

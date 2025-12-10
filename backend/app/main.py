@@ -5,8 +5,16 @@ from fastapi.responses import HTMLResponse, FileResponse, JSONResponse, PlainTex
 from pathlib import Path
 from app.config import settings
 from app.api.routes import router
+from app.logging_setup import logger, setup_logging
 import threading
 import os
+import logging
+
+# Initialize logging system
+setup_logging()
+logger.info("=" * 60)
+logger.info("PANDORA v2.0 Backend Starting...")
+logger.info("=" * 60)
 
 # Database initialization flag
 _db_initialized = False
@@ -32,10 +40,12 @@ async def init_db_middleware(request: Request, call_next):
             if not _db_initialized:
                 try:
                     from app.services.db_initializer import DatabaseInitializer
+                    logger.info("[DATABASE] Initializing database...")
                     DatabaseInitializer.init_db()
                     _db_initialized = True
+                    logger.info("[DATABASE] ✓ Database initialized successfully")
                 except Exception as e:
-                    print(f"[DB] Initialization error: {e}")
+                    logger.error(f"[DATABASE] ✗ Initialization error: {e}")
     
     response = await call_next(request)
     return response
@@ -64,21 +74,24 @@ def resolve_frontend_dir() -> Path:
         if meipass:
             candidate = Path(meipass) / "frontend"
             if candidate.exists():
+                logger.info(f"[FRONTEND] Found in PyInstaller bundle: {candidate}")
                 return candidate
 
         # Fallback: try relative to executable
         candidate = Path(sys.executable).parent / "frontend"
         if candidate.exists():
+            logger.info(f"[FRONTEND] Found relative to executable: {candidate}")
             return candidate
 
     # Development mode: assume project layout
     candidate = Path(__file__).parent.parent.parent / "frontend"
+    logger.info(f"[FRONTEND] Using development mode: {candidate}")
     return candidate
 
 
 frontend_dir = resolve_frontend_dir()
-print(f"[STATIC] Frontend directory resolved to: {frontend_dir}")
-print(f"[STATIC] Frontend dir exists: {frontend_dir.exists()}")
+logger.info(f"[STATIC] Frontend directory resolved to: {frontend_dir}")
+logger.info(f"[STATIC] Frontend dir exists: {frontend_dir.exists()}")
 
 # Mount static directories FIRST (before catch-all route)
 # Mount dist folder (compiled/distributed assets)
@@ -86,22 +99,22 @@ dist_dir = frontend_dir / "dist"
 if dist_dir.exists():
     try:
         app.mount("/dist", StaticFiles(directory=str(dist_dir)), name="dist")
-        print(f"[STATIC] [OK] Mounted /dist -> {dist_dir}")
+        logger.info(f"[STATIC] ✓ Mounted /dist -> {dist_dir}")
     except Exception as e:
-        print(f"[STATIC] Failed to mount /dist: {e}")
+        logger.error(f"[STATIC] ✗ Failed to mount /dist: {e}")
 else:
-    print(f"[STATIC] dist dir not found at {dist_dir}")
+    logger.warning(f"[STATIC] dist dir not found at {dist_dir}")
 
 # Mount src folder (source assets)
 src_dir = frontend_dir / "src"
 if src_dir.exists():
     try:
         app.mount("/src", StaticFiles(directory=str(src_dir)), name="src")
-        print(f"[STATIC] [OK] Mounted /src -> {src_dir}")
+        logger.info(f"[STATIC] ✓ Mounted /src -> {src_dir}")
     except Exception as e:
-        print(f"[STATIC] Failed to mount /src: {e}")
+        logger.error(f"[STATIC] ✗ Failed to mount /src: {e}")
 else:
-    print(f"[STATIC] src dir not found at {src_dir}")
+    logger.warning(f"[STATIC] src dir not found at {src_dir}")
 
 # ROOT route - serve index.html
 @app.get("/", response_class=HTMLResponse)
@@ -111,13 +124,13 @@ async def root():
     if index_path.exists():
         try:
             content = index_path.read_text(encoding='utf-8')
-            print(f"[STATIC] [OK] Serving index.html from {index_path}")
+            logger.info(f"[STATIC] ✓ Serving index.html from {index_path}")
             return content
         except Exception as e:
-            print(f"[STATIC] Error reading index.html: {e}")
+            logger.error(f"[STATIC] ✗ Error reading index.html: {e}")
             return get_index_html_fallback()
     else:
-        print(f"[STATIC] index.html not found at {index_path}")
+        logger.warning(f"[STATIC] index.html not found at {index_path}")
         return get_index_html_fallback()
 
 # Catch-all for individual static files (MUST BE AFTER api/router and root route)
@@ -136,33 +149,33 @@ async def serve_static(file_path: str):
             static_resolved = static_path.resolve()
             frontend_resolved = frontend_dir.resolve()
             if not str(static_resolved).startswith(str(frontend_resolved)):
-                print(f"[STATIC] [FORBIDDEN] Security violation: {static_path}")
+                logger.warning(f"[STATIC] Security violation attempt: {static_path}")
                 return PlainTextResponse("Forbidden", status_code=403)
         except Exception as e:
-            print(f"[STATIC] Path resolution error: {e}")
+            logger.error(f"[STATIC] Path resolution error: {e}")
             return PlainTextResponse("Invalid path", status_code=400)
 
         # Check if file exists
         if static_path.exists() and static_path.is_file():
-            print(f"[STATIC] [OK] Serving {file_path}")
+            logger.debug(f"[STATIC] Serving {file_path}")
             return FileResponse(static_path)
 
         # If not found, try to serve index.html for SPA routing
         # This allows React Router / Vue Router to handle the route client-side
         index_path = frontend_dir / "index.html"
         if index_path.exists():
-            print(f"[STATIC] Route not found ({file_path}), serving index.html for SPA routing")
+            logger.debug(f"[STATIC] Route not found ({file_path}), serving index.html for SPA routing")
             try:
                 return index_path.read_text(encoding='utf-8')
             except Exception as e:
-                print(f"[STATIC] Error serving fallback index.html: {e}")
+                logger.error(f"[STATIC] Error serving fallback index.html: {e}")
                 return get_index_html_fallback()
 
         # Helpful debug: log the attempted path
-        print(f"[STATIC] ✗ Not found: {static_path} (requested: {file_path})")
+        logger.debug(f"[STATIC] Not found: {static_path} (requested: {file_path})")
         return PlainTextResponse("Not found", status_code=404)
     except Exception as e:
-        print(f"[STATIC] Error serving {file_path}: {e}")
+        logger.error(f"[STATIC] Error serving {file_path}: {e}")
         return PlainTextResponse("Internal error", status_code=500)
 
 
@@ -319,6 +332,19 @@ def get_index_html_fallback() -> str:
     </body>
     </html>
     """
+
+
+# Startup event
+@app.on_event("startup")
+async def startup_event():
+    """Log startup information"""
+    logger.info("=" * 60)
+    logger.info("✓ PANDORA v2.0 Backend Ready")
+    logger.info(f"✓ API Running at: http://127.0.0.1:8000")
+    logger.info(f"✓ API Documentation: http://127.0.0.1:8000/docs")
+    logger.info(f"✓ Static Files Mounted: /src, /dist")
+    logger.info(f"✓ Logging to: %LOCALAPPDATA%/PANDORA/logs/application.log")
+    logger.info("=" * 60)
 
 
 @app.get("/health")

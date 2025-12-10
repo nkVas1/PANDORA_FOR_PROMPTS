@@ -666,3 +666,50 @@ def get_analytics_summary(db: Session = Depends(get_db)):
         }
     except:
         return {'total_prompts': 0, 'total_projects': 0, 'total_tags': 0, 'total_usage': 0}
+
+
+# ================ LOGGING ENDPOINT ================
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+@router.post("/logs")
+async def receive_client_logs(log_data: dict):
+    """
+    Получить логи от клиента и записать их на сервер
+    
+    Args:
+        log_data: {
+            "level": "info|warn|error|debug",
+            "message": "сообщение",
+            "module": "имя модуля",
+            "timestamp": "HH:MM:SS",
+            "data": {...} (опционально)
+        }
+    """
+    try:
+        level = log_data.get("level", "info").upper()
+        message = log_data.get("message", "unknown")
+        module = log_data.get("module", "frontend")
+        data = log_data.get("data")
+        
+        # Формируем сообщение для логирования
+        log_message = f"[{module}] {message}"
+        if data:
+            log_message += f" | {data}"
+        
+        # Записываем в логи с соответствующим уровнем
+        if level == "ERROR":
+            logger.error(log_message)
+        elif level == "WARN":
+            logger.warning(log_message)
+        elif level == "DEBUG":
+            logger.debug(log_message)
+        else:
+            logger.info(log_message)
+        
+        return {"status": "logged", "level": level, "message": message}
+    except Exception as e:
+        logger.error(f"Error processing client log: {str(e)}")
+        return {"status": "error", "message": str(e)}

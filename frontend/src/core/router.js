@@ -20,6 +20,12 @@
  * router.addRoute('/prompts', PromptsView);
  * router.navigate('/dashboard');
  */
+
+// Import logger
+import Logger from '../utils/logger.js';
+
+Logger.setModule('Router');
+
 class Router {
   constructor(options = {}) {
     this.container = typeof options.container === 'string' 
@@ -35,6 +41,11 @@ class Router {
     this.afterHooks = [];
     this.history = [];
     
+    Logger.info('Router initialized', {
+      container: this.container?.id || 'body',
+      defaultRoute: this.defaultRoute
+    });
+    
     this.init();
   }
 
@@ -48,6 +59,7 @@ class Router {
       this.resolveRoute();
     });
     
+    Logger.info('Router event listeners attached');
     // Начальная навигация
     this.resolveRoute();
   }
@@ -138,10 +150,13 @@ class Router {
     const path = this.getCurrentRoute();
     const from = this.currentRoute;
     
+    Logger.debug(`Resolving route: ${path}`, { from });
+    
     // Проверить guards
     for (const guardFn of this.guards) {
       const allowed = await guardFn({ path, from });
       if (!allowed) {
+        Logger.warn(`Route guard rejected access to ${path}`);
         this.navigate(from || this.defaultRoute);
         return;
       }
@@ -156,7 +171,7 @@ class Router {
     const route = this.resolveRouteByPath(path);
     
     if (!route) {
-      console.warn(`Route not found: ${path}`);
+      Logger.error(`Route not found: ${path}`, { availableRoutes: Array.from(this.routes.keys()) });
       this.navigate(this.defaultRoute);
       return;
     }
@@ -279,6 +294,8 @@ class Router {
    */
   navigate(path, state = {}) {
     if (!path.startsWith('/')) path = '/' + path;
+    
+    Logger.info(`Navigate to: ${path}`, { state });
     
     // Сохранить состояние (если нужно)
     if (Object.keys(state).length > 0) {
