@@ -162,19 +162,68 @@ function initApp() {
     console.log('[APP] StateManager initialized');
     
     // ==================== HTTP CLIENT ====================
-    window.http = new HTTPClient('http://127.0.0.1:8000/api');
-    
-    // Add request interceptor for auth token (if exists)
-    window.http.addInterceptor('request', (options) => {
-        const token = localStorage.getItem('auth-token');
-        if (token) {
-            options.headers = options.headers || {};
-            options.headers['Authorization'] = `Bearer ${token}`;
+    // Создаем простой HTTP client для API запросов
+    window.http = {
+        baseURL: 'http://127.0.0.1:8000/api',
+        
+        async request(method, endpoint, data = null) {
+            const url = this.baseURL + endpoint;
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            };
+            
+            // Add auth token if exists
+            const token = localStorage.getItem('auth-token');
+            if (token) {
+                options.headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+                options.body = JSON.stringify(data);
+            }
+            
+            try {
+                console.log(`[HTTP] ${method} ${endpoint}`);
+                const response = await fetch(url, options);
+                
+                if (!response.ok) {
+                    console.error(`[HTTP] Error: ${response.status} ${response.statusText}`);
+                    const error = new Error(`HTTP ${response.status}`);
+                    error.response = response;
+                    throw error;
+                }
+                
+                const responseData = await response.json();
+                console.log(`[HTTP] ✓ Response:`, responseData);
+                return responseData;
+            } catch (error) {
+                console.error(`[HTTP] ✗ Request failed:`, error);
+                throw error;
+            }
+        },
+        
+        get(endpoint) {
+            return this.request('GET', endpoint);
+        },
+        
+        post(endpoint, data) {
+            return this.request('POST', endpoint, data);
+        },
+        
+        put(endpoint, data) {
+            return this.request('PUT', endpoint, data);
+        },
+        
+        delete(endpoint) {
+            return this.request('DELETE', endpoint);
         }
-        return options;
-    });
+    };
     
-    console.log('[APP] HTTPClient ready');
+    console.log('[APP] HTTP Client ready at:', window.http.baseURL);
     
     // ==================== COMMAND PALETTE ====================
     window.commandPalette = new CommandPalette();

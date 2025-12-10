@@ -188,44 +188,62 @@ class Router {
    */
   async loadView(route, path) {
     try {
+      console.log(`[Router] Loading view for path: ${path}`);
+      
       // Очистить старый view
       if (this.currentView && typeof this.currentView.destroy === 'function') {
         this.currentView.destroy();
       }
       
-      // Подождать загрузки (если асинхронно)
-      let ViewClass = route.view;
+      // Получить view обработчик
+      let viewHandler = route.view;
       
-      if (ViewClass instanceof Promise) {
-        ViewClass = await ViewClass;
+      // Если это Promise - подождать
+      if (viewHandler instanceof Promise) {
+        viewHandler = await viewHandler;
       }
       
-      // Очистить контейнер ДО загрузки view
-      this.container.innerHTML = '';
-      
-      // Вызвать view функцию/фабрику
-      // Views это фабрики, которые возвращают DOM элементы
-      if (typeof ViewClass === 'function') {
-        // Пример: Dashboard функция возвращает готовый DOM элемент
-        this.currentView = ViewClass({
+      // viewHandler это async функция которая возвращает DOM элемент
+      // Вызываем её и ждем результат
+      if (typeof viewHandler === 'function') {
+        console.log(`[Router] Calling view handler for ${path}`);
+        this.currentView = await viewHandler({
           router: this,
           route: route.options,
           path: path
         });
       } else {
-        this.currentView = ViewClass;
+        this.currentView = viewHandler;
       }
       
-      // Отобразить view
+      // Проверяем результат
+      if (!this.currentView) {
+        throw new Error(`View handler returned null/undefined for ${path}`);
+      }
+      
+      console.log(`[Router] View loaded:`, this.currentView);
+      
+      // Очищаем контейнер
+      this.container.innerHTML = '';
+      
+      // Отображаем view в зависимости от типа
       if (this.currentView instanceof HTMLElement) {
-        // Это уже готовый DOM элемент
+        // Это готовый DOM элемент
+        console.log(`[Router] ✓ View is HTMLElement, appending to container`);
         this.container.appendChild(this.currentView);
-      } else if (typeof this.currentView === 'object' && this.currentView.render) {
+      } else if (typeof this.currentView === 'object' && this.currentView.render && typeof this.currentView.render === 'function') {
         // Если это объект с методом render()
+        console.log(`[Router] View has render() method, calling it`);
         const element = this.currentView.render();
         if (element instanceof HTMLElement) {
           this.container.appendChild(element);
         }
+      } else if (typeof this.currentView === 'string') {
+        // HTML строка
+        console.log(`[Router] View is HTML string`);
+        this.container.innerHTML = this.currentView;
+      } else {
+        throw new Error(`View is not a valid type: ${typeof this.currentView}`);
       }
       
       // Trigger animation
@@ -233,15 +251,20 @@ class Router {
         this.container.classList.add('view-enter');
       });
       
+      console.log(`[Router] ✓ View loaded successfully for ${path}`);
+      
     } catch (error) {
-      console.error('Error loading view:', error);
-      console.error('Stack:', error.stack);
+      console.error(`[Router] ✗ Error loading view for ${path}:`, error);
+      console.error('[Router] Stack:', error.stack);
+      
       this.container.innerHTML = `
-        <div class="error-view" style="padding: 40px; text-align: center;">
-          <h2 style="color: #ef4444;">Error loading page</h2>
+        <div class="error-view" style="padding: 40px; text-align: center; color: #ef4444;">
+          <h2>⚠️ Error loading page</h2>
           <p style="color: #94a3b8; margin: 10px 0;">${error.message}</p>
-          <p style="color: #64748b; font-size: 0.9rem; font-family: monospace;">${error.stack}</p>
-          <button onclick="window.router.navigate('${this.defaultRoute}')" style="padding: 10px 20px; margin-top: 20px; cursor: pointer;">
+          <p style="color: #64748b; font-size: 0.9rem; font-family: monospace; text-align: left; background: #0f0f0f; padding: 10px; border-radius: 4px; overflow-x: auto;">
+            ${error.stack}
+          </p>
+          <button onclick="window.router.navigate('${this.defaultRoute}')" style="padding: 10px 20px; margin-top: 20px; cursor: pointer; background: #3b82f6; color: white; border: none; border-radius: 4px;">
             Go Home
           </button>
         </div>

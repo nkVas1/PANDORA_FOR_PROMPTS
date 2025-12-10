@@ -133,24 +133,18 @@ class LoadingScreen:
         self.logs: List[str] = []
         
         # Логирование в файл
+        # Определяем базовую папку для логов в зависимости от режима запуска
         if getattr(sys, 'frozen', False):
-            # В режиме EXE логи должны быть рядом с exe
-            # Ищем папку dist/PANDORA/ ыгда exe создавался PyInstaller
-            # Если не найдем - используем %USERPROFILE%/AppData/Local/PANDORA/logs
-            import os
-            possible_dirs = [
-                Path(sys.executable).parent,  # _MEI* временная папка
-                Path(sys.executable).parent.parent,  # Может быть выше?
-                Path(os.getenv('APPDATA')) / 'PANDORA',  # %APPDATA%/PANDORA/
-                Path(os.getenv('LOCALAPPDATA')) / 'PANDORA',  # %LOCALAPPDATA%/PANDORA/
-            ]
-            base_dir = possible_dirs[-1]  # По умолчанию LOCALAPPDATA
-            for dir_candidate in possible_dirs[:-1]:
-                if dir_candidate.exists() and (dir_candidate / 'frontend').exists():
-                    base_dir = dir_candidate
-                    break
+            # В режиме EXE (_MEIPASS)
+            # Логи должны быть РЯДОМ С EXE ФАЙЛОМ, в папке где стоит exe
+            # sys.executable это путь к exe файлу
+            exe_dir = Path(sys.executable).parent
+            base_dir = exe_dir
         else:
-            base_dir = Path(__file__).parent
+            # В режиме разработки (python launcher.py)
+            # Логи идут в корень проекта
+            # __file__ это путь к splash_screen_v3.py (desktop/splash_screen_v3.py)
+            base_dir = Path(__file__).parent.parent  # desktop/ -> project_root/
         
         self.log_file = base_dir / "logs" / "splash.log"
         self.log_file.parent.mkdir(parents=True, exist_ok=True)

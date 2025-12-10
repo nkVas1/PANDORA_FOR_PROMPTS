@@ -54,9 +54,6 @@ build/
 
 # PyInstaller
 *.manifest
-*.spec
-*.exe
-PANDORA_v2.0.exe
 *.pyd
 
 # IDE caches

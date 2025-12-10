@@ -10,11 +10,10 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
     
     <!-- CSS -->
-    <link rel="stylesheet" href="./src/css/tokens.css">
-    <link rel="stylesheet" href="./src/css/components.css">
-    <link rel="stylesheet" href="./src/css/views.css">
-    <link rel="stylesheet" href="./src/css/animations.css">
-    <link rel="stylesheet" href="./src/css/dashboard.css">
+    <link rel="stylesheet" href="./css/tokens.css">
+    <link rel="stylesheet" href="./css/components.css">
+    <link rel="stylesheet" href="./css/views.css">
+    <link rel="stylesheet" href="./css/animations.css">
     
     <style>
         body {
@@ -170,6 +169,20 @@
     </div>
     
     <!-- Core Application Script -->
-    <script type="module" src="./src/core/app.js"></script>
+    <script type="module">
+        // Dynamic import with error handling
+        import('./js/app.js').catch(err => {
+            console.error('Failed to load app.js:', err);
+            document.body.innerHTML = `
+                <div style="padding: 40px; text-align: center; color: #ef4444; font-family: monospace;">
+                    <h2>Error Loading Application</h2>
+                    <p>${err.message}</p>
+                    <pre style="text-align: left; background: #0f0f0f; padding: 20px; border-radius: 8px; overflow: auto;">
+${err.stack}
+                    </pre>
+                </div>
+            `;
+        });
+    </script>
 </body>
 </html>
