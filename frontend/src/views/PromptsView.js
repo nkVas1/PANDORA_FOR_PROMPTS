@@ -225,41 +225,52 @@ export default function createPromptsView() {
             `)
             .join('');
         
-        // Setup event listeners
+        // Setup event listeners with null checks
         document.querySelectorAll('.prompt-card').forEach(card => {
-            card.querySelector('.btn-icon[title="Copy"]').addEventListener('click', async (e) => {
-                e.preventDefault();
-                const id = card.dataset.id;
-                const prompt = allPrompts.find(p => p.id == id);
-                if (prompt) {
-                    navigator.clipboard.writeText(prompt.content || '').then(() => {
-                        showToast('Copied to clipboard!');
-                    });
-                }
-            });
-            
-            card.querySelector('.btn-icon[title="Edit"]').addEventListener('click', (e) => {
-                e.preventDefault();
-                const id = card.dataset.id;
-                if (window.router) {
-                    window.appState.set('editingPromptId', id);
-                    window.router.navigate('/editor');
-                }
-            });
-            
-            card.querySelector('.btn-icon[title="Delete"]').addEventListener('click', async (e) => {
-                e.preventDefault();
-                const id = card.dataset.id;
-                if (confirm('Delete this prompt?')) {
-                    try {
-                        await window.http.delete(`/api/prompts/${id}`);
-                        loadPrompts();
-                        window.Toast?.success('Prompt deleted successfully');
-                    } catch (err) {
-                        console.error('Delete failed:', err);
-                        window.Toast?.error(`Failed to delete prompt: ${err.message}`);
+            const copyBtn = card.querySelector('.btn-icon[title="Copy"]');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const id = card.dataset.id;
+                    const prompt = allPrompts.find(p => p.id == id);
+                    if (prompt) {
+                        navigator.clipboard.writeText(prompt.content || '').then(() => {
+                            showToast('Copied to clipboard!');
+                        });
                     }
-                }
+                });
+            }
+            
+            const editBtn = card.querySelector('.btn-icon[title="Edit"]');
+            if (editBtn) {
+                editBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const id = card.dataset.id;
+                    if (window.router && window.appState) {
+                        window.appState.set('editingPromptId', id);
+                        window.router.navigate('/editor');
+                    }
+                });
+            }
+            
+            const deleteBtn = card.querySelector('.btn-icon[title="Delete"]');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const id = card.dataset.id;
+                    if (confirm('Delete this prompt?')) {
+                        try {
+                            await window.http.delete(`/api/prompts/${id}`);
+                            loadPrompts();
+                            window.Toast?.success('Prompt deleted successfully');
+                        } catch (err) {
+                            console.error('Delete failed:', err);
+                            window.Toast?.error(`Failed to delete prompt: ${err.message}`);
+                        }
+                    }
+                });
+            }
+        });
             });
         });
         
@@ -272,19 +283,25 @@ export default function createPromptsView() {
                 <button class="btn-pagination" ${currentPage === totalPages ? 'disabled' : ''} id="next-page">Next →</button>
             `;
             
-            document.getElementById('prev-page').addEventListener('click', () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    renderPrompts();
-                }
-            });
+            const prevBtn = document.getElementById('prev-page');
+            if (prevBtn) {
+                prevBtn.addEventListener('click', () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        renderPrompts();
+                    }
+                });
+            }
             
-            document.getElementById('next-page').addEventListener('click', () => {
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    renderPrompts();
-                }
-            });
+            const nextBtn = document.getElementById('next-page');
+            if (nextBtn) {
+                nextBtn.addEventListener('click', () => {
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        renderPrompts();
+                    }
+                });
+            }
         } else {
             pagination.style.display = 'none';
         }
@@ -292,26 +309,34 @@ export default function createPromptsView() {
     
     // ==================== EVENT LISTENERS ====================
     
-    document.getElementById('prompts-search').addEventListener('input', (e) => {
+    // Helper function for safe event binding
+    const safeAddEventListener = (selector, event, callback) => {
+        const element = document.getElementById(selector);
+        if (element) {
+            element.addEventListener(event, callback);
+        }
+    };
+    
+    safeAddEventListener('prompts-search', 'input', (e) => {
         searchQuery = e.target.value;
         currentPage = 1;
         renderPrompts();
     });
     
-    document.getElementById('prompts-category').addEventListener('change', (e) => {
+    safeAddEventListener('prompts-category', 'change', (e) => {
         filterCategory = e.target.value;
         currentPage = 1;
         renderPrompts();
     });
     
-    document.getElementById('prompts-sort').addEventListener('change', (e) => {
+    safeAddEventListener('prompts-sort', 'change', (e) => {
         sortBy = e.target.value;
         currentPage = 1;
         renderPrompts();
     });
     
-    document.getElementById('btn-new-prompt').addEventListener('click', () => {
-        if (window.router) {
+    safeAddEventListener('btn-new-prompt', 'click', () => {
+        if (window.router && window.appState) {
             window.appState.set('editingPromptId', null);
             window.router.navigate('/editor');
         }

@@ -184,25 +184,37 @@ export default function createProjectsView() {
         
         projectsContainer.innerHTML = cards;
         
-        // Setup event listeners
+        // Setup event listeners with null checks
         document.querySelectorAll('.project-card').forEach(card => {
             const id = card.dataset.id;
             
-            card.querySelector('.btn-icon[title="Edit"]').addEventListener('click', () => {
-                editProject(id);
-            });
+            const editBtn = card.querySelector('.btn-icon[title="Edit"]');
+            if (editBtn) {
+                editBtn.addEventListener('click', () => {
+                    editProject(id);
+                });
+            }
             
-            card.querySelector('.btn-icon[title="Delete"]').addEventListener('click', () => {
-                deleteProject(id);
-            });
+            const deleteBtn = card.querySelector('.btn-icon[title="Delete"]');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', () => {
+                    deleteProject(id);
+                });
+            }
             
-            card.querySelector('[data-action="open"]').addEventListener('click', () => {
-                openProject(id);
-            });
+            const openBtn = card.querySelector('[data-action="open"]');
+            if (openBtn) {
+                openBtn.addEventListener('click', () => {
+                    openProject(id);
+                });
+            }
             
-            card.querySelector('[data-action="edit"]').addEventListener('click', () => {
-                editProject(id);
-            });
+            const editCardBtn = card.querySelector('[data-action="edit"]');
+            if (editCardBtn) {
+                editCardBtn.addEventListener('click', () => {
+                    editProject(id);
+                });
+            }
         });
     }
     

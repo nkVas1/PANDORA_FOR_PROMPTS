@@ -320,6 +320,49 @@ class StateManager {
     this.history = [];
     this.historyIndex = -1;
   }
+
+  /**
+   * Получить значение из состояния по пути
+   * @param {string} path - Путь к свойству (может быть "prompts.0.name")
+   * @returns {any} Значение
+   */
+  get(path) {
+    const keys = path.split('.');
+    let value = this.state;
+    
+    for (const key of keys) {
+      if (value && typeof value === 'object') {
+        value = value[key];
+      } else {
+        return undefined;
+      }
+    }
+    
+    return value;
+  }
+
+  /**
+   * Установить значение в состояние по пути
+   * @param {string} path - Путь к свойству (может быть "prompts.0.name")
+   * @param {any} value - Новое значение
+   */
+  set(path, value) {
+    const keys = path.split('.');
+    let obj = this.state;
+    
+    // Пройти к родительскому объекту
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i];
+      if (!obj[key] || typeof obj[key] !== 'object') {
+        obj[key] = {};
+      }
+      obj = obj[key];
+    }
+    
+    // Установить значение
+    const lastKey = keys[keys.length - 1];
+    obj[lastKey] = value;
+  }
 }
 
 // Экспорт

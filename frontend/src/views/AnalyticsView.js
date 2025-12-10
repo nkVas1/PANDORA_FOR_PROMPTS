@@ -344,12 +344,18 @@ ${Object.entries(analyticsData.categories || {}).map(([cat, count]) =>
     
     // ==================== EVENT LISTENERS ====================
     
-    document.getElementById('analytics-period').addEventListener('change', (e) => {
-        analyticsPeriod = e.target.value;
-        loadAnalytics();
-    });
+    const periodSelect = document.getElementById('analytics-period');
+    if (periodSelect) {
+        periodSelect.addEventListener('change', (e) => {
+            analyticsPeriod = e.target.value;
+            loadAnalytics();
+        });
+    }
     
-    document.getElementById('btn-export-stats').addEventListener('click', exportStats);
+    const exportBtn = document.getElementById('btn-export-stats');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', exportStats);
+    }
     
     // ==================== INITIAL LOAD ====================
     loadAnalytics();
